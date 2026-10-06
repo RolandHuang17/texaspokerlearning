@@ -1,0 +1,54 @@
+{
+  "answer": {
+    "number": 2.0
+  },
+  "checks": [
+    {
+      "detail": "the computed answer is inside the kind's stated range",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "derivation_ref": "pokergto.odds#value_to_bluff_ratio",
+  "generator": {
+    "function": "_answer",
+    "module": "tools/gen_quizzes.py",
+    "seed": 20261007
+  },
+  "id": "quiz.02-04.value-to-bluff-02",
+  "lesson": "02-04",
+  "parameters": {
+    "bet": 10,
+    "kind": "value-to-bluff-ratio",
+    "pot": 10
+  },
+  "prompt": {
+    "en": "You bet 10 into a pot of 10. Under indifference, what value-to-bluff ratio should your betting range carry?",
+    "zh": "你在 10 的底池上下注 10。按无差别条件，你的下注范围里价值与诈唬应当是几比几？"
+  },
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "The item's inputs are drawn from the authored domain; no population frequency or opponent model is involved.",
+        "zh": "题目的输入来自作者设定的取值域；不涉及任何人群频率或对手模型。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#value_to_bluff_ratio",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rationale": {
+    "en": "value:bluff = (P+B)/B = (10+10)/10; the answer is computed by pokergto.odds#value_to_bluff_ratio, not typed in.",
+    "zh": "value:bluff = (P+B)/B = (10+10)/10；答案由 pokergto.odds#value_to_bluff_ratio 算出，不是填进去的。"
+  },
+  "schema_version": "1.0.0",
+  "tolerance": {
+    "absolute": 5e-05,
+    "relative": null
+  },
+  "type": "numeric"
+}

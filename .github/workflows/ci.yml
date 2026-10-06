@@ -198,6 +198,14 @@ jobs:
         shell: bash
         run: python tools/check_provenance.py
 
+      # The quiz bank's answer key is not allowed to be typed: this recomputes every stored answer from
+      # the engine function the item names and fails on drift, so a corrected formula cannot leave a
+      # stale number being drilled. It also refuses a non-finite or out-of-domain answer, which is the
+      # shape a broken generator produces.
+      - name: Quiz answers are computed, not typed
+        shell: bash
+        run: python tools/check_quiz_answers.py
+
       # `data/src/glossary.yaml` is exempt inside that tool: it is a terminology authority whose schema
       # forbids extra properties, so a `provenance` block cannot be attached to a term at all. The
       # generated artifact it feeds (glossary.json) is provenance-carrying and is validated by the

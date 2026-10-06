@@ -44,12 +44,15 @@ TRAINER = REPO_ROOT / "trainer"
 PUBLIC_DATA = TRAINER / "public" / "data"
 MANIFEST_TS = TRAINER / "src" / "generated" / "manifest.ts"
 
-#: Extensions the trainer is allowed to read. Everything else in ``data/gen`` (the nav fragment, say)
-#: belongs to mkdocs and has no business in a browser bundle.
-CONSUMED_SUFFIXES = (".json", ".csv")
+#: The only thing the trainer consumes: JSON artifacts, fetched and parsed by one loader.
+#: ``solver/*.csv`` stays out deliberately -- a view that lists the manifest expects every entry to be
+#: JSON, and one once offered ``kuhn.csv`` to ``JSON.parse`` and threw. The nav fragment is not consumed
+#: either: it is mkdocs' table of contents, and the trainer has its own tab bar.
+CONSUMED_SUFFIXES = (".json",)
 
 #: Files that describe the tree rather than teach from it, so they are not copied into the bundle.
-SKIP_RELATIVES = ("manifest.json",)
+#: The fingerprint of the tree, not a teaching artifact: including it would hash a file into itself.
+SKIP_RELATIVES = ("manifest.json", "nav.yml")
 
 
 def _sha256(path: Path) -> str:

@@ -3,12 +3,13 @@ import { computed, ref } from "vue";
 import MdfSizingScale from "./views/MdfSizingScale.vue";
 import RangeChart from "./views/RangeChart.vue";
 import SolverDeck from "./views/SolverDeck.vue";
+import QuizDrill from "./views/QuizDrill.vue";
 import { manifestInfo, SUPPORTED_SCHEMA, type Locale } from "./lib/data";
 
 // Tabs, not a router: the trainer is a static bundle published under /trainer/, and three screens do
 // not need history management. Adding a fourth should not require infrastructure.
 
-type Screen = "sizing" | "ranges" | "solver";
+type Screen = "sizing" | "ranges" | "solver" | "quiz";
 
 const locale = ref<Locale>("zh");
 const screen = ref<Screen>("sizing");
@@ -24,6 +25,7 @@ const copy = computed(() =>
         sizing: "尺度滑尺",
         ranges: "13×13 范围图",
         solver: "求解器观察台",
+        quiz: "题库速算",
         schema: "数据契约版本与本构建不匹配",
         engine: "引擎",
         artifacts: "可用产物",
@@ -35,6 +37,7 @@ const copy = computed(() =>
         sizing: "Sizing scale",
         ranges: "13x13 range chart",
         solver: "Solver deck",
+        quiz: "Quick drill",
         schema: "artifact schema does not match this build",
         engine: "engine",
         artifacts: "artifacts",
@@ -69,11 +72,15 @@ const copy = computed(() =>
     <button :class="{ on: screen === 'solver' }" type="button" @click="screen = 'solver'">
       {{ copy.solver }}
     </button>
+    <button :class="{ on: screen === 'quiz' }" type="button" @click="screen = 'quiz'">
+      {{ copy.quiz }}
+    </button>
   </nav>
 
   <main>
     <MdfSizingScale v-if="screen === 'sizing'" :locale="locale" />
     <RangeChart v-else-if="screen === 'ranges'" :locale="locale" />
+    <QuizDrill v-else-if="screen === 'quiz'" :locale="locale" />
     <SolverDeck v-else :locale="locale" />
   </main>
 </template>

@@ -138,8 +138,8 @@ src/pokergto/   引擎：牌、评估器、胜率、范围、赔率、EV、SPR�
 docs/en|zh/     92 节课的骨架，路径与章节逐节镜像；写到几节看 ROADMAP.md，机器口径的计数在
                 data/gen/index.zh.json 的 totals 里
 data/schema/    JSON Schema —— 所有产物的冻结契约
-data/src/       人工编写、需人工签署的 YAML：目前只有 glossary.yaml 与 curriculum.yaml；
-                spot / 牌局 / 题库三块要到 M6，不提前伪造
+data/src/       人工编写、需人工签署的 YAML：glossary.yaml、curriculum.yaml，以及题库的*取值域*
+                （作者侧永远不写答案）；spot / 牌局两块要到 M6，不提前伪造
 data/gen/       生成、提交、字节确定的数据产物
 tools/          生成器与 CI 闸门，含"证明闸门真的会失败"的负向测试
 trainer/        静态 Vue 3 + Vite，只消费 data/gen：尺度滑尺、13×13 范围图、求解器观察台

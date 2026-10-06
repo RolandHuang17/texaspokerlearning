@@ -11,6 +11,19 @@ Le résumé est en chinois sous chaque entrée.
 ## [Unreleased]
 
 ### Added / 新增
+- Quiz pipeline: `data/src/quizzes/quizzes.yaml` authors *domains* (which quantity, over which inputs),
+  `tools/gen_quizzes.py` instantiates 19 items and asks `pokergto` for each answer, and
+  `tools/check_quiz_answers.py` recomputes every stored answer in CI and in a pre-commit hook. There is
+  no field anywhere in the authored YAML where an answer may be written, so there is no answer key to go
+  stale. A negative test tampers one number and requires the gate to name it.
+  题库流水线：`data/src/quizzes/quizzes.yaml` 只写"考哪个量、取值域是什么"，`tools/gen_quizzes.py`
+  生成 19 题并向 `pokergto` 要答案，`tools/check_quiz_answers.py` 在 CI 与 pre-commit 里逐题重算。
+  作者侧 YAML 里根本没有"答案"这个字段，所以不存在会过期的答案键；负向测试改一个数字，闸门必须点出来。
+- Trainer: a fourth screen, 题库速算 / Quick drill. The learner's number is compared to the artifact's
+  computed answer with the artifact's own tolerance; both the pass and the fail branch were clicked in a
+  browser, because a drill whose correct-answer path never ran is only half tested.
+  训练器加第四块屏（题库速算）：学员输入与产物里"算出来的答案"按产物自带的容差比对；判对与判错两条
+  分支都在浏览器里真点过——没跑过"答对"的练习只算测了一半。
 - `trainer/`: a static Vue 3 + Vite trainer at `/trainer/` with three screens -- a sizing/MDF scale over
   the generated tables, a 13x13 range viewer over the generated charts, and a solver deck that plays the
   recorded exploitability curve and prints the proof ledger. It implements no poker mathematics: the

@@ -1,0 +1,54 @@
+{
+  "answer": {
+    "number": 0.30303
+  },
+  "checks": [
+    {
+      "detail": "the computed answer is inside the kind's stated range",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "derivation_ref": "pokergto.odds#equity_needed_to_call",
+  "generator": {
+    "function": "_answer",
+    "module": "tools/gen_quizzes.py",
+    "seed": 20261007
+  },
+  "id": "quiz.02-01.equity-needed-to-call-02",
+  "lesson": "02-01",
+  "parameters": {
+    "bet": 5,
+    "kind": "equity-needed-to-call",
+    "pot": 6.5
+  },
+  "prompt": {
+    "en": "The pot is 6.5 and you must add 5 to continue. Ignoring implied odds, what equity makes calling exactly break-even?",
+    "zh": "底池 6.5，你需要再付 5 才能看下去。撇开隐含赔率，你需要多少胜率才刚好不亏？"
+  },
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "The item's inputs are drawn from the authored domain; no population frequency or opponent model is involved.",
+        "zh": "题目的输入来自作者设定的取值域；不涉及任何人群频率或对手模型。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#equity_needed_to_call",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rationale": {
+    "en": "equity needed = B/(P+2B) = 5/(6.5+2*5); the answer is computed by pokergto.odds#equity_needed_to_call, not typed in.",
+    "zh": "equity needed = B/(P+2B) = 5/(6.5+2*5)；答案由 pokergto.odds#equity_needed_to_call 算出，不是填进去的。"
+  },
+  "schema_version": "1.0.0",
+  "tolerance": {
+    "absolute": 5e-05,
+    "relative": null
+  },
+  "type": "numeric"
+}

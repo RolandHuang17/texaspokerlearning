@@ -120,6 +120,16 @@ repos:
         pass_filenames: false
         files: ^(data/gen/|data/schema/|tools/check_artifact_schema\.py|src/pokergto/artifacts\.py)
 
+      # Separate from the provenance gate on purpose: provenance asks "where did this claim come from",
+      # this asks "does the stored number still equal what the named engine function returns for the
+      # parameters in this same file". A quiz answer can satisfy provenance and still be stale.
+      - id: check-quiz-answers
+        name: quiz answers recomputed from the engine
+        entry: python tools/check_quiz_answers.py
+        language: system
+        pass_filenames: false
+        files: ^(data/src/quizzes/|data/gen/quizzes/|src/pokergto/odds\.py|src/pokergto/equity\.py|tools/(gen_quizzes|check_quiz_answers)\.py)
+
       - id: inject-doc-tables-check
         name: AUTO blocks are not hand-edited
         entry: python tools/inject_doc_tables.py --check

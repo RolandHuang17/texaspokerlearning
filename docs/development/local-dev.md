@@ -214,8 +214,10 @@ file -- and why a lesson that exists on disk but is missing from the nav is a cu
 
 ## Trainer
 
-`trainer/` is a static Vue 3 + Vite app published under `/trainer/`. It is a *consumer* of
-`data/gen` and contains no poker mathematics (ADR-0004), so it must be synced before it is run:
+`trainer/` is a static Vue 3 + Vite app published under `/trainer/`, with four screens: a sizing scale,
+a 13x13 range viewer, a solver deck and a numeric quiz drill. It is a *consumer* of `data/gen` and
+contains no poker mathematics (ADR-0004) -- the drill compares what you type against the answer the
+engine computed and stored, not against a key an author wrote -- so it must be synced before it is run:
 
 ```bash
 python tools/sync_trainer_data.py   # copies data/gen -> trainer/public/data, stamps src/generated/manifest.ts
@@ -223,6 +225,13 @@ cd trainer
 npm ci
 npm run dev                          # http://localhost:5173/trainer/
 npm run build                        # vue-tsc --noEmit && vite build
+```
+
+Quiz items are generated, so a fresh clone needs them before the drill has anything to ask:
+
+```bash
+python tools/gen_all.py --only quizzes
+python tools/check_quiz_answers.py
 ```
 
 `tools/sync_trainer_data.py --check` is the CI mode: it compares the copied tree and the stamped

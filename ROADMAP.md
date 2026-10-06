@@ -106,7 +106,9 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
       report its exploitability in bb/100, reusing `solver/exploitability.py` (no new solver)
 - [ ] Chapters **09 Cash Practice**, **13 Population & Exploitation**, **14 Capstone**
 - [ ] Quiz pipeline: authored bank + generated numeric variants with *computed* answers
-      (`check_quiz_answers.py` refuses a hand-typed answer key)
+      (`check_quiz_answers.py` refuses a hand-typed answer key). **Landed early**, in the M3 round: the
+      bank asks the engine quantities that already exist (MDF, equity needed, value:bluff, exact draw
+      odds), so waiting gained nothing. Spots/hands still wait for M6's solves.
 - [ ] Remaining trainer screens: quiz, live-hand replay, push/fold drill, progress dashboard
 
 ## M7 — 1.0 hardening, no new topics

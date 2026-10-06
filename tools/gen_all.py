@@ -80,6 +80,19 @@ def _step_solver(out: Path) -> list[Path]:
     return sorted((out / "solver").glob("*.json"))
 
 
+def _step_quizzes(out: Path) -> list[Path]:
+    """Quiz items whose answers the engine computed from authored domains.
+
+    Runs before ``index`` because the index counts authored artifacts, and a landing page reporting "0
+    questions" next to a bank of 19 would be a lie of omission.
+    """
+    from gen_quizzes import BANK, generate
+
+    if not BANK.exists():
+        return []
+    return generate(out)
+
+
 def _step_index(out: Path) -> list[Path]:
     """Curriculum index artifacts, plus the generated nav the mkdocs build reads.
 
@@ -221,6 +234,7 @@ STEPS: list[tuple[str, Step]] = [
     ("ranges", _step_ranges),
     ("solver", _step_solver),
     ("tables", _step_tables),
+    ("quizzes", _step_quizzes),
     ("index", _step_index),
     ("manifest", _step_manifest),
 ]

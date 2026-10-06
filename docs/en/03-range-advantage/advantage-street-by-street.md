@@ -93,12 +93,12 @@ All rows use one fixed pair of illustrative ranges (`table.03-01`, row 2): BTN =
 ## 生成表 / Generated tables
 
 <!-- BEGIN AUTO:table.03-01.equity-vs-nut-advantage -->
-|    Board |             Hero |          Villain | Hero equity | Equity edge | Hero nut share |  Nut edge | Who bets often | Who bets big |
-|---:|---:|---:|---:|---:|---:|---:|:---:|:---:|
-|   Kh7s3d |        CO opener |        BB caller |    71.5272% |    43.0545% |       11.5385% |  11.5385% |      hero      |     hero     |
-|   9h6d3c |       BTN opener |        BB caller |    36.8154% |   -26.3691% |        9.0909% |   9.0909% |    villain     |     hero     |
-|   As9s5d |        CO opener |        BB caller |    61.0233% |    22.0466% |        0.0000% | -16.6667% |      hero      |   villain    |
-| Kh7s3d4c | CO opener (turn) | BB caller (turn) |    76.9775% |    53.9550% |       12.0000% |  12.0000% |      hero      |     hero     |
+|    Board |                       Hero range |                           Villain range |             Hero |          Villain | Hero equity | Equity edge | Hero nut share |  Nut edge | Who bets often | Who bets big |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|:---:|:---:|
+|   Kh7s3d |    AKs,AQs,ATs,KQs,AKo,AQo,99,77 | KJs,QJs,JTs,T9s,98s,A5s-A2s,KQo,AJo,76s |        CO opener |        BB caller |    71.5272% |    43.0545% |        6.8182% |   6.8182% |      hero      |     hero     |
+|   9h6d3c | AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs |   87s,76s,65s,54s,T8s,T9s,98o,97o,66,55 |       BTN opener |        BB caller |    36.8154% |   -26.3691% |        4.7619% |   4.7619% |    villain     |     hero     |
+|   As9s5d |     AKo,AQo,AJs,ATs,KTs,QQ,JJ,TT |           KQs,QJs,KJs,JTs,98s,76s,99,55 |        CO opener |        BB caller |    61.0233% |    22.0466% |        0.0000% | -10.3448% |      hero      |   villain    |
+| Kh7s3d4c |         AKo,AQo,ATs,KQs,99,77,44 |         KJs,QJs,JTs,T9s,98s,A5s,KQo,AJo | CO opener (turn) | BB caller (turn) |    76.9775% |    53.9550% |        7.5000% |   7.5000% |      hero      |     hero     |
 
 <!-- provenance: kind=derived verified=true -->
 !!! unverified "Provenance: derived in this repository · verified · confidence high"

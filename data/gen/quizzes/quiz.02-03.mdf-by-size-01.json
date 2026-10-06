@@ -1,0 +1,54 @@
+{
+  "answer": {
+    "number": 0.8
+  },
+  "checks": [
+    {
+      "detail": "the computed answer is inside the kind's stated range",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "derivation_ref": "pokergto.odds#minimum_defense_frequency",
+  "generator": {
+    "function": "_answer",
+    "module": "tools/gen_quizzes.py",
+    "seed": 20261007
+  },
+  "id": "quiz.02-03.mdf-by-size-01",
+  "lesson": "02-03",
+  "parameters": {
+    "bet": 2,
+    "kind": "minimum-defense-frequency",
+    "pot": 8
+  },
+  "prompt": {
+    "en": "The pot is 8 and the opponent bets 2. What share of your range must you continue with so that a bluff with any two cards does not profit?",
+    "zh": "底池 8，对手下注 2。你的范围至少要防守多大比例，才让对手的任何两张牌诈唬都不赚？"
+  },
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "The item's inputs are drawn from the authored domain; no population frequency or opponent model is involved.",
+        "zh": "题目的输入来自作者设定的取值域；不涉及任何人群频率或对手模型。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#minimum_defense_frequency",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rationale": {
+    "en": "MDF = P/(P+B) = 8/(8+2); the answer is computed by pokergto.odds#minimum_defense_frequency, not typed in.",
+    "zh": "MDF = P/(P+B) = 8/(8+2)；答案由 pokergto.odds#minimum_defense_frequency 算出，不是填进去的。"
+  },
+  "schema_version": "1.0.0",
+  "tolerance": {
+    "absolute": 5e-05,
+    "relative": null
+  },
+  "type": "numeric"
+}

@@ -1,0 +1,55 @@
+{
+  "answer": {
+    "number": 0.560606
+  },
+  "checks": [
+    {
+      "detail": "the computed answer is inside the kind's stated range",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "derivation_ref": "pokergto.equity#draw_probability",
+  "generator": {
+    "function": "_answer",
+    "module": "tools/gen_quizzes.py",
+    "seed": 20261007
+  },
+  "id": "quiz.01-03.draw-probability-00",
+  "lesson": "01-03",
+  "parameters": {
+    "cards_to_come": 2,
+    "kind": "draw-probability",
+    "outs": 15,
+    "unseen": 45
+  },
+  "prompt": {
+    "en": "You have 15 outs, 45 unseen cards, and 2 card(s) still to come. What is the exact probability of hitting? Do not use the rule of two or four.",
+    "zh": "你有 15 张补牌，45 张牌还没出现，后面还会再来 2 张。命中的精确概率是多少？（不要用小/大法则，要精确值）"
+  },
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "The item's inputs are drawn from the authored domain; no population frequency or opponent model is involved.",
+        "zh": "题目的输入来自作者设定的取值域；不涉及任何人群频率或对手模型。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.equity#draw_probability",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rationale": {
+    "en": "15 outs, 2 card(s) to come from 45 unseen; the answer is computed by pokergto.equity#draw_probability, not typed in.",
+    "zh": "15 outs, 2 card(s) to come from 45 unseen；答案由 pokergto.equity#draw_probability 算出，不是填进去的。"
+  },
+  "schema_version": "1.0.0",
+  "tolerance": {
+    "absolute": 5e-05,
+    "relative": null
+  },
+  "type": "numeric"
+}

@@ -152,8 +152,8 @@ src/pokergto/   engine: cards, evaluator, equity, ranges, odds, ev, spr, varianc
 docs/en|zh/     the 92-lesson spine, mirrored path-for-path and section-for-section; ROADMAP.md
                 records how many are authored, and data/gen/index.en.json holds the machine count
 data/schema/    JSON Schemas — the frozen contract for every artifact
-data/src/       authored YAML, human-signed-off: glossary.yaml and curriculum.yaml today; the
-                spots/hands/quizzes banks arrive with M6 and are not faked before then
+data/src/       authored YAML, human-signed-off: glossary.yaml, curriculum.yaml and the quiz *domains*
+                (never answers); the spots/hands banks arrive with M6 and are not faked before then
 data/gen/       generated, committed, byte-deterministic artifacts
 tools/          generators and the CI gates, incl. negative tests that prove the gates fail
 trainer/        static Vue 3 + Vite consumer of data/gen: sizing scale, 13x13 viewer, solver deck

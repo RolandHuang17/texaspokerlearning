@@ -16,7 +16,9 @@ no story rots into a tautology.
 from __future__ import annotations
 
 import copy
+import json
 from pathlib import Path
+from random import Random
 from typing import Any
 
 import pytest
@@ -588,3 +590,41 @@ def test_the_trainer_sync_detects_a_stale_copy(tmp_path: Path, monkeypatch) -> N
     victim = trainer / "public" / "data" / "tables" / "table.02-03.mdf-vs-sizing.json"
     victim.write_bytes(victim.read_bytes().replace(b"0.75", b"0.74", 1))
     assert sync_tool.sync(check=True) == 1, "a mutated artifact must fail the version check"
+
+
+def test_a_tampered_quiz_answer_is_refused(tmp_path: Path) -> None:
+    """The quiz answer key is not authored: arithmetic re-runs it. is a claim about arithmetic, so arithmetic re-runs it.
+
+    Two separate fakes matter: a *changed* number (the drift case -- a corrected formula leaving a stale
+    key behind) and an *unparseable* item (the case of someone adding an `answer` field to the authored
+    YAML, where there is no such field today by design).
+    """
+    quizzes = _tool("gen_quizzes")
+    checker = _tool("check_quiz_answers")
+    bank = {
+        "schema_version": "1.0.0",
+        "engine_version": "0.1.0",
+        "templates": [
+            {
+                "id": "probe.mdf",
+                "lesson": "02-03",
+                "kind": "minimum-defense-frequency",
+                "variants": 1,
+                "prompt": {"zh": "底池 {pot}，下注 {bet}。", "en": "Pot {pot}, bet {bet}."},
+                "domain": {"pot": [10], "bet": [5]},
+            }
+        ],
+    }
+    out = tmp_path / "gen"
+    items = [quizzes._instantiate(spec, Random(0), 0) for spec in bank["templates"]]
+    assert items[0]["answer"]["number"] == pytest.approx(0.666667, abs=1e-5)
+    for item in items:
+        quizzes.write_artifact(out / "quizzes" / f"{item['id']}.json", item, schema="quiz")
+    path = next((out / "quizzes").glob("quiz.*.json"))
+    assert checker.check_item(path) == [], "a freshly generated item must pass"
+
+    tampered = json.loads(path.read_text(encoding="utf-8"))
+    tampered["answer"]["number"] = 0.75
+    path.write_text(__import__("json").dumps(tampered), encoding="utf-8")
+    problems = checker.check_item(path)
+    assert problems and "stored 0.75" in problems[0], problems

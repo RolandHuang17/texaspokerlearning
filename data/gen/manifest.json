@@ -1,5 +1,5 @@
 {
-  "artifact_count": 29,
+  "artifact_count": 48,
   "engine_version": "0.1.0",
   "files": {
     "glossary.json": {
@@ -9,16 +9,130 @@
       "sha256": "ef13691d3cb221cc88134b434d51e27e89a31e6b593610d44455e63efcb9ffed"
     },
     "index.en.json": {
-      "bytes": 71008,
+      "bytes": 71009,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "84264952b73bdbaaa5d048492740079257f9397eb4d1f1944a4740c5f95b3e98"
+      "sha256": "45b149a251350585d235e160a5d0f85eda36bc4dade0ac3f27f159da02309c66"
     },
     "index.zh.json": {
-      "bytes": 71008,
+      "bytes": 71009,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "8fbc9b1e7803cb25353e802bb41a42654bd5ed0f01212cd484c90959de78b258"
+      "sha256": "74a9f8bf305a51b385ef92a197b17dcec33d745124634db1f18fef3729aa278e"
+    },
+    "quizzes/quiz.01-03.draw-probability-00.json": {
+      "bytes": 1783,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "9e2880fe87681ec558d91f5eb69e304b2724d6995ece1223476d6bcdd7afd0ff"
+    },
+    "quizzes/quiz.01-03.draw-probability-01.json": {
+      "bytes": 1778,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "e8383fd7f53c7628a90b2e5f67c5f87ca0b1fc9c7b7e19b978cc24844e1697d4"
+    },
+    "quizzes/quiz.01-03.draw-probability-02.json": {
+      "bytes": 1778,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "43c945b3bec03bbd1d1a709faa9abbfd2e6b790d3480e3ddf952c115e81d8437"
+    },
+    "quizzes/quiz.01-03.draw-probability-03.json": {
+      "bytes": 1773,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "9c6df38fde4bbd36b26808010248d3388b10b2d176b9808d036b74a99a9dcb4e"
+    },
+    "quizzes/quiz.02-01.equity-needed-to-call-00.json": {
+      "bytes": 1700,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "34344faa51e65dd735c713e3ddae8b717fc8e2fa643a6fcfbbe6ad0fa99df40c"
+    },
+    "quizzes/quiz.02-01.equity-needed-to-call-01.json": {
+      "bytes": 1733,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "3b5a08f28d1eaa029fcdbd8cf0942a9cbecd1d0d86a2661f85a6eac4e0aa1e3b"
+    },
+    "quizzes/quiz.02-01.equity-needed-to-call-02.json": {
+      "bytes": 1704,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "1eae967b1e22fd48a062b66c771ef7c5ed5d8bb35ce737364134648059a517ef"
+    },
+    "quizzes/quiz.02-01.equity-needed-to-call-03.json": {
+      "bytes": 1738,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "cecb68e331dc3c0ac4a82b80e76d8ed3538a56658e5051bb6e3657d27819b614"
+    },
+    "quizzes/quiz.02-01.equity-needed-to-call-04.json": {
+      "bytes": 1700,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "11738065e1908c11d6f81c98637cda878d8383d80604691e7f287e8eef3971e8"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-00.json": {
+      "bytes": 1721,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "20d029feb1121acbf369ecfc5de883abacb5ba76f6af6df85872e681c875043b"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-01.json": {
+      "bytes": 1709,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "4a473c26649e161a8754a789b46ad1c0b4efb1a6c146756ad6bc02db40ac70ae"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-02.json": {
+      "bytes": 1714,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "0bfa00f17440b959e3ccd57ae3ac28c578db0578cfca39d6fbc9cd47c0fa65be"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-03.json": {
+      "bytes": 1714,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "c1ef527616bc03b8770078e38f76f22213b8df64bb4c488df6e245eef11b598b"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-04.json": {
+      "bytes": 1716,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "6507f190f15409af2018f24296c759e3aac03aa8f8351e9fb7d8cdaa005d40db"
+    },
+    "quizzes/quiz.02-03.mdf-by-size-05.json": {
+      "bytes": 1717,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "a7690c29bc8e38b2f5f8fc9714d37d66ecdba3364fa14574c4d5b3399c374e02"
+    },
+    "quizzes/quiz.02-04.value-to-bluff-00.json": {
+      "bytes": 1675,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "67bb913c04af50636dba6b95d8c541d70759283db0b7a55baae1e29efb9f8074"
+    },
+    "quizzes/quiz.02-04.value-to-bluff-01.json": {
+      "bytes": 1706,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "a8360482952fddeab8059e0abd8b05aeb724940fe45c6f79e32ac10a06ee6cbb"
+    },
+    "quizzes/quiz.02-04.value-to-bluff-02.json": {
+      "bytes": 1675,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "31a11d4be4327d591458585e36e4e18362ce6042cdb866db02f63468f67dec13"
+    },
+    "quizzes/quiz.02-04.value-to-bluff-03.json": {
+      "bytes": 1706,
+      "kind": "quiz",
+      "schema": "quiz",
+      "sha256": "a9da9ce4ee55de7ac8b0cb018aa94edd2801e0ab4577fdcfe3c6efc43c9b39b8"
     },
     "ranges/range.02-03.mdf-floor-vs-half-pot.json": {
       "bytes": 6044,

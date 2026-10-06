@@ -1,0 +1,103 @@
+# Authored quiz *templates*. There is deliberately no `answer` field anywhere in this file.
+#
+# An author supplies a question and the domain its inputs are drawn from; `tools/gen_quizzes.py`
+# instantiates the variants and asks `pokergto` for the answer, and `tools/check_quiz_answers.py`
+# recomputes every stored answer in CI. That structure is the point: a typed answer key is how a quiz
+# teaches a wrong number for years after the arithmetic around it was corrected.
+#
+# kinds (the only quantities the engine can answer for, see COMPUTED in tools/gen_quizzes.py):
+#   minimum-defense-frequency | equity-needed-to-call | value-to-bluff-ratio | draw-probability
+#
+# Each template carries its own `provenance:` because tools/check_provenance.py treats every record in
+# data/src as a strategy claim that must state its origin. For a quiz that origin is the engine function
+# answering it -- the same reference the generated items store -- so the gate is telling the truth here
+# rather than being waived.
+
+schema_version: "1.0.0"
+engine_version: "0.1.0"
+
+templates:
+  - id: "02-03.mdf-by-size"
+    provenance:
+      kind: derived
+      verified: true
+      confidence: high
+      license: CC-BY-SA-4.0
+      upstream: null
+      derivation_ref: pokergto.odds#minimum_defense_frequency
+      note:
+        en: "Every variant of this template is answered by pokergto.odds#minimum_defense_frequency; the authored part is only the domain."
+        zh: "本模板每一问的答案都由 pokergto.odds#minimum_defense_frequency 算出；作者写的只有取值域。"
+    lesson: "02-03"
+    kind: minimum-defense-frequency
+    variants: 6
+    prompt:
+      zh: "底池 {pot}，对手下注 {bet}。你的范围至少要防守多大比例，才让对手的任何两张牌诈唬都不赚？"
+      en: "The pot is {pot} and the opponent bets {bet}. What share of your range must you continue with so that a bluff with any two cards does not profit?"
+    domain:
+      pot: [6, 8, 10, 12]
+      bet: [2, 3, 4, 6, 8]
+
+  - id: "02-01.equity-needed-to-call"
+    provenance:
+      kind: derived
+      verified: true
+      confidence: high
+      license: CC-BY-SA-4.0
+      upstream: null
+      derivation_ref: pokergto.odds#equity_needed_to_call
+      note:
+        en: "Every variant of this template is answered by pokergto.odds#equity_needed_to_call; the authored part is only the domain."
+        zh: "本模板每一问的答案都由 pokergto.odds#equity_needed_to_call 算出；作者写的只有取值域。"
+    lesson: "02-01"
+    kind: equity-needed-to-call
+    variants: 5
+    prompt:
+      zh: "底池 {pot}，你需要再付 {bet} 才能看下去。撇开隐含赔率，你需要多少胜率才刚好不亏？"
+      en: "The pot is {pot} and you must add {bet} to continue. Ignoring implied odds, what equity makes calling exactly break-even?"
+    domain:
+      pot: [6.5, 10, 12, 20]
+      bet: [2.17, 3, 5, 8]
+
+  - id: "02-04.value-to-bluff"
+    provenance:
+      kind: derived
+      verified: true
+      confidence: high
+      license: CC-BY-SA-4.0
+      upstream: null
+      derivation_ref: pokergto.odds#value_to_bluff_ratio
+      note:
+        en: "Every variant of this template is answered by pokergto.odds#value_to_bluff_ratio; the authored part is only the domain."
+        zh: "本模板每一问的答案都由 pokergto.odds#value_to_bluff_ratio 算出；作者写的只有取值域。"
+    lesson: "02-04"
+    kind: value-to-bluff-ratio
+    variants: 4
+    prompt:
+      zh: "你在 {pot} 的底池上下注 {bet}。按无差别条件，你的下注范围里价值与诈唬应当是几比几？"
+      en: "You bet {bet} into a pot of {pot}. Under indifference, what value-to-bluff ratio should your betting range carry?"
+    domain:
+      pot: [10, 12, 20]
+      bet: [3.33, 5, 10, 20]
+
+  - id: "01-03.draw-probability"
+    provenance:
+      kind: derived
+      verified: true
+      confidence: high
+      license: CC-BY-SA-4.0
+      upstream: null
+      derivation_ref: pokergto.equity#draw_probability
+      note:
+        en: "Every variant of this template is answered by pokergto.equity#draw_probability; the authored part is only the domain."
+        zh: "本模板每一问的答案都由 pokergto.equity#draw_probability 算出；作者写的只有取值域。"
+    lesson: "01-03"
+    kind: draw-probability
+    variants: 4
+    prompt:
+      zh: "你有 {outs} 张补牌，{unseen} 张牌还没出现，后面还会再来 {cards_to_come} 张。命中的精确概率是多少？（不要用小/大法则，要精确值）"
+      en: "You have {outs} outs, {unseen} unseen cards, and {cards_to_come} card(s) still to come. What is the exact probability of hitting? Do not use the rule of two or four."
+    domain:
+      outs: [9, 8, 15, 4]
+      unseen: [47, 46, 45]
+      cards_to_come: [1, 2]
