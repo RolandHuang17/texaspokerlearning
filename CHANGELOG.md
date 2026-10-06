@@ -11,6 +11,36 @@ Le résumé est en chinois sous chaque entrée.
 ## [Unreleased]
 
 ### Added / 新增
+- Leduc hold'em is solved and gated, which is the first solver claim in this repository that has no
+  closed form behind it. 360 deals, 36 decision nodes, 3,780 information sets, and the rules are written
+  out in `src/pokergto/solver/games.py#leduc` rather than borrowed: the artifact's value is
+  `-0.0436612219` chips per hand at exploitability `2.25e-6`, inside the bracket `[-0.0436636,
+  -0.0436591]` that its own two exact best responses imply. The gates are that bracket, plus dominance
+  (nobody folds the nuts, nobody calls with a hand losing to everything) restricted to information sets the
+  solved strategy actually reaches -- 3,780 rows include hundreds the equilibrium never plays, and an
+  average strategy is free to be wrong there, so the reach floor is stated rather than assumed.
+  Leduc 扑克现在被解出来并登记进门禁，这是本仓库第一个没有闭式解背书的求解器结论。360 个发牌、36 个决策
+  节点、3,780 个信息集，规则完整写在 `games.py#leduc` 里而不是引用外部定义：生成物给出的博弈值是每手
+  `-0.0436612219`，可剥削度 `2.25e-6`，落在它自己两条精确最佳响应推出的区间 `[-0.0436636, -0.0436591]`
+  之内。门禁就是这个区间，加上占优关系（坚果牌不弃牌、必输牌不跟注）——但只限制在解出的策略真正会走到的
+  信息集上：3,780 行里有几百行均衡根本不走到，而平均策略在那些地方"是错的"并不计入可剥削度，所以那个可达
+  阈值是写出来的，不是猜出来的。
+- `solver/vector.py` is a producer now, for Leduc only. The per-deal recursion spends 0.23 s per
+  iteration on that tree against the vector form's 0.003 s -- 68x at 50 iterations, 77x at 200, 35 s
+  versus about 38 minutes for the 10,000 the gate registers -- and it earned the job by clearing every
+  registered gate on its own (`tests/test_solver_vector.py`), where under plain regret matching the two
+  implementations are bit-identical. Kuhn and the one-street toys are still written by `cfr.py`.
+  `solver/vector.py` 现在可以产出生成物了，但只负责 Leduc。同一棵树上逐牌递归每轮 0.23 秒、公共树形式
+  每轮 0.003 秒——50 轮时 68 倍、200 轮时 77 倍，登记的那 10,000 轮从约三十八分钟变成 35 秒；它能接手，
+  是因为自己独立通过了每一条已登记的门（`tests/test_solver_vector.py`），而在朴素遗憾匹配下两种实现是
+  逐位相同的。Kuhn 与单街玩具仍然由 `cfr.py` 产出。
+- The trainer's solver screen can filter Leduc's 3,780 information sets and re-points its picker when a
+  different artifact is loaded, instead of leaving a stale key looking up an empty strategy -- which is a
+  blank panel that renders like a solved one. Verified in a browser on `solver/leduc.json`, in both
+  locales, with the pass and the filter branch both clicked.
+  训练器的求解器观察台现在可以过滤 Leduc 的 3,780 个信息集，并且在换产物时重设选择框，而不是留着旧的键
+  去查一个空策略——那是一块看起来"已经解好"的空白面板。已在浏览器里对 `solver/leduc.json` 实测，中英两版、
+  过滤与命中两条分支都点过。
 - Quiz pipeline: `data/src/quizzes/quizzes.yaml` authors *domains* (which quantity, over which inputs),
   `tools/gen_quizzes.py` instantiates 19 items and asks `pokergto` for each answer, and
   `tools/check_quiz_answers.py` recomputes every stored answer in CI and in a pre-commit hook. There is
@@ -49,6 +79,15 @@ Le résumé est en chinois sous chaque entrée.
   `mkdocs_nav.py`（站点导航由课程骨架生成，登记即到达）。
 
 ### Fixed / 修复
+- `solver/vector.py` floored *every* regret row after touching a few, which also erases the opponent's
+  negative regrets during our own traversal: a different CFR+ trajectory from `solver/cfr.py`, and one no
+  gate detected. Every registered gate passed with the wrong scope -- the two forms still agreed on each
+  frequency the registry looks at -- while the solved strategy tables drifted up to `1.1e-2` apart. Only
+  the rows a node touched are floored now, which is what lets "the same algorithm, faster" be said of it.
+  `solver/vector.py` 过去在碰到几个信息集之后会把**整个**遗憾矩阵都做一次下限截断，于是连对手那一侧的负
+  遗憾也在我们这次遍历里被抹掉：这与 `solver/cfr.py` 走的是不同的 CFR+ 轨迹，而且没有任何一道门能发现。
+  用错的截断范围跑，所有已登记的门照样通过——两种实现在门禁看的那几个频率上仍然一致——但整张策略表会差到
+  `1.1e-2`。现在只截断这个节点真正碰到的那些行，"同一算法、只是更快"这句话才说得出口。
 - `data/gen/manifest.json` recorded the commit sha, the Python version and the numpy version of the
   machine that built it. A byte-compared file that names its own commit can never agree with a later
   checkout, so `gen_all --check` was guaranteed to fail after every commit and on every CI Python other

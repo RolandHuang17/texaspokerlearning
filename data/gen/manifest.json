@@ -1,5 +1,5 @@
 {
-  "artifact_count": 48,
+  "artifact_count": 49,
   "engine_version": "0.1.0",
   "files": {
     "glossary.json": {
@@ -169,6 +169,12 @@
       "kind": "solver_run",
       "schema": "solver_run",
       "sha256": "d168664fe07b1ca39c7306b29b3430917cf67c6b2686a8c21565e4edabbe4cc9"
+    },
+    "solver/leduc.json": {
+      "bytes": 299631,
+      "kind": "solver_run",
+      "schema": "solver_run",
+      "sha256": "c0ad86fa1c61e6654bc973d76d4cf769551b9c28206b746dad2c48137adb5899"
     },
     "solver/toy_1street_half_pot.json": {
       "bytes": 5043,

@@ -11,13 +11,33 @@ tractable one deal at a time -- and the fast form has ways of being wrong that t
 * regrets and strategy sums may only be written at the *updating* player's information sets, because
   the utilities arriving up the call stack are from that player's perspective;
 * padding ragged per-infoset rows with zeros makes a nonexistent action look like an action with
-  probability ``0``, which multiplies a child's reach by zero and freezes part of the tree.
+  probability ``0``, which multiplies a child's reach by zero and freezes part of the tree;
+* flooring *the whole regret matrix* after a traversal touches a few information sets also floors the
+  opponent's rows, which is a different algorithm from the per-row flooring of :mod:`pokergto.solver.cfr`.
 
 The first two are not hypothetical: an earlier vector attempt here stalled at exploitability 0.89 with
-a game value of +0.57 and only Kuhn's analytic value exposed it. All three are handled below, and
-``tests/test_solver_vector.py`` holds the fast form against the slow one -- same tree, same iterations,
-regrets and average strategy agreeing -- because agreement with a proof is the only honest admission
-control for a faster way to be wrong.
+a game value of +0.57 and only Kuhn's analytic value exposed it. The fourth was found by this file's own admission run, and the honest version of what it found is less
+flattering than a bug. With whole-matrix flooring, every registered gate still passed: plain matching
+agreed to ``1e-16``, CFR+ agreed on all four closed-form frequencies per entry, exploitability stayed at
+``3e-5`` or better. What disagreed was everything the gates do not look at -- the average strategy over
+all 3,780 Leduc information sets drifted up to ``1.1e-2`` between the two implementations. That is the
+reason to fix the scope rather than note it: a gate samples a handful of frequencies, and the only thing a
+second implementation contributes beyond those samples is the same trajectory. Two solvers that agree on
+the four numbers anyone checks and disagree on the rest are one check, not two.
+
+What the two forms can and cannot be required to agree on is stated in
+``tests/test_solver_vector.py``, and it is not equality everywhere:
+
+* under plain regret matching the two are **bit-identical** -- same game value, same average strategy,
+  difference exactly zero on all six registered proof entries;
+* under CFR+ they are **not** bit-identical and cannot be. :mod:`cfr` recurses deal by deal, so it
+  floors an information set's row *between* deals, cutting off negative partial sums that have already
+  been added; this file sums every deal at a node and floors *once*. The flooring scope now matches
+  (touched rows only); the flooring moment cannot, without giving up the vectorisation that is the whole
+  point. Both forms therefore satisfy every registered gate on their own, and the gates -- not equality
+  between implementations -- are the standard. That is the same conclusion :mod:`cfr` reaches about
+  Kuhn's equilibrium family: a solver's job is to land inside the set the math defines, not to reproduce
+  another solver's path.
 
 Storage is flat: ``(n_infosets * width)`` buffers indexed by information set, with a per-node column
 mask, so a scatter is one ``np.add.at`` over a gathered index array instead of a Python loop over
@@ -181,11 +201,15 @@ class VectorCFRSolver:
             values = (weight[:, None] * (utilities - node_utility[:, None])).ravel()
             np.add.at(self.regrets.ravel(), flat, values)
             if self.plus:
-                # Floor at every touch, not once per iteration: flooring later lets a negative regret
-                # participate in regret matching first, which changes the update order and so the
-                # equilibrium of the zero-sum *family* CFR+ settles into. Measured on Kuhn: flooring
-                # once per iteration lands 8.5e-3 away from the textbook form instead of 1e-16.
-                np.maximum(self.regrets, 0.0, out=self.regrets)
+                # Floor exactly the rows this node touched, and nothing else. Whole-matrix flooring is
+                # a different algorithm: it zeroes the *opponent's* negative regrets during our own
+                # traversal, which changes the strategy they act on two lines later. Measured before
+                # this was fixed, the two forms agreed to 1e-16 under plain regret matching (nothing is
+                # floored, so the scope cannot be wrong) and drifted 1.1e-2 in the defender's frequency
+                # at two times pot under CFR+ -- while still reporting a tidy exploitability of 1.1e-4,
+                # which is exactly the failure mode this file exists to prevent.
+                rows = np.unique(infosets)
+                self.regrets[rows] = np.maximum(self.regrets[rows], 0.0)
             own_weight = float(self.iteration) if self.weighting == "linear" else 1.0
             np.add.at(
                 self.strategy_sum.ravel(),

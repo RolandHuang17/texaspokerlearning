@@ -253,6 +253,22 @@ class TreeBuilder:
         return tree
 
 
+def pad_strategy(rows: Sequence[np.ndarray], tree: GameTree) -> np.ndarray:
+    """Stack per-infoset strategies into ``(n_infosets, max_actions)``, zero-padding ragged rows.
+
+    Padding rather than dropping is required because every consumer gathers by row (information set) and
+    indexes by column (action); a shifted row would pair an action with the wrong strategy. The width is
+    the tree's maximum, so a row that is shorter than the widest node's action list is not "actions with
+    probability zero" -- :mod:`pokergto.solver.vector` fills its own padding with an even split precisely
+    so that a read which forgot to mask cannot turn "no such action" into "this action is never played".
+    """
+    width = int(max(tree.infoset_actions))
+    matrix = np.zeros((tree.n_infosets, width))
+    for index, row in enumerate(rows):
+        matrix[index, : row.shape[0]] = row
+    return matrix
+
+
 def regret_matching(regrets: np.ndarray) -> np.ndarray:
     """Current strategy from cumulative regrets: positive part, normalised; uniform if all zero.
 

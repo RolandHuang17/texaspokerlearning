@@ -31,9 +31,12 @@ from typing import Any
 from ..errors import ProofGateError
 from ..odds import bluff_fraction_at_indifference, minimum_defense_frequency
 from .cfr import SolveResult
+from .exploitability import br_pair, infoset_reach
+from .games import REACH_FLOOR, leduc_dominance
 from .games import kuhn as build_kuhn
+from .games import leduc as build_leduc
 from .games import one_street_bluff_catcher as build_one_street
-from .tree import GameTree
+from .tree import GameTree, pad_strategy
 
 ANTE = 1.0
 KUHN_VALUE = -float(Fraction(1, 18)) * ANTE
@@ -65,12 +68,30 @@ class ProofEntry:
     #: what broke when these keys stopped being formatted numbers.
     parameters: dict[str, float] = field(default_factory=dict)
     measure_every: int = 0
+    #: Which implementation produces this entry's artifacts: ``"cfr"`` for the textbook per-deal recursion
+    #: in :mod:`pokergto.solver.cfr`, ``"vector"`` for the public-tree form in
+    #: :mod:`pokergto.solver.vector`. The default is the textbook form on purpose: that one is the
+    #: definition of correctness here, so a game has to be too big for it before the faster form takes
+    #: over. ``tests/test_solver_vector.py`` holds the two against each other on every registered gate,
+    #: which is what makes the choice an optimisation rather than a new claim.
+    implementation: str = "cfr"
     assertions: tuple[Assertion, ...] = ()
     tolerances: dict[str, float] = field(default_factory=dict)
     notes: dict[str, str] = field(default_factory=dict)
 
     def build(self) -> GameTree:
         return self.builder()
+
+    @property
+    def expected_algorithm(self) -> str:
+        """The ``algorithm`` string the artifact this entry produces has to carry.
+
+        Derived rather than written twice: the solver names itself, and both ``tools/run_solver.py`` and
+        the test that re-reads the committed artifact compare against this, so a registry that changed
+        implementation without changing the label would fail instead of shipping an artifact that
+        describes the wrong arithmetic.
+        """
+        return f"{self.algorithm}_vector" if self.implementation == "vector" else self.algorithm
 
 
 #: Artifact ``checks[].kind`` for each assertion. The values come from ``common.schema.json``'s
@@ -85,6 +106,9 @@ CHECK_KIND_BY_ASSERTION: dict[str, str] = {
     "jack_never_calls": "frequency_bounds",
     "jack_bluff_in_family": "frequency_bounds",
     "value_bets_always": "frequency_bounds",
+    "nut_never_folded": "frequency_bounds",
+    "worst_never_called": "frequency_bounds",
+    "value_bracket": "value_bracket",
 }
 
 
@@ -299,6 +323,133 @@ KUHN = ProofEntry(
 
 #: Every validated game. Adding a game means adding an entry with a real anchor here, then it can be
 #: solved, committed, and cited. Without an entry the artifact cannot exist.
+def _leduc_entry(iterations: int = 10_000) -> ProofEntry:
+    """Leduc's gates, none of which needs a closed form -- because there isn't one to cite.
+
+    Three mechanisms, all computable from the tree alone:
+
+    * **the value bracket.** Two exact best responses bound the true game value: ``-BR(1) <= v <= BR(0)``,
+      and the width of that interval is ``2 x exploitability``. This is what lets the artifact publish a
+      number for Leduc's value without trusting a solver's self-report or borrowing somebody else's table.
+      The assertion measures the distance *outside* the bracket, so a passing run reports exactly ``0``.
+    * **dominance at information sets the strategy actually reaches.** Folding the current nuts is
+      strictly dominated, and so is calling with a hand that loses to every opponent holding. Both must
+      survive into the solved strategy -- at the decisions that happen. Measured on the committed run, the
+      residue that survives is ``1e-7`` at a reached information set and ``1e-2`` at the ones below the
+      average strategy is whatever regret matching left behind and exploitability cannot see it, because
+      getting there requires the opponent to walk a line they never walk. The exemption is the floor
+      ``games.REACH_FLOOR``, stated here so a reader can re-run the claim with a different one.
+    * **exploitability itself**, against the threshold below, in the half-sum convention.
+
+    What this does *not* prove is stated where it matters: the bracket bounds the value, it does not
+    identify a strategy, and Leduc has no analytic equilibrium to compare frequencies against. Anyone who
+    wants that should read Kuhn's entry, which has it and says so.
+    """
+    def _frequency_at_reached(
+        tree: GameTree,
+        result: SolveResult,
+        labels: tuple[str, ...],
+        action: str,
+    ) -> tuple[float, int]:
+        positions = {label: index for index, label in enumerate(tree.infoset_labels)}
+        matrix = pad_strategy(result.average_strategy, tree)
+        reach = infoset_reach(tree, matrix)
+        worst = 0.0
+        exempt = 0
+        for label in labels:
+            index = positions[label]
+            if reach[index] < REACH_FLOOR:
+                exempt += 1
+                continue
+            choices = result.infoset_actions[index]
+            if action not in choices:
+                continue
+            worst = max(worst, float(result.average_strategy[index][choices.index(action)]))
+        return worst, exempt
+
+    def assert_nut_never_folded(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
+        worst, _exempt = _frequency_at_reached(tree, result, leduc_dominance(tree).nut, "fold")
+        return worst, 0.0
+
+    def assert_worst_never_called(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
+        worst, _exempt = _frequency_at_reached(tree, result, leduc_dominance(tree).worst, "call")
+        return worst, 0.0
+
+    def assert_value_bracket(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
+        matrix = pad_strategy(result.average_strategy, tree)
+        upper, lower = br_pair(tree, matrix)
+        outside = max(0.0, result.game_value - upper) + max(0.0, -lower - result.game_value)
+        return outside, 0.0
+
+    return ProofEntry(
+        game="leduc",
+        parameters={"ante": ANTE, "bet_flop": 2.0, "bet_turn": 4.0, "cap": 2},
+        family="leduc",
+        builder=lambda: build_leduc(ante=ANTE),
+        algorithm="cfr_plus",
+        #: The vector form, because the per-deal recursion needs about seventy-six minutes for the
+        #: iterations this gate wants. See ``ProofEntry.implementation``.
+        implementation="vector",
+        iterations=iterations,
+        exploitability_threshold=1e-5,
+        measure_every=500,
+        assertions=(
+            Assertion(
+                "value_bracket",
+                {
+                    "zh": "博弈价值必须落在两条最佳响应给出的区间 [-BR(1), BR(0)] 内",
+                    "en": "The game value must lie inside the bracket [-BR(1), BR(0)] the two exact best "
+                    "responses give",
+                },
+                assert_value_bracket,
+            ),
+            Assertion(
+                "nut_never_folded",
+                {
+                    "zh": "在真正会被走到的信息集上，坚果牌绝不能弃牌",
+                    "en": "At information sets the strategy actually reaches, the nut hand is never folded",
+                },
+                assert_nut_never_folded,
+            ),
+            Assertion(
+                "worst_never_called",
+                {
+                    "zh": "在真正会被走到的信息集上，必输牌绝不跟注",
+                    "en": "At information sets the strategy actually reaches, a hand losing to every "
+                    "opponent holding never calls",
+                },
+                assert_worst_never_called,
+            ),
+        ),
+        tolerances={
+            "value_bracket": 1e-12,
+            # Measured at the committed solve: 7.8e-8 and 1.3e-7 respectively, across the 150 nut and 316
+            # strictly-worst information sets that clear the reach floor. Read those as "one dominated
+            # decision in ten million", not as zero -- a converged average strategy keeps a residue that
+            # shrinks like 1/sqrt(T), and a gate that demanded exact zero would be a gate on the rounding.
+            # (First draft of this comment said "measured exactly zero", because it was reading
+            # ``strategy_report()``, which rounds to six decimal places. The assertion reads the raw
+            # strategy. Numbers that look like zero and numbers that are zero are different claims.)
+            "nut_never_folded": 1e-5,
+            "worst_never_called": 1e-5,
+        },
+        notes={
+            "zh": "Leduc 没有解析均衡可抄，所以这里用的是不需要闭式的三门禁：价值区间、可达信息集上的占优关系、"
+            "以及可剥削度。区间给出的是价值的边界，不是策略的唯一性；未走到的信息集上的频率不是结论，是噪声。",
+            "en": "Leduc has no analytic equilibrium to copy, so the gates are the three that do not need one: "
+            "the value bracket, dominance at reached information sets, and exploitability. The bracket bounds "
+            "the value, not the strategy's uniqueness, and a frequency at an unreachable information set is "
+            "noise rather than a finding.",
+        },
+    )
+
+
 PUBLISHED_PROOFS: dict[str, ProofEntry] = {
     KUHN.game: KUHN,
     "toy_1street_one_third": _one_street_entry("toy_1street_one_third", float(Fraction(1, 3))),
@@ -311,6 +462,7 @@ PUBLISHED_PROOFS: dict[str, ProofEntry] = {
     # range and the board, and the only way to show the closed forms still hold at 2x pot -- where the
     # bluff share rises to 40% and the value:bluff ratio falls to 3:2 -- is to solve it and check.
     "toy_1street_two_pot": _one_street_entry("toy_1street_two_pot", 2.0),
+    "leduc": _leduc_entry(),
 }
 
 

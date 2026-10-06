@@ -242,7 +242,7 @@ The habit to train is a different reading order: **shape first, then numbers, an
 
 1. **Games that are not a family.** Change sizes, streets or player count and the equilibrium may collapse to a point (then copying frequencies is legitimate) or stay a line (then copying is wrong). The test is not somebody's chart: it is whether you can write an indifference condition that pins that row.
 2. **After abstraction.** Card abstraction merges information sets, so `alpha` and `kappa` get coarser meanings; 08-06 discusses the direction of the bias.
-3. **Scale.** 6 deals, 12 rows and 20,000 iterations solve exactly; a real postflop tree does not, this project cut the 6-max postflop solver outright (`adr/0002`, Rule B), and Leduc is honestly absent (milestone M3).
+3. **Scale.** 6 deals, 12 rows and 20,000 iterations solve exactly; a real postflop tree does not, and this project cut the 6-max postflop solver outright (`adr/0002`, Rule B). Leduc is the middle case and it is here now: 360 deals and 3,780 rows, where this file's per-deal recursion needs about 0.23 s per iteration and the public-tree form needs 0.003 s. Read `08-04` for what gates it, because there is no `-1/18` to compare it against.
 4. **Transfers:** indifference sets frequencies; single rows can be unidentifiable while relations are; a profile can carry the right game value and still be exploitable. **Does not transfer:** Kuhn's digits, and "the jack's bluff frequency is always free", a symmetry that exists only with three cards.
 
 ## 陷阱 / Common mistakes

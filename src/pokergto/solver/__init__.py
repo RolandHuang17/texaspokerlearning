@@ -9,8 +9,8 @@ decides whether any of it may be cited in a lesson.
 from __future__ import annotations
 
 from .cfr import CFRSolver, SolveResult, solve
-from .exploitability import best_response_value, expected_value, exploitability
-from .games import kuhn, one_street_bluff_catcher
+from .exploitability import best_response_value, expected_value, exploitability, infoset_reach
+from .games import kuhn, leduc, leduc_dominance, one_street_bluff_catcher
 from .proofs import PUBLISHED_PROOFS, ProofEntry, entry_for, is_validated, require_validated, verify
 from .tree import DecisionNode, GameTree, TerminalNode, TreeBuilder, regret_matching
 
@@ -27,8 +27,11 @@ __all__ = [
     "entry_for",
     "expected_value",
     "exploitability",
+    "infoset_reach",
     "is_validated",
     "kuhn",
+    "leduc",
+    "leduc_dominance",
     "one_street_bluff_catcher",
     "regret_matching",
     "require_validated",

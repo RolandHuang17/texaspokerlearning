@@ -97,8 +97,24 @@ const infosets = computed(() =>
   run.value ? Object.keys(run.value.average_strategy).sort() : [],
 );
 const infoset = ref("");
+/**
+ * Leduc's artifact carries 3,780 information sets, which a bare select cannot browse. The filter matches
+ * substrings of the label (`node:player:private|board`), so `:1:Ks` is "every decision where player 1
+ * holds the king of spades". The selected row stays in the list even when the query stops matching it:
+ * narrowing a search must never silently change which strategy the meters below are drawing.
+ */
+const query = ref("");
+const shownInfosets = computed(() => {
+  const needle = query.value.trim();
+  const list = needle ? infosets.value.filter((key) => key.includes(needle)) : infosets.value;
+  return infoset.value && !list.includes(infoset.value)
+    ? [infoset.value, ...list]
+    : list;
+});
 watch(infosets, (keys) => {
-  if (!infoset.value && keys.length > 0) infoset.value = keys[0];
+  // Switching games has to re-point the picker, or the meters would render the empty object that a
+  // stale key looks up to -- and an empty strategy looks like a solved one, which is worse than blank.
+  if (keys.length > 0 && !keys.includes(infoset.value)) infoset.value = keys[0];
 });
 </script>
 
@@ -185,8 +201,18 @@ watch(infosets, (keys) => {
       </table>
 
       <h3>{{ props.locale === "zh" ? "平均策略" : "average strategy" }}</h3>
+      <input
+        v-model="query"
+        class="filter"
+        type="search"
+        :placeholder="props.locale === 'zh' ? '过滤信息集，例如 :1:Ks' : 'filter information sets, e.g. :1:Ks'"
+        :aria-label="props.locale === 'zh' ? '过滤信息集' : 'filter information sets'"
+      />
+      <p class="count">
+        {{ shownInfosets.length }} / {{ infosets.length }}
+      </p>
       <select v-model="infoset" class="infoset" aria-label="information set">
-        <option v-for="key in infosets" :key="key" :value="key">{{ key }}</option>
+        <option v-for="key in shownInfosets" :key="key" :value="key">{{ key }}</option>
       </select>
       <ul class="strategy">
         <li v-for="(frequency, action) in run.average_strategy[infoset] ?? {}" :key="action">
@@ -310,6 +336,15 @@ td {
 }
 .detail {
   color: var(--muted);
+}
+.filter {
+  min-width: 200px;
+  margin: 0 0 4px;
+}
+.count {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
 }
 .infoset {
   min-width: 200px;

@@ -23,7 +23,7 @@
 2. Your showdown equity once it lands, `e_hit`, together with the identity that the hit and miss branches, weighted, must return today's equity `e₀`.
 3. The decomposition of `EV(bet) − EV(check)` into `B·(2e₀ − 1)` (value) + `B·β·p·(1 − 2e_hit)` (protection) + the fold branch `f·(P − EV(call))`.
 
-Here `β` is "how often he bets the next street after completing". **`β` is not computable in this repository**: making it `derived` needs a solved two-street game, and `docs/development/solver-proof-policy.md` records that neither Leduc nor the ruddy toy is implemented. So the protection term stays a function of `β`, never a number.
+Here `β` is "how often he bets the next street after completing". A cross-street frequency of exactly this shape *is* computable for one game in this repository -- Leduc has two betting streets and its artifact keys the second street by private card and both board cards (`data/gen/solver/leduc.json`). What is not computable is `β` **for the hand above**: Leduc's deck, its one size per street and its absent board development are not this flop, and no hold'em postflop game is solved here. So the protection term stays a function of `β`, never a number.
 
 ## 推导 / Derivation
 
@@ -270,7 +270,7 @@ All equities, conditional equities, hit rates and expectations are computed here
 | Hand 2's `−1.161616`, `−0.929293`, `1.858586` | `derived` | the same command as Example 2 with `e₀ = 38/99` and `e_hit = 191/198` (villain's seat, `1 − e_hit`); the signs flip automatically |
 | 45 vs 47 unseen cards and `0.200000 / 0.191489 / 0.349676 / 0.363636` | `derived` | rates: `PYTHONPATH=src python -c "from pokergto.equity import draw_probability as dp; print(dp(9,45,1), dp(9,45,2), dp(9,47,1), dp(9,47,2))"`; unseen count: `PYTHONPATH=src python -c "from pokergto.equity import unseen_after; from pokergto.cards import parse_cards as pc; print(unseen_after(pc('9h5h3d'),[pc('AcAd'),pc('QhJh')]))"` → `45` |
 | `f = 1/3`, `β = 1`, turn size = flop size | `reference` + **UNVERIFIED** | declared model inputs. The 1/3 comes from `pokergto.odds.required_fold_frequency(10, 5)`, but "he actually folds that often" is not measured |
-| **A protection bonus as a number** | no artifact → **UNVERIFIED** | needs a two-street solve: `docs/development/solver-proof-policy.md` records Leduc and ruddy as unimplemented, and `src/pokergto/solver/proofs.py` currently lists Kuhn plus five one-street size toys |
+| **A protection bonus as a number** | no artifact for this hand → **UNVERIFIED** | a cross-street frequency of this shape exists for Leduc (`data/gen/solver/leduc.json`), whose six cards, one size per street and absent board development are not this flop; `src/pokergto/solver/proofs.py` registers Kuhn, five one-street size toys and Leduc, and no hold'em postflop game |
 | "How often the opponent barrels after improving" (`β`) | no artifact → **UNVERIFIED** | same as above; `data/src/spots/*.yaml` records single-node actions and cannot express a cross-street policy |
 | Equity realization (EqR) as used here | `reference` | the concept from `01-06` only; no EqR value is quoted, because this repository implements none -- see the deletion note in `src/pokergto/theory/__init__.py` |
 

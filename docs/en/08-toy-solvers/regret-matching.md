@@ -189,7 +189,7 @@ To see the shape of "regret -> frequency", read the artifact rows instead: in Ku
 
 1. **Wrong information-set numbering.** Merging two decisions that should stay apart (or splitting one) means optimising a ledger in a world that does not exist. `tree.py` keeps the numbering in one place and `validate()` demands that every row of an information set has the same action count -- that is the guard.
 2. **Wrong weights.** Squaring the opponent's probability, or folding your own reach into the regret. This repository did both; `08-04` gives the symptoms.
-3. **A game with no anchor.** Where nothing analytic exists to compare against (Leduc, the two-street toy), this project ships neither the game nor an artifact: regret matching converges to *something*, and that is not evidence of correctness (`adr/0002`).
+3. **A game with no anchor.** Regret matching converges to *something*, and that is not evidence of correctness, so `adr/0002` asks for a validation mechanism per game -- and only one of its four is an analytic value. Leduc has no closed form and ships anyway, because three checks that need none are writable for it: the best-response value bracket, dominance at the information sets the solved strategy actually reaches, and exploitability itself. The two-street toy still has no entry, and with no entry `tools/run_solver.py` cannot write it an artifact at all.
 4. **What does not transfer.** Toy rows hold 2 actions and the tree holds 1 to 2 streets. A real postflop tree has orders of magnitude more rows: same mechanism, incomparable scale.
 
 ## 陷阱 / Common mistakes

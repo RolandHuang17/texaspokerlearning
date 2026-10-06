@@ -34,6 +34,7 @@ bootstrap_path()
 from pokergto.artifacts import GEN_DIR, Provenance, dumps, sha256_of, write_artifact  # noqa: E402
 from pokergto.solver.cfr import CFRSolver  # noqa: E402
 from pokergto.solver.proofs import PUBLISHED_PROOFS, ProofEntry, verify  # noqa: E402
+from pokergto.solver.vector import VectorCFRSolver  # noqa: E402
 
 SCHEMA_VERSION = "1.0.0"
 
@@ -43,7 +44,19 @@ def run_entry(
 ) -> tuple[dict[str, object], list[tuple[int, float]], float]:
     tree = entry.build()
     iterations = max(50, entry.iterations // 20) if quick else entry.iterations
-    solver = CFRSolver(tree, plus=entry.algorithm == "cfr_plus")
+    plus = entry.algorithm == "cfr_plus"
+    # Which implementation writes this artifact is a registry field, not a guess: the vector form is what
+    # makes a 3,780-information-set game solvable at all, and the textbook form stays the producer for
+    # every game it can finish. See ProofEntry.implementation.
+    if entry.implementation == "vector":
+        solver = VectorCFRSolver(tree, plus=plus)
+    elif entry.implementation == "cfr":
+        solver = CFRSolver(tree, plus=plus)
+    else:
+        raise SystemExit(
+            f"{entry.game}: unknown solver implementation {entry.implementation!r}; expected 'cfr' or "
+            "'vector'"
+        )
     result = solver.run(iterations, measure_every=entry.measure_every or max(1, iterations // 25))
     records = verify(entry, tree, result)
     artifact = {

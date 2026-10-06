@@ -182,7 +182,7 @@ It stops being free in these cases:
 1. **After card abstraction.** Putting `AhKh` and `AhQh` in one bucket creates an information set that cannot see its own cards. The strategy is still defined on the merged row, but the true optimum could have separated them, and that gap is the abstraction error. 08-06 measures its direction.
 2. **Multiway pots.** Every opponent brings a private vector. The row-per-information-set structure survives; the balance constants do not, because a bluff must beat everyone (`07-01` derives `d = 1 - (B/(P+B))^(1/N)`).
 3. **Games with imperfect recall.** Lines that reconverge on a board can blur a real player's memory of their own action. That is a distinct theoretical difficulty and this repository does not model it.
-4. **Model size.** Leduc and the two-street toy are not implemented (milestone M3). `adr/0002` decides what happens to a game with no validation anchor: not half-shipped, but refused -- `tools/run_solver.py` errors out for anything missing from `solver/proofs.py`, because a subtly wrong tree converges cheerfully to the equilibrium of a game nobody documented.
+4. **Model size.** Leduc is where "free" stops being free: 360 deals, 85 public nodes and **3,780 information sets**, against 12 rows for Kuhn. The per-deal recursion spends about 0.23 s per iteration there, so the 10,000 iterations its gate registers would take about thirty-eight minutes; the public-tree form in `solver/vector.py` does the same solve in 35 s, and it has to clear every registered gate before it may write an artifact (`tests/test_solver_vector.py`). What `adr/0002` refuses is a game with no validation anchor -- `tools/run_solver.py` errors out for anything missing from `solver/proofs.py` -- and a two-street toy with no closed form is where that refusal still bites. Leduc got in because three gates that need no closed form were writable for it; `08-04` names them.
 5. **What does transfer to real hold'em:** why an information set is one row (you cannot see the opponent), the habit of asking granularity before numbers, and the discipline that a per-deal argmax is not a best response. **What does not:** 12 rows solve exactly, a real postflop tree does not, and this project deliberately cut the 6-max postflop solver (`adr/0002`, Rule B).
 
 ## 陷阱 / Common mistakes
@@ -225,7 +225,9 @@ Every number here is recomputable with one command. No range chart or strategy o
 | One-street counts 2/5/2/3/3 | `derived` | `config.tree` in `data/gen/solver/toy_1street_half_pot.json` |
 | The 1,326 combo decomposition | `derived` | `data/gen/tables/table.01-01.combo-decomposition.json` |
 | MDF floor range chart | `derived` | `data/gen/ranges/range.02-03.mdf-floor-vs-half-pot.json` (algebra, not solver output) |
-| Leduc and the two-street toy | not implemented | milestone M3; the refusal is argued in `adr/0002` and `docs/development/solver-proof-policy.md` |
+| The Leduc tree shape (360 deals, 85 nodes, 36 decision, 49 terminal, 3,780 infosets) | `derived` | `config.tree` in `data/gen/solver/leduc.json`, asserted again in `tests/test_solver.py` |
+| The Leduc solve (value -0.043661 chips/hand, exploitability 2.25e-6) | `derived` | `data/gen/solver/leduc.json`; gate at `src/pokergto/solver/proofs.py#leduc` |
+| A two-street toy with a closed form | not implemented | `adr/0002` and `docs/development/solver-proof-policy.md` argue the refusal |
 | The real river spot in hand 2 | `reference` + **UNVERIFIED** | author-built illustration; its only factual numbers (MDF 50%, defense 0.666668) come from the `derived` artifacts above |
 
 ## 术语 / Terms

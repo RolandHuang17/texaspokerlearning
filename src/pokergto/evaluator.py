@@ -222,6 +222,79 @@ def _evaluate7_direct(cards: Sequence[Card]) -> int:
     return _pack(Category.HIGH_CARD, ranks_desc[:5])
 
 
+#: The only three-card run that is not named by its own top card.
+_WHEEL_LOW = 3
+
+
+def _straight_high_from_three(values: set[int]) -> int | None:
+    """High card of a three-card straight, or ``None``.
+
+    ``A-2-3`` is a straight and it is **three-high**: inside the wheel the ace plays as a one, so the top
+    card of the run is the three. Naming it five-high the way :func:`evaluate5` names ``A-5-4-3-2`` would
+    make ``A-2-3`` and ``2-3-4`` compare equal, which is not a rule anyone plays by.
+    """
+    if len(values) != 3:
+        return None
+    ordered = sorted(values)
+    if ordered[2] - ordered[0] == 2:
+        return ordered[2]
+    if ordered == [2, 3, 14]:
+        return _WHEEL_LOW
+    return None
+
+
+def evaluate3(cards: Sequence[Card]) -> int:
+    """Total-ordered score of exactly three cards, packed with the same integers as :func:`evaluate5`.
+
+    Leduc hold'em deals one private card each against a two-card board, so its showdown is a three-card
+    comparison and :func:`evaluate5` cannot express it. The category ladder is reused verbatim --
+    ``STRAIGHT_FLUSH > FLUSH > STRAIGHT > ONE_PAIR > HIGH_CARD`` -- because Leduc is a hold'em variant and
+    its rules say hold'em's ordering restricted to the hands that can exist, not three-card poker's
+    ordering (where a straight outranks a flush because the deck is different).
+
+    Which categories a deck can actually reach is a fact to enumerate rather than assume, and on Leduc's
+    six-card deck (J, Q, K in two suits) three of a kind cannot occur because no rank has a third copy,
+    and every flush is automatically a straight because the only three-card flush is J-Q-K of one suit.
+    The two orderings that differ between conventions therefore never fire here; ``tests/test_evaluator.py``
+    walks all C(6,3) boards to pin that claim instead of trusting this paragraph.
+    """
+    if len(cards) != 3:
+        raise ValueError(f"evaluate3 needs exactly 3 cards, got {len(cards)}")
+    counts = Counter(c.rank.value for c in cards)
+    ranks_desc = sorted(counts, reverse=True)
+    is_flush = len({c.suit for c in cards}) == 1
+    straight_high = _straight_high_from_three(set(counts))
+    groups = sorted(counts.items(), key=lambda kv: (kv[1], kv[0]), reverse=True)
+    pattern = [count for _, count in groups]
+    ordered_ranks = [rank for rank, _ in groups]
+
+    if pattern[0] == 3:
+        return _pack(Category.THREE_OF_A_KIND, ordered_ranks)
+    if is_flush and straight_high is not None:
+        return _pack(Category.STRAIGHT_FLUSH, [straight_high])
+    if is_flush:
+        return _pack(Category.FLUSH, ranks_desc)
+    if straight_high is not None:
+        return _pack(Category.STRAIGHT, [straight_high])
+    if pattern[0] == 2:
+        pair_rank, *kickers = ordered_ranks
+        return _pack(Category.ONE_PAIR, [pair_rank, *kickers])
+    return _pack(Category.HIGH_CARD, ranks_desc)
+
+
+def best_score_three(private: Sequence[Card], board: Sequence[Card]) -> int:
+    """Showdown score for a one-private-card, two-board-card game such as Leduc hold'em."""
+    private_cards = tuple(private)
+    board_cards = tuple(board)
+    if len(private_cards) != 1:
+        raise ValueError(f"a three-card showdown takes exactly 1 private card, got {len(private_cards)}")
+    if len(board_cards) != 2:
+        raise ValueError(f"a three-card showdown takes exactly 2 board cards, got {len(board_cards)}")
+    if private_cards[0] in board_cards:
+        raise ValueError(f"{private_cards[0].code} cannot be both a player's card and a board card")
+    return evaluate3([*private_cards, *board_cards])
+
+
 def best_score(hole: Sequence[Card], board: Sequence[Card]) -> int:
     """Best hand from a player's hole cards plus the board. Accepts 3..5 board cards."""
     all_cards = tuple(hole) + tuple(board)

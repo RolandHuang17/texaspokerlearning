@@ -25,7 +25,7 @@ import numpy as np
 import pytest
 
 from pokergto.odds import bluff_fraction_at_indifference, minimum_defense_frequency
-from pokergto.solver import cfr, vector
+from pokergto.solver import cfr, proofs, vector
 from pokergto.solver.games import kuhn, one_street_bluff_catcher
 from pokergto.solver.tree import TreeBuilder
 
@@ -135,6 +135,55 @@ def test_vector_form_hits_kuhn_from_an_equilibrium_of_the_proven_family() -> Non
     jack_open = result.strategy_report()["0:0:J"]["bet"]
     assert 0.0 <= jack_open <= 1.0 / 3.0 + 1e-9
     assert result.exploitability < 1e-3
+
+
+def _verify(entry: object, tree: object, result: object) -> list[dict[str, object]]:
+    """Run the gate CI runs, inside the test process.
+
+    Re-implementing the comparison here would let the test and the real gate drift apart, which is the
+    one outcome a proof gate is supposed to make impossible.
+    """
+    import importlib
+    import sys
+    from pathlib import Path
+
+    repo = Path(__file__).resolve().parents[1]
+    for path in (str(repo / "tools"), str(repo / "src")):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    return importlib.import_module("run_solver").verify(entry, tree, result)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("name", sorted(proofs.PUBLISHED_PROOFS))
+def test_cfr_plus_vector_form_satisfies_every_registered_gate(name: str) -> None:
+    """The fast form under CFR+ has to clear the real gates, not merely match the slow form.
+
+    This test exists because the one above it could not have caught a bug that was actually in this file.
+    Plain regret matching never floors a regret, so a test that only uses it cannot see the *scope* of
+    the floor; the vector form used to floor the entire regret matrix at each touch, which also floors
+    the opponent's rows during our own traversal. That is a different algorithm. It agreed with the
+    textbook form to ``1e-16`` under plain matching, kept reporting a healthy exploitability of
+    ``1.1e-4``, and missed the defender's closed-form frequency at two times pot by ``1.1e-2`` -- a gate
+    failure with a clean-looking artifact attached, which is the exact shape of failure ADR-0002 exists
+    to catch.
+    """
+    entry = proofs.PUBLISHED_PROOFS[name]
+    tree = entry.build()
+    result = vector.solve_vector(tree, entry.iterations, plus=entry.algorithm == "cfr_plus")
+    records = _verify(entry, tree, result)
+    failed = [f"{record['kind']}: {record.get('detail', '')}" for record in records if not record["pass"]]
+    assert not failed, f"{name} failed its own gates under the vector form: {failed}"
+    assert result.exploitability <= entry.exploitability_threshold
+
+
+def test_cfr_plus_vector_form_lands_inside_kuhns_equilibrium_family() -> None:
+    """CFR+ changes the path, so the claim on Kuhn is family membership and the analytic value."""
+    entry = proofs.PUBLISHED_PROOFS["kuhn"]
+    tree = entry.build()
+    result = vector.solve_vector(tree, entry.iterations, plus=True)
+    assert result.game_value == pytest.approx(-1.0 / 18.0, abs=1e-4)
+    jack_open = result.strategy_report()["0:0:J"]["bet"]
+    assert 0.0 <= jack_open <= 1.0 / 3.0 + 1e-6, f"alpha {jack_open} is outside the proven family"
 
 
 def test_ragged_action_counts_do_not_zero_out_an_existing_branch() -> None:

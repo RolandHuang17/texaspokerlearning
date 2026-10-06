@@ -250,7 +250,7 @@ hero 胜率 61.0233%，胜率优势 **+22.0466%**；而当前最高分是三条 
 | 49 张转牌 19/30 与 2352 条路线 1148 / 1256（48.8095% / 53.4014%）；合法组合数 44、58、63、48、46、29、40、44 | `derived` | `nut_advantage` 与 `Range.with_removed` 逐牌面调用，本节现算 |
 | 每行两个分母（纸面与合法：52/44、66/63、36/29、50/40） | `derived` | `python -m pokergto range "spec"` 对 `Range.with_removed(*board).total_combos()` |
 | 四个示例范围的"这是策略"这件事 | `reference` | `tools/gen_tables.py` 的 `ADVANTAGE_SPOTS`：示例输入，非解出的策略 |
-| 转牌/河牌上"某人会怎么打" | **UNVERIFIED / 未核验** | 本仓库没有后翻牌均衡解；`data/gen/solver` 只有 Kuhn 与单街尺度的玩具树。任何"solver 在这里会下 2 倍池底"的说法都没有对应生成物 |
+| 转牌/河牌上"某人会怎么打" | **UNVERIFIED / 未核验** | 本仓库没有后翻牌均衡解；`data/gen/solver` 只有 Kuhn、单街尺度玩具与 Leduc——最后一个是六张牌、两条下注街的博弈，不是四张公共牌加一张河牌的真实翻后树。任何"solver 在这里会下 2 倍池底"的说法都没有对应生成物 |
 | 多人底池下的同一对照 | **UNVERIFIED / 未核验** | `nut_advantage` 只接受两个范围；三范围比较需要另行建模，`03-09` 目前只给稀释的方向 |
 
 ## 术语 / Terms

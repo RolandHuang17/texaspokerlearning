@@ -182,7 +182,7 @@ PYTHONPATH=src python -c "from pokergto.solver.games import one_street_bluff_cat
 1. **牌力抽象之后。** 把 `AhKh` 和 `AhQh` 塞进同一个桶，你就造出了一个"看不见自己牌"的信息集。这时策略仍然定义在合并后的行上，但真实最优打法可以在合并前区分它们——误差由此产生，方向由 08-06 讨论。
 2. **多人底池。** 每个对手都有自己的私有向量，信息集变成 `(节点, 我的牌)`，但动作分布要对所有对手的联合范围做出反应。零和两人生成的"一行两频率"结构仍在，`s/(1+2s)` 那类配比却变了（`07-01`）。
 3. **不完美回忆的博弈。** 真实德州里"我在翻牌过牌、转牌下注"和"我在翻牌下注、转牌过牌"走到同一张公共牌面时，玩家可能记不清自己的线；理论上有专门的困难，本仓库不做。
-4. **模型规模。** Leduc 与两条街的玩具博弈尚未实现（里程碑 M3）。`adr/0002` 的规则是：一个没有验证锚点的博弈不是"先做半个"，而是**拒绝生成生成物**——`tools/run_solver.py` 对不在 `solver/proofs.py` 注册表里的博弈直接报错。半个错误的博弈树会 happily 收敛到另一个博弈的均衡，那正是 ADR-0002 要拦的事。
+4. **模型规模。** Leduc 是"免费"到此为止的地方：360 个发牌、85 个公共节点、**3,780 个信息集**，而 Kuhn 只有 12 行。逐牌递归在那里每轮约 0.23 秒，Leduc 登记的 10,000 轮要跑约三十八分钟；`solver/vector.py` 的公共树形式 35 秒跑完同一个解，而它在写出任何生成物之前必须先通过全部已登记的门（`tests/test_solver_vector.py`）。`adr/0002` 拒绝的是"没有验证锚点的博弈"——`tools/run_solver.py` 对不在注册表里的博弈直接报错，因为一棵写错的树会开心地收敛到另一个博弈的均衡——而"有闭式解的两条街玩具"正是这条规则现在还卡住的地方：Leduc 能进来，靠的是三条不需要闭式的门禁，见 `08-04`。
 5. **能转移到真实德州的部分**：信息集是一个频率行的原因（你看不见对手）、粒度先于数值的问题顺序、"按发牌取 argmax 不是最优应对"这条纪律。**不能转移的部分**：12 行可以精确解，真实翻后树不行；本仓库明确切掉了 6 人桌翻后求解器（`adr/0002` Rule B）。
 
 ## 陷阱 / Common mistakes
@@ -225,7 +225,9 @@ PYTHONPATH=src python -c "from pokergto.solver.games import one_street_bluff_cat
 | 单街博弈 2/5/2/3/3 计数 | `derived` | `data/gen/solver/toy_1street_half_pot.json` 的 `config.tree` |
 | 1326 组合分解 | `derived` | `data/gen/tables/table.01-01.combo-decomposition.json` |
 | MDF 底线范围图 | `derived` | `data/gen/ranges/range.02-03.mdf-floor-vs-half-pot.json`（代数生成，非求解器输出） |
-| Leduc / 两条街玩具博弈 | 未实现 | 里程碑 M3；`adr/0002` 与 `docs/development/solver-proof-policy.md` 说明为何拒绝半成品 |
+| Leduc 的树形状（360 发牌、85 节点、36 决策、49 终局、3,780 信息集） | `derived` | `data/gen/solver/leduc.json` 的 `config.tree`；同一组数字在 `tests/test_solver.py` 里被断言 |
+| Leduc 的解（价值 −0.043661、可剥削度 2.25e-6） | `derived` | `data/gen/solver/leduc.json`；门禁在 `src/pokergto/solver/proofs.py#leduc` |
+| 有闭式解的两条街玩具 | 未实现 | `adr/0002` 与 `docs/development/solver-proof-policy.md` 说明为何拒绝半成品 |
 | 真实河牌牌局 2 的范围描述 | `reference` + **未核验声明** | 作者自建的示例场景；其中唯一的事实性数字（MDF 50%、0.666668）取自上表 `derived` 生成物 |
 
 ## 术语 / Terms

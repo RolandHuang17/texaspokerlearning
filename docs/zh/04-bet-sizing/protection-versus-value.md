@@ -23,7 +23,7 @@
 2. 他成牌之后你在摊牌上的胜率 `e(成牌)`，以及成牌/未成牌两支加权后必须回到当前胜率 `e(现在)` 这一恒等式。
 3. 把 `EV(bet) − EV(check)` 拆成三项：`B·(2e(现在) − 1)`（价值项）+ `B·β·p·(1 − 2e(成牌))`（保护项）+ 弃牌项 `f·(P − EV(跟注))`。
 
-其中 `β` 是"他成牌后在下一条街下注的频率"。**`β` 不是本仓库能算的量**：要它变成 `derived`，必须有一个求解决过两街博弈的结果，而 `docs/development/solver-proof-policy.md` 明确记录 Leduc 与 ruddy 都还没实现。所以保护项在这里只能是 `β` 的函数，不能是一个数。
+其中 `β` 是"他成牌后在下一条街下注的频率"。**这个形状的跨街频率，本仓库有一个博弈算得出来**：Leduc 有两条下注街，生成物里第二街是按"自己的牌 + 两张公共牌"索引的（`data/gen/solver/leduc.json`）。算不出的是**上面这手牌**的 `β`——Leduc 的牌组、每街一个尺度、没有牌面发展，都不是这个翻牌，而本仓库没有解过任何翻后 hold'em 博弈。所以保护项在这里仍然只能是 `β` 的函数，不能是一个数。
 
 ## 推导 / Derivation
 
@@ -270,7 +270,7 @@ EV(bet) − EV(check) = B·[ (2e₀ − 1) − β·p·(2e_hit − 1) ]      (f =
 | 牌局 2 的 `−1.161616`、`−0.929293`、`1.858586` | `derived` | 例 2 的同一命令，把 `e₀` 换成 `38/99`、`e_hit` 换成 `191/198`（对手视角，`1 − e_hit`），符号自动翻向 |
 | 45 / 47 未观测牌与 `0.200000 / 0.191489 / 0.349676 / 0.363636` | `derived` | 成牌率：`PYTHONPATH=src python -c "from pokergto.equity import draw_probability as dp; print(dp(9,45,1), dp(9,45,2), dp(9,47,1), dp(9,47,2))"`；未观测牌数：`PYTHONPATH=src python -c "from pokergto.equity import unseen_after; from pokergto.cards import parse_cards as pc; print(unseen_after(pc('9h5h3d'),[pc('AcAd'),pc('QhJh')]))"` → `45` |
 | `f = 1/3`、`β = 1`、转牌尺度 = 翻牌尺度 | `reference` + **UNVERIFIED** | 作者声明的模型输入。`f` 的口径来自 `pokergto.odds.required_fold_frequency(10, 5) = 1/3`，但"对手确实按这个频率弃"未测 |
-| **保护收益作为一个数字** | 无生成物 → **UNVERIFIED** | 需要两街求解决：`docs/development/solver-proof-policy.md` 记录 Leduc 与 ruddy 未实现，`src/pokergto/solver/proofs.py` 的 `PUBLISHED_PROOFS` 目前只有 Kuhn 与五个单街尺度玩具 |
+| **保护收益作为一个数字** | 这手牌无生成物 → **UNVERIFIED** | 这个形状的跨街频率 Leduc 有（`data/gen/solver/leduc.json`），但它的六张牌、每街一个尺度、没有牌面发展都不是这个翻牌；`src/pokergto/solver/proofs.py` 登记的是 Kuhn、五个单街尺度玩具与 Leduc，没有任何翻后 hold'em 博弈 |
 | "对手成牌后开火的频率 `β`" | 无生成物 → **UNVERIFIED** | 同上；`data/src/spots/*.yaml` 只能记录单节点动作，无法给出跨街策略 |
 | 胜率实现（EqR）在本节的使用 | `reference` | 只用概念（`01-06` 的定义），不引用任何 EqR 数值；本仓库没有 EqR 的实现，见 `src/pokergto/theory/__init__.py` 关于删除保护/极化模块的记录 |
 

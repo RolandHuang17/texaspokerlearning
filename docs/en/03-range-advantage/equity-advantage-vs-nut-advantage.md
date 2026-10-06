@@ -250,7 +250,7 @@ Every figure is computed in this repository or taken from a committed artifact. 
 | 19 / 30 of 49 turn cards; 1148 / 1256 of 2352 runouts; legal combo counts 44, 58, 63, 48, 46, 29, 40, 44 | `derived` | `nut_advantage` and `Range.with_removed` evaluated board by board in this session |
 | The two spec denominators per row (written and legal) | `derived` | `python -m pokergto range "spec"` against `Range.with_removed(*board).total_combos()` |
 | The four example ranges | `reference` | `ADVANTAGE_SPOTS` in `tools/gen_tables.py`: illustrative inputs, not a solved strategy |
-| How a solved line would actually play these spots | **UNVERIFIED / 未核验** | this repository holds no postflop equilibrium; `data/gen/solver` contains Kuhn- and one-street-scale toys only. Any claim that "the solver bets two times pot here" has no artifact behind it |
+| How a solved line would actually play these spots | **UNVERIFIED / 未核验** | this repository holds no hold'em postflop equilibrium; `data/gen/solver` contains Kuhn, the one-street sizing toys, and Leduc -- a six-card game with two betting streets, not four community cards and a river. Any claim that "the solver bets two times pot here" has no artifact behind it |
 | The same comparison three-way | **UNVERIFIED / 未核验** | `nut_advantage` takes two ranges; `03-09` currently states the dilution direction without a computed three-range table |
 
 ## 术语 / Terms

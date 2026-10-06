@@ -39,7 +39,7 @@ from typing import Literal
 import numpy as np
 
 from ..errors import InvariantError
-from .tree import DecisionNode, GameTree, TerminalNode, regret_matching
+from .tree import DecisionNode, GameTree, TerminalNode, pad_strategy, regret_matching
 
 
 @dataclass(slots=True)
@@ -104,10 +104,10 @@ class CFRSolver:
         return out
 
     def current_matrix(self) -> np.ndarray:
-        return _pad(self.current_strategy(), self.tree)
+        return pad_strategy(self.current_strategy(), self.tree)
 
     def average_matrix(self) -> np.ndarray:
-        return _pad(self.average_strategy(), self.tree)
+        return pad_strategy(self.average_strategy(), self.tree)
 
     # --- traversal --------------------------------------------------------------------
 
@@ -206,19 +206,6 @@ class CFRSolver:
             infoset_labels=list(self.tree.infoset_labels),
             infoset_actions=_actions_per_infoset(self.tree),
         )
-
-
-def _pad(rows: list[np.ndarray], tree: GameTree) -> np.ndarray:
-    """Stack per-infoset strategies into ``(n_infosets, max_actions)``, zero-padding ragged rows.
-
-    Padding rather than dropping is required because callers gather by row (information set) and index
-    by column (action); a shifted row would pair an action with the wrong strategy.
-    """
-    width = int(max(tree.infoset_actions))
-    matrix = np.zeros((tree.n_infosets, width))
-    for index, row in enumerate(rows):
-        matrix[index, : row.shape[0]] = row
-    return matrix
 
 
 def _actions_per_infoset(tree: GameTree) -> list[list[str]]:

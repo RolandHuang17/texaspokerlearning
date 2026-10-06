@@ -10,10 +10,15 @@ Shipped in this milestone:
   betting range equals ``bet/(pot+2bet)``. CFR must reproduce both. If it does not, either the math
   module or the solver is wrong, and the test names which.
 
-Two more games (Leduc and a two-street "protection" toy) are the next milestone's work. They are
-deliberately **absent** rather than half-built: a subtly mis-specified game converges happily to the
-equilibrium of a game that is not the one documented, which is precisely the failure ADR-0002 exists
-to prevent.
+* :func:`leduc` -- six cards, two betting streets, one bet and one raise per street. The benchmark game of
+  the CFR literature, and the first game here too big for the per-deal recursion: its anchor is not a
+  closed form (there isn't one) but exploitability, the value bracket that exact best responses imply, and
+  dominance facts that must survive into the solved strategy.
+
+A two-street "protection" toy is the remaining entry in `adr/0002`'s table and it is deliberately
+**absent** rather than half-built: a subtly mis-specified game converges happily to the equilibrium of a
+game that is not the one documented, which is precisely the failure ADR-0002 exists to prevent. Shipping it
+means writing its gate in the same pull request.
 
 **Utility convention, fixed once.** Terminal payoffs are net chips from the start of the hand, with
 each player's ante already committed, and player 1 always receives the negative of player 0's number.
@@ -26,14 +31,23 @@ same indifference conditions, and :mod:`pokergto.solver.proofs` checks that they
 from __future__ import annotations
 
 from collections.abc import Sequence
+from dataclasses import dataclass
 from itertools import permutations
 
 import numpy as np
 
-from ..errors import InputError
+from ..cards import Card
+from ..errors import InputError, InvariantError
+from ..evaluator import best_score_three
 from .tree import GameTree, TreeBuilder
 
 DEFAULT_ANTE = 1.0
+
+#: A decision reached less often than this is off the equilibrium path, and a solved strategy says
+#: nothing trustworthy about behaviour there. One hand in a hundred thousand is a stated convention, not a
+#: measurement: the point is that the claim below is only made about decisions a player actually faces.
+#: See :func:`pokergto.solver.exploitability.infoset_reach` for why exploitability cannot see the rest.
+REACH_FLOOR = 1e-5
 
 
 def kuhn(ante: float = DEFAULT_ANTE) -> GameTree:
@@ -179,7 +193,210 @@ def one_street_bluff_catcher(pot: float = 1.0, bet_size: float = 0.5) -> GameTre
     return builder.build(node_p0)
 
 
+#: Leduc's deck: three ranks in two suits, six cards, four of which get dealt.
+LEDUC_RANKS = ("J", "Q", "K")
+LEDUC_SUITS = ("s", "h")
+
+
+def leduc(ante: float = 1.0, bet_flop: float = 2.0, bet_turn: float = 4.0, cap: int = 2) -> GameTree:
+    """Leduc hold'em: six cards, two betting streets, one bet and one raise per street.
+
+    **The rules, stated completely, because a subtly wrong tree converges just as happily as a right one
+    -- to the equilibrium of a game nobody documented.**
+
+    * Deck: ``J``, ``Q``, ``K`` in two suits. Each player is dealt one private card and the board carries
+      two, one revealed before each street. Two cards stay unseen.
+    * Both players ante ``ante``, so ``2 * ante`` is dead money before anyone looks at a card.
+    * Street one bets ``bet_flop``, street two bets ``bet_turn``. Player 0 acts first on both streets.
+    * At most ``cap`` aggressive actions per street, where a bet and a raise each count and a check and a
+      call do not. With ``cap = 2`` a street can take exactly these sequences::
+
+            check-check
+            check-bet-fold    check-bet-call    check-bet-raise-fold    check-bet-raise-call
+            bet-fold          bet-call          bet-raise-fold          bet-raise-call
+
+    * A fold pays what the folder committed to the other player. At showdown both players have committed
+      the same amount and the winner takes it; equal scores split, which is a reachable outcome here
+      rather than a defensive branch -- on board ``Js Jh`` with ``Qh`` for the player holding ``Qd``,
+      both hold jack-pairs with a queen kicker.
+
+    **What is provable about it.** Leduc has no closed-form equilibrium to check against, so the gates
+    registered in :mod:`pokergto.solver.proofs` are the ones that do not need one: exploitability below
+    the threshold, the value bracket ``-BR(1) <= v <= BR(0)`` that follows from the same exact best
+    responses, dominance facts that must survive into the solved strategy (nobody folds a hand beating
+    everything the opponent could hold), and byte-identical reruns. No published Leduc strategy table or
+    game value is copied into this repository and no lesson cites one; the numbers come from solving
+    *this* tree, whose exact rules are above.
+
+    The tree is 360 deals, 85 public nodes -- 36 decision, 49 terminal -- and 3,780 information sets, all
+    of them counted from the built object rather than derived by hand. It is also the first game here too
+    large for the per-deal recursion in :mod:`pokergto.solver.cfr` to solve inside a minute, which is what
+    :mod:`pokergto.solver.vector` is for -- and why that file has to clear these same gates before it is
+    allowed to write artifacts.
+    """
+    if ante <= 0:
+        raise InputError("ante must be positive")
+    if bet_flop <= 0 or bet_turn <= 0:
+        raise InputError("bet sizes must be positive")
+    if cap < 1:
+        raise InputError("cap must allow at least one aggressive action")
+
+    hands = [Card.parse(f"{rank}{suit}") for rank in LEDUC_RANKS for suit in LEDUC_SUITS]
+    codes = [card.code for card in hands]
+    # One deal per ordered assignment: player 0's card, player 1's card, the flop card, the turn card.
+    # The turn is part of the deal from the start even though nobody sees it on street one; deals that
+    # differ only in it share an information set there, which is how the hidden card becomes a probability
+    # rather than a special case.
+    positions = list(permutations(range(len(hands)), 4))
+    deals: list[tuple[str, str, str, str]] = [tuple(codes[i] for i in position) for position in positions]  # type: ignore[misc]
+    n = len(deals)
+
+    winner = np.zeros(n, dtype=np.float64)
+    for row, (first, second, flop, turn) in enumerate(positions):
+        board = (hands[flop], hands[turn])
+        score_first = best_score_three((hands[first],), board)
+        score_second = best_score_three((hands[second],), board)
+        winner[row] = float(np.sign(score_first - score_second))
+
+    builder = TreeBuilder(
+        "leduc",
+        {
+            "zh": "Leduc 扑克：六张牌、两条街、每街最多一注一加注。CFR 文献的基准博弈，规则在本仓库完整写出，"
+            "不靠引用外部定义。",
+            "en": "Leduc hold'em: six cards, two streets, one bet and one raise per street. The benchmark "
+            "game of the CFR literature, specified here in full rather than by reference.",
+        },
+        deals,
+    )
+
+    def visible(actor: int, depth: int) -> list[str]:
+        """The information-set key: the actor's own card plus the board cards already revealed.
+
+        Our public nodes index *betting sequences* only, not which cards came up, so the seen board has to
+        be part of the key. Two deals that differ only in an unseen card therefore collapse into one
+        information set, which is the whole point.
+        """
+        return [f"{deal[actor]}|{''.join(deal[2:2 + depth])}" for deal in deals]
+
+    def terminal_fold(folder: int, committed: tuple[float, float]) -> int:
+        node_id = builder.new_node_id()
+        amount = committed[folder]
+        builder.add_terminal(node_id, np.full(n, -amount if folder == 0 else amount))
+        return node_id
+
+    def terminal_showdown(committed: tuple[float, float]) -> int:
+        node_id = builder.new_node_id()
+        amount = max(committed)
+        if abs(committed[0] - committed[1]) > 1e-12:
+            raise InvariantError("a showdown needs equal commitments")
+        builder.add_terminal(node_id, winner * amount)
+        return node_id
+
+    def street_end(depth: int, committed: tuple[float, float]) -> int:
+        if depth == 2:
+            return terminal_showdown(committed)
+        return betting(2, 0, committed, 0, False, 0)
+
+    def betting(
+        depth: int,
+        actor: int,
+        committed: tuple[float, float],
+        aggressive: int,
+        facing: bool,
+        actions: int,
+    ) -> int:
+        """One public decision node. Children are built first so ids are assigned bottom-up."""
+        stake = bet_flop if depth == 1 else bet_turn
+        legal: tuple[str, ...] = (
+            (("fold", "call", "raise") if aggressive < cap else ("fold", "call"))
+            if facing
+            else ("check", "bet")
+        )
+        children: list[int] = []
+        for action in legal:
+            if action == "fold":
+                children.append(terminal_fold(actor, committed))
+                continue
+            if action == "call":
+                level = max(committed)
+                children.append(street_end(depth, (level, level)))
+                continue
+            if action == "check":
+                # The second check closes the street; the first one passes the action over.
+                children.append(
+                    street_end(depth, committed) if actions else betting(
+                        depth, 1 - actor, committed, aggressive, False, 1
+                    )
+                )
+                continue
+            raised_to = committed[1 - actor] + stake
+            following = (raised_to, committed[1]) if actor == 0 else (committed[0], raised_to)
+            children.append(
+                betting(depth, 1 - actor, following, aggressive + 1, True, actions + 1)
+            )
+
+        node_id = builder.new_node_id()
+        builder.add_decision(node_id, actor, legal, children, visible(actor, depth))
+        return node_id
+
+    root = betting(1, 0, (ante, ante), 0, False, 0)
+    return builder.build(root)
+
+
+@dataclass(frozen=True, slots=True)
+class LeducDominance:
+    """Information sets whose acting hand is decided before the opponent ever acts.
+
+    ``nut`` holds the labels where the actor beats **every** private card the opponent could hold on that
+    board; ``worst`` holds the labels where the actor loses to every one of them. Both are statements
+    about the three cards on the table, so they are checkable without solving anything -- which is exactly
+    why they make good gates: a solver that folds the nuts or calls with a guaranteed loser has a sign
+    error somewhere in the payoff bookkeeping, and no amount of convergence evidence will show it.
+    """
+
+    nut: tuple[str, ...]
+    worst: tuple[str, ...]
+
+    @property
+    def total(self) -> int:
+        return len(self.nut) + len(self.worst)
+
+
+def leduc_dominance(tree: GameTree) -> LeducDominance:
+    """Classify a :func:`leduc` tree's information sets as strictly-best or strictly-worst.
+
+    Reads the labels :func:`leduc` writes (``node:player:private|board``), so it is coupled to that
+    format by construction -- it belongs next to the builder for that reason. Only the turn street is
+    classified: on the flop street the second board card has not been revealed, so no hand there is decided
+    and any claim would be about a hand the player does not hold yet.
+    """
+    hands = [Card.parse(f"{rank}{suit}") for rank in LEDUC_RANKS for suit in LEDUC_SUITS]
+    nut: list[str] = []
+    worst: list[str] = []
+    for label in tree.infoset_labels:
+        _, _, key = label.split(":", 2)
+        private, seen = key.split("|")
+        if len(seen) != 4:
+            continue
+        holder = Card.parse(private)
+        board = (Card.parse(seen[:2]), Card.parse(seen[2:]))
+        own = best_score_three((holder,), board)
+        others = [
+            best_score_three((candidate,), board)
+            for candidate in hands
+            if candidate != holder and candidate not in board
+        ]
+        if not others:
+            continue
+        if own > max(others):
+            nut.append(label)
+        elif own < min(others):
+            worst.append(label)
+    return LeducDominance(nut=tuple(nut), worst=tuple(worst))
+
+
 GAME_BUILDERS: dict[str, tuple[str, Sequence[str]]] = {
     "kuhn": ("kuhn", ("ante",)),
     "toy_1street": ("one_street_bluff_catcher", ("pot", "bet_size")),
+    "leduc": ("leduc", ("ante", "bet_flop", "bet_turn", "cap")),
 }

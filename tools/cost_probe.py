@@ -40,6 +40,15 @@ from run_solver import run_entry  # noqa: E402
 BUDGETS: dict[str, tuple[float, float]] = {
     "kuhn": (150.0, 256.0),
     "toy_1street": (60.0, 256.0),
+    # Leduc is the first family the textbook per-deal recursion cannot afford: 360 deals x 85 public
+    # nodes costs about 0.23 s per iteration, so its registered 10,000 iterations would run for about
+    # thirty-eight minutes. The public-tree form in ``solver/vector.py`` finishes the same solve in 35 s,
+    # which is a measured 65x at that size (68x at 50 iterations, 77x at 200 -- the ratio grows with the
+    # iteration count because the fixed per-step Python overhead is amortised),
+    # and that file has to clear every registered gate before it may write an artifact
+    # (``tests/test_solver_vector.py``), which is what makes this budget an optimisation rather than a
+    # new claim. Measured 2026-10-07 on the author's laptop (py3.12, Windows): 35 s, peak under 1 MB.
+    "leduc": (180.0, 256.0),
 }
 
 #: Families with no declared budget are a failure, not a free pass: an undeclared game is exactly how

@@ -6,12 +6,24 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema_version", "id", "game", "algorithm", "iterations", "seed",
-    "exploitability_bb_per_hand", "proof_entry", "provenance"
+    "schema_version",
+    "id",
+    "game",
+    "algorithm",
+    "iterations",
+    "seed",
+    "exploitability_bb_per_hand",
+    "proof_entry",
+    "provenance"
   ],
   "properties": {
-    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "id": {
+      "$ref": "common.schema.json#/$defs/id"
+    },
     "game": {
       "enum": [
         "kuhn",
@@ -25,10 +37,26 @@
         "multiway_3player_fixed"
       ]
     },
-    "game_description": { "$ref": "common.schema.json#/$defs/lang_string" },
-    "algorithm": { "enum": ["cfr", "cfr_plus", "linear_cfr"] },
-    "iterations": { "type": "integer", "minimum": 1 },
-    "seed": { "type": "integer" },
+    "game_description": {
+      "$ref": "common.schema.json#/$defs/lang_string"
+    },
+    "algorithm": {
+      "enum": [
+        "cfr",
+        "cfr_plus",
+        "linear_cfr",
+        "cfr_vector",
+        "cfr_plus_vector"
+      ],
+      "description": "The update rule plus which implementation produced the run. ``*_vector`` names are separate rather than folded in because the two forms agree exactly under plain regret matching but not under CFR+: the textbook form floors an information set between deals, the vector form floors after summing the node's deals. A reader is entitled to know which arithmetic wrote their number."
+    },
+    "iterations": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "seed": {
+      "type": "integer"
+    },
     "config": {
       "type": "object",
       "additionalProperties": true,
@@ -39,25 +67,69 @@
       "minimum": 0,
       "description": "(BR_1 + BR_2) / 2 for a two-player zero-sum game, in chips per hand. Convention is stated in every lesson that reads it."
     },
-    "exploitability_threshold": { "type": "number", "minimum": 0 },
-    "game_value_bb_per_hand": { "type": ["number", "null"] },
-    "closed_form_value": { "type": ["number", "null"] },
+    "exploitability_threshold": {
+      "type": "number",
+      "minimum": 0
+    },
+    "game_value_bb_per_hand": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "closed_form_value": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
     "curve": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["iteration", "exploitability"],
+        "required": [
+          "iteration",
+          "exploitability"
+        ],
         "properties": {
-          "iteration": { "type": "integer", "minimum": 1 },
-          "exploitability": { "type": "number", "minimum": 0 },
-          "elapsed_seconds": { "type": ["number", "null"] }
+          "iteration": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "exploitability": {
+            "type": "number",
+            "minimum": 0
+          },
+          "elapsed_seconds": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
         }
       }
     },
-    "average_strategy": { "type": ["object", "null"] },
-    "timing_seconds": { "type": ["number", "null"], "minimum": 0 },
-    "peak_memory_mb": { "type": ["number", "null"], "minimum": 0 },
+    "average_strategy": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "timing_seconds": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "peak_memory_mb": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
     "proof_entry": {
       "type": "string",
       "pattern": "^[a-z0-9_]+$",
@@ -67,7 +139,14 @@
       "type": "boolean",
       "description": "True only if a re-run with the same seed produced byte-identical output."
     },
-    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
-    "checks": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/check" } }
+    "provenance": {
+      "$ref": "common.schema.json#/$defs/provenance"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "common.schema.json#/$defs/check"
+      }
+    }
   }
 }

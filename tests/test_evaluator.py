@@ -23,8 +23,10 @@ from pokergto.cards import Card, class_key, standard_deck
 from pokergto.evaluator import (
     Category,
     best_score,
+    best_score_three,
     category_of,
     describe,
+    evaluate3,
     evaluate5,
     evaluate7,
     evaluate7_reference,
@@ -47,6 +49,86 @@ EXPECTED_COUNTS = {
     Category.ONE_PAIR: 1098240,
     Category.HIGH_CARD: 1302540,
 }
+
+
+# --- the three-card path Leduc hold'em needs ------------------------------------------------
+
+
+LEDUC_DECK = [Card.parse(f"{rank}{suit}") for rank in "JQK" for suit in "sh"]
+
+
+def _three_card_kind(cards: tuple[Card, ...]) -> str:
+    """The rulebook definition, written independently of ``evaluate3`` so the two can be compared.
+
+    Six cards, three ranks, two suits: this is small enough that the whole ladder can be spelled out in
+    four lines, which is exactly what makes it usable as an oracle.
+    """
+    counts = Counter(card.rank.value for card in cards)
+    flush = len({card.suit for card in cards}) == 1
+    ordered = sorted(counts)
+    straight = len(counts) == 3 and (ordered[2] - ordered[0] == 2 or ordered == [2, 3, 14])
+    if max(counts.values()) == 3:
+        return "three of a kind"
+    if flush and straight:
+        return "straight flush"
+    if flush:
+        return "flush"
+    if straight:
+        return "straight"
+    if max(counts.values()) == 2:
+        return "one pair"
+    return "high card"
+
+
+@pytest.mark.parametrize(
+    "cards",
+    [tuple(hand) for hand in combinations(LEDUC_DECK, 3)],
+    ids=["-".join(c.code for c in hand) for hand in combinations(LEDUC_DECK, 3)],
+)
+def test_evaluate3_matches_the_rulebook_on_every_leduc_hand(cards: tuple[Card, ...]) -> None:
+    """All C(6,3) = 20 three-card hands Leduc's deck can produce, against the written-out rule."""
+    assert category_of(evaluate3(cards)) is Category[_three_card_kind(cards).upper().replace(" ", "_")]
+
+
+def test_leducs_deck_cannot_reach_the_categories_whose_ordering_is_disputed() -> None:
+    """The claim in ``evaluate3``'s docstring, checked rather than trusted.
+
+    Three-card poker ranks a straight above a flush; hold'em ranks a flush above a straight. This
+    repository follows hold'em, and on Leduc's six-card deck the choice never fires: every flush needs
+    J-Q-K of one suit, which is simultaneously a straight, and three of a kind needs a third copy of a
+    rank that does not exist. If the deck ever changes, this test is the tripwire that says the ordering
+    decision has become a real one.
+    """
+    kinds = Counter(_three_card_kind(tuple(hand)) for hand in combinations(LEDUC_DECK, 3))
+    assert set(kinds) == {"straight flush", "straight", "one pair"}
+    assert kinds == Counter({"one pair": 12, "straight": 6, "straight flush": 2})
+
+
+def test_evaluate3_orders_straight_flush_above_straight_above_pair() -> None:
+    best = evaluate3(tuple(LEDUC_DECK[i] for i in (0, 2, 4)))  # Js Qs Ks
+    straight = evaluate3([Card.parse("Js"), Card.parse("Qh"), Card.parse("Ks")])
+    pair = evaluate3([Card.parse("Ks"), Card.parse("Kh"), Card.parse("Js")])
+    assert best > straight > pair
+
+
+def test_three_card_wheel_is_three_high_not_five_high() -> None:
+    """A-2-3 is the one run where the ace is not the top card, and naming it five-high would tie it
+    with 2-3-4. The five-card evaluator can call A-5-4-3-2 five-high because the run's own five cards
+    make that unambiguous; with three cards, the top card of the run is the three."""
+    wheel = evaluate3([Card.parse("As"), Card.parse("2h"), Card.parse("3d")])
+    six_high = evaluate3([Card.parse("2s"), Card.parse("3h"), Card.parse("4d")])
+    assert _three_card_kind(tuple(Card.parse(c) for c in ("As", "2h", "3d"))) == "straight"
+    assert six_high > wheel
+
+
+def test_best_score_three_refuses_impossible_inputs() -> None:
+    board = (Card.parse("As"), Card.parse("Kh"))
+    with pytest.raises(ValueError, match="exactly 2 board cards"):
+        best_score_three([Card.parse("Qd")], board[:1])
+    with pytest.raises(ValueError, match="exactly 1 private card"):
+        best_score_three([Card.parse("Qd"), Card.parse("Jd")], board)
+    with pytest.raises(ValueError, match="both a player's card and a board card"):
+        best_score_three([Card.parse("As")], board)
 
 
 def test_hand_class_counts_total_is_c_52_5() -> None:

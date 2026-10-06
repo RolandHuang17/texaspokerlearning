@@ -8,10 +8,19 @@
       "description": "A string that must exist in both languages. Bilingual content is a type-level requirement, not a convention: an artifact cannot express a monolingual title.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["zh", "en"],
+      "required": [
+        "zh",
+        "en"
+      ],
       "properties": {
-        "zh": { "type": "string", "minLength": 1 },
-        "en": { "type": "string", "minLength": 1 }
+        "zh": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
       }
     },
     "glossary_ref": {
@@ -26,13 +35,26 @@
     },
     "status": {
       "description": "ready requires BOTH languages complete (ADR-0005 / D4) and, for anything citing a solver result, a matching entry in src/pokergto/solver/proofs.py.",
-      "enum": ["draft", "in-review", "ready", "deprecated"]
+      "enum": [
+        "draft",
+        "in-review",
+        "ready",
+        "deprecated"
+      ]
     },
     "provenance_kind": {
-      "enum": ["derived", "reference", "external"]
+      "enum": [
+        "derived",
+        "reference",
+        "external"
+      ]
     },
     "confidence": {
-      "enum": ["high", "medium", "low"]
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
     },
     "accepted_license": {
       "description": "Closed list. Proprietary sources (PioSolver, GTO Wizard, GTO+, Upswing, Run It Once, ...) are absent on purpose; adding one requires editing this schema and NOTICE together.",
@@ -48,68 +70,161 @@
     "provenance": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "verified", "confidence", "license", "upstream"],
+      "required": [
+        "kind",
+        "verified",
+        "confidence",
+        "license",
+        "upstream"
+      ],
       "properties": {
-        "kind": { "$ref": "#/$defs/provenance_kind" },
+        "kind": {
+          "$ref": "#/$defs/provenance_kind"
+        },
         "verified": {
           "type": "boolean",
           "default": false,
           "description": "Defaults to false. Only three things set it true: a derivation_ref into theory/** with an executing test, a solver_run whose game is listed in solver/proofs.py, or an external source with a manifest-listed compatible license."
         },
-        "confidence": { "$ref": "#/$defs/confidence" },
-        "license": { "$ref": "#/$defs/accepted_license" },
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+        "license": {
+          "$ref": "#/$defs/accepted_license"
+        },
         "upstream": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Required non-null when kind is external; must have a record in data/src/licensing_manifest.yaml."
         },
-        "derivation_ref": { "type": ["string", "null"] },
-        "solver_run": { "type": ["string", "null"] },
+        "derivation_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "solver_run": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
         "assumptions": {
           "type": "array",
-          "items": { "$ref": "#/$defs/lang_string" },
+          "items": {
+            "$ref": "#/$defs/lang_string"
+          },
           "description": "Modeling assumptions stated rather than implied. The multiway MDF formula assumes independent defenders, which card removal makes false in practice."
         },
-        "note": { "$ref": "#/$defs/lang_string" }
+        "note": {
+          "$ref": "#/$defs/lang_string"
+        }
       },
       "allOf": [
         {
-          "if": { "properties": { "kind": { "const": "external" } } },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "external"
+              }
+            }
+          },
           "then": {
-            "required": ["upstream"],
-            "properties": { "upstream": { "type": "string", "minLength": 1 } }
+            "required": [
+              "upstream"
+            ],
+            "properties": {
+              "upstream": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
           }
         },
         {
-          "if": { "properties": { "kind": { "const": "derived" } } },
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "derived"
+              }
+            }
+          },
           "then": {
             "anyOf": [
               {
-                "required": ["derivation_ref"],
-                "properties": { "derivation_ref": { "type": "string", "minLength": 5 } }
+                "required": [
+                  "derivation_ref"
+                ],
+                "properties": {
+                  "derivation_ref": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
               },
               {
-                "required": ["solver_run"],
-                "properties": { "solver_run": { "type": "string", "minLength": 5 } }
+                "required": [
+                  "solver_run"
+                ],
+                "properties": {
+                  "solver_run": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
               }
             ]
           }
         },
         {
-          "if": { "properties": { "verified": { "const": true } } },
+          "if": {
+            "properties": {
+              "verified": {
+                "const": true
+              }
+            }
+          },
           "then": {
-            "properties": { "confidence": { "const": "high" } },
+            "properties": {
+              "confidence": {
+                "const": "high"
+              }
+            },
             "anyOf": [
               {
-                "required": ["derivation_ref"],
-                "properties": { "derivation_ref": { "type": "string", "minLength": 5 } }
+                "required": [
+                  "derivation_ref"
+                ],
+                "properties": {
+                  "derivation_ref": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
               },
               {
-                "required": ["solver_run"],
-                "properties": { "solver_run": { "type": "string", "minLength": 5 } }
+                "required": [
+                  "solver_run"
+                ],
+                "properties": {
+                  "solver_run": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
               },
               {
-                "required": ["upstream"],
-                "properties": { "upstream": { "type": "string", "minLength": 5 } }
+                "required": [
+                  "upstream"
+                ],
+                "properties": {
+                  "upstream": {
+                    "type": "string",
+                    "minLength": 5
+                  }
+                }
               }
             ],
             "description": "verified: true must point at something checkable. minLength guards against the null placeholder that is always present for optional refs."
@@ -120,38 +235,72 @@
     "unverified_claim": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["claim", "why_unverified", "path_to_verified"],
+      "required": [
+        "claim",
+        "why_unverified",
+        "path_to_verified"
+      ],
       "properties": {
-        "claim": { "$ref": "#/$defs/lang_string" },
-        "why_unverified": { "$ref": "#/$defs/lang_string" },
-        "path_to_verified": { "$ref": "#/$defs/lang_string" },
-        "blocks_ready_status": { "type": "boolean", "default": false }
+        "claim": {
+          "$ref": "#/$defs/lang_string"
+        },
+        "why_unverified": {
+          "$ref": "#/$defs/lang_string"
+        },
+        "path_to_verified": {
+          "$ref": "#/$defs/lang_string"
+        },
+        "blocks_ready_status": {
+          "type": "boolean",
+          "default": false
+        }
       }
     },
     "scenario_tag": {
       "description": "Cash 6-max 100bb, MTT, heads-up/button-vs-big-blind, population-exploitative, or shared theory.",
-      "enum": ["cash", "mtt", "hu", "population", "shared"]
+      "enum": [
+        "cash",
+        "mtt",
+        "hu",
+        "population",
+        "shared"
+      ]
     },
     "street_tag": {
-      "enum": ["preflop", "flop", "turn", "river", "multi-street", "n-a"]
+      "enum": [
+        "preflop",
+        "flop",
+        "turn",
+        "river",
+        "multi-street",
+        "n-a"
+      ]
     },
     "tags": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["scenario"],
+      "required": [
+        "scenario"
+      ],
       "properties": {
         "scenario": {
           "type": "array",
           "minItems": 1,
-          "items": { "$ref": "#/$defs/scenario_tag" }
+          "items": {
+            "$ref": "#/$defs/scenario_tag"
+          }
         },
         "streets": {
           "type": "array",
-          "items": { "$ref": "#/$defs/street_tag" }
+          "items": {
+            "$ref": "#/$defs/street_tag"
+          }
         },
         "concepts": {
           "type": "array",
-          "items": { "$ref": "#/$defs/glossary_ref" }
+          "items": {
+            "$ref": "#/$defs/glossary_ref"
+          }
         }
       }
     },
@@ -159,9 +308,14 @@
       "description": "Numbers in artifacts carry their unit. Both languages render the same value with their own unit convention, which is why a unit drift between zh and en is structurally impossible.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["value", "unit"],
+      "required": [
+        "value",
+        "unit"
+      ],
       "properties": {
-        "value": { "type": "number" },
+        "value": {
+          "type": "number"
+        },
         "unit": {
           "enum": [
             "probability",
@@ -175,20 +329,31 @@
             "dimensionless"
           ]
         },
-        "display": { "type": "string" },
-        "stderr": { "type": "number" }
+        "display": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "number"
+        }
       }
     },
     "frequency_map": {
       "description": "Hand class -> action frequency in [0,1]. Keys are 169 canonical classes (AA, KK, ..., A2o).",
       "type": "object",
-      "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      }
     },
     "check": {
       "description": "An invariant that was true when this artifact was generated. tools/gen_all.py --check re-runs them: an artifact that stops passing is a bug, not a diff.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "pass"],
+      "required": [
+        "kind",
+        "pass"
+      ],
       "properties": {
         "kind": {
           "enum": [
@@ -203,14 +368,34 @@
             "determinism",
             "closed_form_residual",
             "edges_disagree",
-            "monotonicity"
+            "monotonicity",
+            "value_bracket"
           ]
         },
-        "value": { "type": ["number", "null"] },
-        "threshold": { "type": ["number", "null"] },
-        "tol": { "type": ["number", "null"] },
-        "pass": { "type": "boolean" },
-        "detail": { "type": "string" }
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "tol": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "pass": {
+          "type": "boolean"
+        },
+        "detail": {
+          "type": "string"
+        }
       }
     }
   }
