@@ -62,47 +62,49 @@ class VectorCFRSolver:
         )
         self.width = int(max(tree.infoset_actions))
         self.counts = np.asarray(tree.infoset_actions, dtype=np.int64)
-        #: Columns that exist for each information set. Padding is masked, never read as a zero
-        #: probability.
-        self.present = np.zeros((tree.n_infosets, self.width), dtype=bool)
-        self.present[np.arange(tree.n_infosets), :] = False
-        for index, count in enumerate(self.counts):
-            self.present[index, : int(count)] = True
+        #: Columns that exist for each information set. Padding must never be read as a zero
+        #: probability, which is what fills it in :meth:`current_matrix` is for.
+        self.present = (
+            np.arange(self.width)[None, :] < self.counts[:, None]
+        )  # (n_infosets, width) broadcasting the row's own action count
         self.regrets = np.zeros((tree.n_infosets, self.width))
         self.strategy_sum = np.zeros((tree.n_infosets, self.width))
         self.iteration = 0
-        self._children, self._infosets, self._payoffs, self._masks, self._players = self._compile()
+        self._children, self._infosets, self._payoffs, self._players = self._compile()
 
     # --- compilation ------------------------------------------------------------------
 
     def _compile(
         self,
-    ) -> tuple[
-        list[tuple[int, ...]], list[np.ndarray], list[np.ndarray], list[np.ndarray], list[int]
-    ]:
+    ) -> tuple[list[tuple[int, ...]], list[np.ndarray], list[np.ndarray], list[int]]:
+        """Flatten the tree so a traversal never touches a Python node object per deal.
+
+        There is deliberately no per-node action mask here. A gather is ``sigma[infosets][:, :width]``,
+        which already restricts to the actions that exist at that node, and a mask sized to that same
+        width is therefore all-True by construction -- indexing it with ``[:, action]`` selects one
+        column of a column-slice and can never mask anything. A guard that is always true is not a
+        guard, so the hazard it was written against (a padded column read as ``sigma = 0``, which zeroes
+        a child's reach and freezes a subtree while the run still reports a tidy exploitability) is
+        handled where it can actually bite: :meth:`current_matrix` fills padded columns with an even
+        split, so no read can turn "this action is not here" into "probability zero".
+        """
         children: list[tuple[int, ...]] = []
         infosets: list[np.ndarray] = []
         payoffs: list[np.ndarray] = []
-        masks: list[np.ndarray] = []
         players: list[int] = []
         for node in self.tree.nodes:
             if isinstance(node, TerminalNode):
                 children.append(())
                 infosets.append(np.zeros(0, dtype=np.int64))
                 payoffs.append(np.asarray(node.payoff, dtype=np.float64))
-                masks.append(np.zeros((0, 0), dtype=bool))
                 players.append(-1)
                 continue
             assert isinstance(node, DecisionNode)
-            count = len(node.children)
-            mask = np.zeros((self.tree.n_deals, count), dtype=bool)
-            mask[:, :] = True
             children.append(tuple(node.children))
             infosets.append(np.asarray(node.infosets, dtype=np.int64))
             payoffs.append(np.zeros(0, dtype=np.float64))
-            masks.append(mask)
             players.append(node.player)
-        return children, infosets, payoffs, masks, players
+        return children, infosets, payoffs, players
 
     # --- strategies -------------------------------------------------------------------
 
@@ -158,6 +160,7 @@ class VectorCFRSolver:
 
         infosets = self._infosets[node_id]
         width = len(self._children[node_id])
+        # The slice is the mask: columns beyond this node's action count are not read.
         gather = sigma[infosets][:, :width]
         utilities = np.empty((self.tree.n_deals, width), dtype=np.float64)
         for action, child in enumerate(self._children[node_id]):
@@ -192,7 +195,13 @@ class VectorCFRSolver:
         return node_utility
 
     def step(self, player: int) -> None:
-        """One traversal updating only ``player``'s regrets and strategy sums."""
+        """One traversal updating only ``player``'s regrets and strategy sums.
+
+        The strategy snapshot is taken once per traversal, exactly as :class:`pokergto.solver.cfr.
+        CFRSolver` does it. Recomputing per node would make regret-matching updates land in the middle
+        of the same traversal, and the two forms would then differ by an algorithm change rather than by
+        a speed change -- which is the one thing this file is not allowed to become.
+        """
         ones = np.ones(self.tree.n_deals, dtype=np.float64)
         self._walk(self.tree.root, ones, ones, player, self.current_matrix())
 

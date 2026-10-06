@@ -127,11 +127,16 @@ What is *not* here yet, stated because the gap is where the next work is:
   ``tests/test_solver_vector.py`` as a padding regression, and Leduc is unwritten, so no lesson may cite
   a two-street solve until `PUBLISHED_PROOFS` does.
 - A second implementation exists and is *not* the producer. `solver/vector.py` is the vectorised form the
-  preflop model will need; `tests/test_solver_vector.py` holds it to machine-epsilon agreement with the
-  textbook form under plain regret matching, and to independent satisfaction of the closed forms under
-  CFR+ (where update order legitimately changes which equilibrium a solver lands in). It produces no
-  artifact yet. Until it does, `solver/cfr.py` is what writes `data/gen/solver`, and it is 3.1x slower on
-  Kuhn -- a speedup measured on a 6-deal tree, which is why no claim about preflop feasibility rests on it.
+  preflop model will need; `tests/test_solver_vector.py` holds it to machine-epsilon agreement (1e-17,
+  not bit equality: the two forms sum identical terms with different associativity) with the textbook
+  form under plain regret matching, and to independent satisfaction of the closed forms under CFR+, where
+  flooring order legitimately changes which member of Kuhn's equilibrium family a solver lands in. It
+  produces no artifact yet. Until it does, `solver/cfr.py` writes `data/gen/solver`.
+- The speedup is measured and it is not yet the point. On the trees that exist -- six deals for Kuhn,
+  twelve for the one-street toy -- the vector form runs 3.1x on Kuhn at 20,000 iterations and 1.1x on the
+  toy. Both numbers are dominated by fixed per-step Python overhead rather than by the deal loop, so
+  nothing here has demonstrated the win the preflop model needs; the phase that solves 1,326 combos is
+  where that claim has to be won or dropped.
 - Push/fold Nash and the 1326-combo preflop model are unimplemented, which is why chapters 05, 10, 11
   and 12 hold no range charts: an invented opening range would be the exact thing adr/0005 forbids.
 - The vectorised tree-walk is not the current implementation. `solver/cfr.py` is the textbook per-deal
