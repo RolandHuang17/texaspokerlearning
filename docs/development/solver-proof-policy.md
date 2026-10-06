@@ -121,9 +121,17 @@ What is wired and running, so a contributor does not have to take a documented r
 
 What is *not* here yet, stated because the gap is where the next work is:
 
-- Four proof entries exist -- Kuhn and the one-third, half-pot and pot 1-street toys. The Leduc,
-  ruddy and 2-street games in the plan above are unwritten, so nothing in this repository has solved a
-  game with two betting streets. A lesson may not cite one until `PUBLISHED_PROOFS` does.
+- Five proof entries exist -- Kuhn and the 1-street toys at one-third, half, three-quarter, pot and
+  double-pot (overbet) sizing -- all from two families. Nothing in this repository has yet solved a game
+  with two *betting* streets: `games.two_street_probe` exists only inside
+  ``tests/test_solver_vector.py`` as a padding regression, and Leduc is unwritten, so no lesson may cite
+  a two-street solve until `PUBLISHED_PROOFS` does.
+- A second implementation exists and is *not* the producer. `solver/vector.py` is the vectorised form the
+  preflop model will need; `tests/test_solver_vector.py` holds it to machine-epsilon agreement with the
+  textbook form under plain regret matching, and to independent satisfaction of the closed forms under
+  CFR+ (where update order legitimately changes which equilibrium a solver lands in). It produces no
+  artifact yet. Until it does, `solver/cfr.py` is what writes `data/gen/solver`, and it is 3.1x slower on
+  Kuhn -- a speedup measured on a 6-deal tree, which is why no claim about preflop feasibility rests on it.
 - Push/fold Nash and the 1326-combo preflop model are unimplemented, which is why chapters 05, 10, 11
   and 12 hold no range charts: an invented opening range would be the exact thing adr/0005 forbids.
 - The vectorised tree-walk is not the current implementation. `solver/cfr.py` is the textbook per-deal

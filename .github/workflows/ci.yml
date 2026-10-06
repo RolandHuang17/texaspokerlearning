@@ -172,10 +172,13 @@ jobs:
         shell: bash
         run: python tools/cost_probe.py
 
-      # The solver marker exists in pyproject and tests/test_solver.py carries it: canonical Kuhn
-      # shape, the analytic -1/18, CFR+ beating CFR, best response against a brute force over pure
-      # strategies, solver-vs-algebra per bet size, byte-identical reruns, and a proof gate that is
-      # shown to be able to fail.
+      # The solver marker is carried by tests/test_solver.py (canonical Kuhn shape, the analytic
+      # -1/18, CFR+ beating CFR, best response against a brute force over pure strategies,
+      # solver-vs-algebra per bet size, byte-identical reruns, a proof gate shown able to fail) and by
+      # tests/test_solver_vector.py, which holds the vectorised form to machine-epsilon agreement with
+      # the textbook form under plain regret matching -- the admission control for the faster
+      # implementation, because a vectorised CFR has previously converged here to something stable that
+      # was not an equilibrium.
       - name: Solver behaviour tests
         shell: bash
         run: python -m pytest -m solver -q

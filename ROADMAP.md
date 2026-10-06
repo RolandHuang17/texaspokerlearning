@@ -71,7 +71,7 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 ## M3 — CFR+, Leduc, and the visible differentiator  ← partly done
 
 - [ ] Leduc, ruddy and 2-street toys (`cfr_plus` landed as a mode of `CFRSolver`, recorded under M2;
-      per-game exploitability CSVs exist for the four registered proofs)
+      per-game exploitability CSVs exist for the five registered proofs)
 - [ ] GitHub Pages live: docs at root, trainer at `/trainer/` -- the workflow is written
       (`pages.yml` builds both and skips the trainer when `trainer/` is absent), the deployment is not,
       because publishing is the maintainer's call and has not been made yet
