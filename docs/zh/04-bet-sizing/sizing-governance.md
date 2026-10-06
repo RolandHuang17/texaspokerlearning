@@ -255,7 +255,7 @@ f = 2b/(p+2b)                      ->  D = 0  ->  区间为 all/none   尺度单
 | MDF 底线配额 | `derived` | `data/gen/ranges/range.04-02.mdf-floor-vs-pot.json` |
 | 所有 `f` 值 | 声明输入 | **UNVERIFIED / 未核验**：`table.04-05` 的 `provenance.assumptions` 明确写着"弃牌率是声明的输入，不是任何人群的实测"。本节所有结论都是对给定 `f` 的条件式回答。 |
 | `f` 随尺度如何变化 | **UNVERIFIED / 未核验** | 本仓库没有求解决策可支持这条映射；它属于第 08 章之后的求解器工作。 |
-| 枚举范围未做牌面移除 | 已实测的限制 | **UNVERIFIED / 未核验**：`parse("77")` 在 `Kh7s3d` 上仍含 `7s` 组合，`range_equity` 与 `nut_advantage` 都按完整范围计数（实测 `77` 对 `AKo` 得 `0.983838` 而非 `1.0`），故 `table.03-01` 的组合数与坚果占比是上偏计数，本节只用它的符号与比较，不用它当精确配额。 |
+| 范围必须由调用方按牌面收缩 | 引擎行为，已实测 | `parse("77")` 在 `Kh7s3d` 上仍含 `7s` 组合，因此 `nut_advantage` 与 `is_capped` 会拒绝未收缩的输入，`table.03-01` 给出的是 `parse(spec, exclude=board)` 之后的计数（44，不是 52）。胜率那一列不需要额外小心：`range_equity` 自己会屏蔽冲突组合，所以 `77` 对 `AKo` 两种读法都得 `0.983838`——那 1.6% 是河牌发出 K 全成葫芦的真实反制，不是分母假象。 |
 
 ## 术语 / Terms
 

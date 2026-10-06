@@ -18,7 +18,7 @@
         "zh": "剩余筹码(bb)"
       },
       "key": "stack_bb",
-      "unit": "combos"
+      "unit": "bb"
     },
     {
       "digits": 2,
@@ -36,7 +36,7 @@
         "zh": "最大标准尺度(bb)"
       },
       "key": "largest_standard_size_bb",
-      "unit": "combos"
+      "unit": "bb"
     },
     {
       "digits": 2,

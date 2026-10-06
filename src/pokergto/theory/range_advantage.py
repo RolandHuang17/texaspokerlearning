@@ -97,8 +97,12 @@ def nut_advantage(
     """Share of each range's combos that sit at the top of the hand-strength ordering on this board.
 
     Definition used: the best score any combo of either range achieves on ``board`` is the reference;
-    a combo counts as nut-tier when it is within ``near_nuts`` steps below it, where a step is one rank
-    in the evaluator's total order. With ``near_nuts=0`` this is the literal nuts.
+    a combo counts as nut-tier when it is within ``near_nuts`` below it, measured in units of the
+    evaluator's packed integer score. With ``near_nuts=0`` this is the literal nuts.
+
+    The unit matters and is not a hand type. Adjacent distinct strengths on a three-card board can sit
+    16 integers apart, so ``near_nuts=1,2,3`` all return the ``near_nuts=0`` share; a "small" tolerance
+    here is not a small margin, and "second-nuts" cannot be defined with this parameter.
 
     A range handed to this function must already exclude the board. It cannot detect the collision
     itself, because "the best hand in range" and "how many combos are in range" are both computed off
@@ -162,11 +166,11 @@ def _assert_board_excluded(
 def is_capped(rng: Range, board: tuple[Card, ...], *, tolerance: int = 0) -> bool:
     """Whether the range holds the best hand this board can deal at all.
 
-    ``tolerance`` is in steps of the evaluator's *total order* -- one step is one distinct hand strength
-    -- so the default says what it means: capped means the nuts are absent. A positive tolerance answers
-    the softer question "is it a clear margin below the ceiling", and must be asked explicitly, because
-    the packed scores two hand strengths apart differ by thousands of integers and a small numeric
-    tolerance is not a small margin.
+    ``tolerance`` is in units of the evaluator's packed integer score, the same unit
+    :func:`nut_advantage`'s ``near_nuts`` uses, so the default says what it means: capped means the
+    nuts are absent. Adjacent distinct hand strengths are tens or thousands of integers apart, which
+    means a positive tolerance answers a much softer question than it sounds like -- "is it a clear
+    margin below the ceiling" has to be asked with a number measured against the gaps, not with 1 or 2.
 
     The ceiling is the best hand any two cards could make here, taken over all 1326 combos rather than
     only the ones this range holds: capped means "not in *my* range", not "not achievable in principle".

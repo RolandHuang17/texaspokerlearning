@@ -309,7 +309,6 @@ InputError: is_capped: range 0 still holds 7c7s, a card on the board. Narrow it 
 | 单挑三行的胜率（0.715272、0.368154、0.610233）与坚果占比（0.068182、0.047619、0.103448） | `derived` | `python -c` 调 `pokergto.theory.range_advantage.advantage(..., mode="exact")`；胜率列与产物 `table.03-01.equity-vs-nut-advantage` 逐位一致 |
 | 空气:价值（0.833333、2.222222、0.444444；4.444444、4.0、0.740741） | `derived` | `python -c` 调 `pokergto.theory.multiway.bluff_value_ratio`（排除牌面后） |
 | EV（−0.635757、−8.320008、−6.51648、+5.0、+1.5）、0.9375、0.75 | `derived` | `python -c` 调 `pokergto.ev.ev_call / ev_pure_bluff`、`pokergto.odds.at_least_one_defense / equity_needed_to_call` |
-| 产物 `table.03-01.equity-vs-nut-advantage` 的**坚果占比列**（11.5385%、9.0909%、16.6667%） | **UNVERIFIED / 与本节命令不一致** | 本节的命令给出 6.8182%、4.7619%、10.3448%。差异来自引擎现在要求范围先排除牌面（见上面两条拒绝），而该产物的这两列是排除规则之前生成的读数。本节的句子一律采用可复算的那一组；这条差异属于 `data/gen` 与 `src/` 的协调问题，本节只记录、不修改。 |
 | 三个"声明范围"（CO/BB/BTN 的 spec 字符串） | `reference` + **UNVERIFIED** | 讲解用输入：不是求解结果，也不是任何人群的开池/跟注范围。换成求解决策需要 `data/src` 的 spot 产物 + `tools/gen_tables.py`。 |
 | 独立防守假设本身 | `reference` + **UNVERIFIED** | 移除效应使其不成立；产物把这条写进 `provenance.assumptions`。本仓库尚无量化该偏差的产物（多人摊牌胜率函数不存在，`range_equity` 只接两家）。 |
 | "三人池里至少一人成对的概率"这类句子 | **UNVERIFIED**，本节拒绝给出 | 没有产生它的函数；本节任何这类百分比都不是本仓库的结论。 |

@@ -254,7 +254,7 @@ Every number in this lesson is computed in this repository. No commercial solver
 | MDF floor quota chart | `derived` | `data/gen/ranges/range.04-02.mdf-floor-vs-pot.json` |
 | Every `f` value used | declared input | **UNVERIFIED**: `table.04-05`'s own `provenance.assumptions` states that fold frequencies are declared, not measured. Everything here is a conditional answer for a stated `f`. |
 | How `f` moves with `b` | **UNVERIFIED** | Nothing in this repository solves that mapping; it is chapter 08 work. |
-| Enumerated ranges are not thinned by board cards | measured limitation | **UNVERIFIED**: `parse("77")` still contains `7s` combos on a `Kh7s3d` board, and both `range_equity` and `nut_advantage` count the full range (measured: `77` vs `AKo` returns `0.983838`, not `1.0`). The combo counts and nut shares in `table.03-01` are therefore upper-biased; this lesson uses their signs and comparisons, never them as exact quotas. |
+| Ranges must be narrowed by the caller | engine behaviour, measured | `parse("77")` still holds `7h7s` on a `Kh7s3d` board, so `nut_advantage` and `is_capped` refuse it and `table.03-01` publishes `parse(spec, exclude=board)` counts (44, not 52). Equity needs no such care: `range_equity` masks colliding combos by itself, which is why `77` versus `AKo` returns `0.983838` on either reading -- that shortfall is real counterfeiting on a king-full-of-sevens river, not a denominator artifact. |
 
 ## 术语 / Terms
 

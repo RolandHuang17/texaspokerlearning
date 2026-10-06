@@ -866,8 +866,20 @@ def build_capped_ranges() -> dict[str, Any]:
         function="is_capped",
         assumptions=(
             {
-                "en": "Capped means the range's best holding sits below the board's reachable ceiling by more than `tolerance` steps of the evaluator's total order, where a step is one distinct hand strength.",
-                "zh": "封顶的判定是：范围最强手在评估器全序里比牌面可达上限低出超过 tolerance 步；一步 = 一种不同的牌力。",
+                "en": "Capped means the range's best holding sits below the board's reachable ceiling by "
+                "more than `tolerance`, counted in units of the evaluator's packed integer score -- not in "
+                "hand types: adjacent distinct strengths can sit 16 units apart, while a hand-type step "
+                "here is 184,320 units or more. The default tolerance is 0.",
+                "zh": "封顶的判定是：范围最强手比牌面可达上限低出超过 tolerance，单位是评估器打包整数分的刻度，"
+                "不是牌型种类：相邻两种不同牌力可以只差 16 个刻度，而一档牌型差距在这里是 184,320 个刻度起步。"
+                "tolerance 默认为 0。",
+            },
+            {
+                "en": "Ranges are narrowed to the board with notation.parse(spec, exclude=board) before "
+                "they are measured, so `Combos` is the number of deals that are still possible; "
+                "`is_capped` refuses a range that still contains a board card.",
+                "zh": "范围先经 notation.parse(spec, exclude=board) 按牌面收缩再测量，`组合数` 一列是仍然可发的牌数；"
+                "`is_capped` 会拒绝仍含牌面那张卡的范围。",
             },
         ),
         checks=[
@@ -1158,7 +1170,7 @@ def build_size_ceiling_by_stack() -> dict[str, Any]:
             {
                 "key": "stack_bb",
                 "header": {"zh": "剩余筹码(bb)", "en": "Stack behind (bb)"},
-                "unit": "combos",
+                "unit": "bb",
                 "digits": 0,
             },
             {
@@ -1170,7 +1182,7 @@ def build_size_ceiling_by_stack() -> dict[str, Any]:
             {
                 "key": "largest_standard_size_bb",
                 "header": {"zh": "最大标准尺度(bb)", "en": "Largest standard size (bb)"},
-                "unit": "combos",
+                "unit": "bb",
                 "digits": 1,
             },
             {

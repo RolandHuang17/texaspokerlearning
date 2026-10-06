@@ -18,15 +18,15 @@
 
 ## 核心原理 / The principle
 
-A range is **capped** on a board exactly when its own best holding sits clearly below what that board can produce:
+A range is **capped** on a board exactly when its own best holding sits below what that board can produce:
 
 ```
-C(B)             = max over ALL 1,326 combos of best_score(hand, B)   -- the board's ceiling
+C(B)             = max over all 1,326 combos of best_score(hand, B)   -- the board's ceiling
 best(H, B)       = max over i in H of           best_score(i, B)      -- the range's strongest hand
 is_capped(H, B)  <=>  best(H, B) < C(B) - tolerance
 ```
 
-`tolerance` defaults to 2. This is a `derived` claim: `C(B)` and `best(H,B)` are both computed combo by combo by the evaluator, with no external table. **The ranges themselves are illustrative inputs (`reference`)**, so every "capped" in this lesson means "capped for the range written on paper", never "capped for the real line".
+`H` must already exclude `B`: `is_capped` calls the same guard `nut_advantage` uses and raises `InputError("is_capped: range 0 still holds ... a card on the board")` rather than scoring a hand that cannot be dealt. `tolerance` defaults to **0**, which is the literal question: is the ceiling missing from this range or not. This is a `derived` claim: `C(B)` and `best(H,B)` are both computed combo by combo by the evaluator, with no external table. **The ranges themselves are illustrative inputs (`reference`)**, so every "capped" in this lesson means "capped for the range as written and then narrowed to the board", never "capped for the real line".
 
 <!-- provenance: kind=derived verified=true -->
 > !!! note "Provenance"
@@ -42,17 +42,17 @@ Three quantities have to be defined separately; conflating them is this lesson's
 
 **The test.** `best(H, B) < C(B) - tolerance`. Note that this is an **integer comparison** on the evaluator's total order.
 
-One detail has to be stated, because it is the trap in this section. The artifact's `provenance.assumptions` says "a step is one distinct hand strength", but the `tolerance` in the code is a count of **units** of that integer order. Measured on the four three-card boards used here:
+One detail has to be stated, because it is the trap in this section. `tolerance` is counted in **units of the evaluator's packed integer score**, not in hand types. Measured on the four three-card boards used here:
 
 - Each of them is covered by only **91** distinct final strengths across all 1,326 combos.
-- On `AsKsQh` the smallest gap between two adjacent distinct strengths is **1** unit (high card `A-K-Q-4-2` versus `A-K-Q-4-3`), so "2 units" really can absorb two kicker-level differences.
-- But gaps with actual hand-type meaning are far larger: the smallest gap on `Kh7s3d` is **16**, trips sevens sit **368,640** units below trips kings, the capped `AsKsQh` row is **3,150,704** units below, and the capped villain on `9h6d3c` is **184,320** units below.
+- On `AsKsQh` the smallest gap between two adjacent distinct strengths is **1** unit (high card `A-K-Q-4-2` versus `A-K-Q-4-3`), so a tolerance of 2 really can absorb two kicker-level differences.
+- But gaps with hand-type meaning are far larger: the smallest gap on `Kh7s3d` is **16**, trips sevens sit **368,640** units below trips kings, the capped `AsKsQh` row is **3,150,704** units below the ceiling, and the capped villain on `9h6d3c` is **184,320** units below.
 
-So the real meaning of `tolerance = 2` is "strictly below the ceiling, forgiven only inside about two kicker units", not "up to two hand types below". Reading the assumption sentence as the latter makes the tolerance look generous; the measurements say it is very tight.
+That is why the default is 0 and not 2. A tolerance of 2 forgives about two kicker steps, which is nothing next to a 184,320-unit hand-type gap: it cannot silently reclassify a capped range. The earlier default of 2 was therefore not a soft margin but a rounding allowance whose size nobody had measured -- and the artifact caption that described it as "one step = one distinct hand strength" described something the code does not do. Both are corrected here; `data/gen/tables/table.03-02.capped-range-check.json` carries the new wording.
 
 **Why this is a sizing conclusion and not a hand-strength conclusion.** A big bet is a formal challenge to be raised, and the top of the raise chain has to be occupiable, otherwise every hand that actually goes to war sits on the other side. `is_capped` judges exactly "can I stand on top", so it deletes big sizes and raises -- not the ability to win the hand on average, which Live hand 2 prices at a counter-intuitive number.
 
-**The ceiling is a knife-edge, not a slope.** Computed per board, the classes that reach `C(B)` are: `Kh7s3d` -> only `KK`; `AsKsQh` -> only `JT`; `9h6d3c` -> only `99`; `As9s5d` -> only `AA`. **Each board has exactly one class on the roof, and it holds 6 (or 16) combos.** So "is this line capped" usually reduces to whether one cell made it into the range.
+**The ceiling is a knife-edge, not a slope.** Computed per board, the classes that reach `C(B)` are: `Kh7s3d` -> only `KK`; `AsKsQh` -> only `JT`; `9h6d3c` -> only `99`; `As9s5d` -> only `AA`. **Each board has exactly one class on the roof.** Narrowed to the board those cells hold 3, 16, 3 and 3 legal combos respectively -- the pairs lose three of their six combos to the board's own rank, while `JT` shares no rank with `AsKsQh` and keeps all sixteen. So "is this line capped" usually reduces to whether one cell made it into the range.
 
 ## 直觉 / Intuition
 
@@ -60,28 +60,28 @@ Think of `C(B)` as the top floor of this particular building. Whether your range
 
 - With the key you may bet big, because when the opponent raises you hold hands that answer, and his raise becomes his own risk.
 - Without the key your strongest hand is already downstairs. The opponent does not have to read your cards, only your line: he knows the top is empty on your side, so he can raise and call large sizes freely, **because nothing in your range is above what he raises with**.
-- "Capped" and "behind" are different axes. Capped is an **upper bound**; behind is an **average**. A capped range can be comfortably ahead on average (Live hand 2 measures 61.2680%) and still be unable to supply the value segment a big size requires.
+- "Capped" and "behind" are different axes. Capped is an **upper bound**; behind is an **average**. A capped range can be comfortably ahead on average (Live hand 2 measures 63.1846%) and still be unable to supply the value segment a big size requires.
 
 Mental model: `03-01` put a roof on the table; this lesson adds one rule -- **the position of that roof is set by the board, not by the two ranges**. `03-01` asks "who stands highest right now"; `03-02` asks "does your range even contain the highest floor this board has".
 
 ## 算例 / Worked examples
 
-All verdicts come from `is_capped(parse(spec), board)` with the default `tolerance = 2`.
+All verdicts come from `is_capped(parse(spec, exclude=board), board)` with the default `tolerance = 0`. Combo counts below are the narrowed ones unless a parenthesised "as written" count says otherwise; `python -m pokergto range "spec"` prints the written count, and `Range.with_removed(*board).total_combos()` the narrowed one.
 
-**Example 1 -- `Kh7s3d`, hero = `AKs,AQs,ATs,KQs,AKo,AQo,99,77` (52 combos).**
-`best(H,B)` = trips sevens (`77`), `C(B)` = trips kings; the gap is 368,640 units -> **capped**.
-How knife-edge that is: `is_capped(parse("AKs,AQs,ATs,KQs,AKo,AQo,99,77,KK"), board)` -> **False** (58 combos, and hero's nut share moves to 6/58 = **10.3448%** because the reference rises from trips sevens to trips kings). Adding `K7s` (two pair) stays capped; adding `73o` stays capped. **This is not a question of how many combos, it is a question of whether that one cell is present.**
+**Example 1 -- `Kh7s3d`, hero = `AKs,AQs,ATs,KQs,AKo,AQo,99,77` (44 combos, 52 as written).**
+`best(H,B)` = trips sevens (`77`, 3 combos left after the board's `7s`), `C(B)` = trips kings; the gap is 368,640 units -> **capped**.
+How knife-edge that is: `is_capped(parse("AKs,AQs,ATs,KQs,AKo,AQo,99,77,KK", exclude=board), board)` -> **False** (47 combos, 58 as written, and hero's nut share moves from 3/44 = 6.8182% to 3/47 = **6.3830%** because the reference rises from trips sevens to trips kings -- and `KK` itself loses three of its six combos to the board's `Kh`). Adding `K7s` (two pair) stays capped; adding `73o` stays capped. **This is not a question of how many combos, it is a question of whether that one cell is present.**
 
-**Example 2 -- `AsKsQh`, hero = `AA,KK,QQ,JT,T9,AT,KT` (82 combos).**
-`best(H,B)` = straight to an ace = `C(B)` -> **not capped**, gap 0. Hero's nut share is 16/82 = **19.5122%**, all 16 combos of `JT`.
-Same board, villain = `98s,76s,54s,65,K9,K8,Q9,J9` (92 combos): `best` = one pair `K A Q 9`, **3,150,704** units below the ceiling -> **capped**. Add `JT` -> False. Add `T9s` -> still capped (`T9s` is only ace-high on this board; the straight needs a `J`).
+**Example 2 -- `AsKsQh`, hero = `AA,KK,QQ,JT,T9,AT,KT` (65 combos, 82 as written).**
+`best(H,B)` = straight to an ace = `C(B)` -> **not capped**, gap 0. Hero's nut share is 16/65 = **24.6154%**: all 16 `JT` combos survive, since neither rank appears on the board, while 17 of the spec's 82 combos are deals the board already made impossible.
+Same board, villain = `98s,76s,54s,65,K9,K8,Q9,J9` (80 combos, 92 as written): `best` = one pair `K A Q 9`, **3,150,704** units below the ceiling -> **capped**. Add `JT` -> False. Add `T9s` -> still capped (`T9s` is only ace-high on this board; the straight needs a `J`).
 
 **Example 3 -- `9h6d3c`: one side capped, the other not, on the same board.**
-hero = `AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs` (66 combos) contains `99`, so `best` = trips nines = `C(B)` -> **not capped**.
-Delete `99`: `is_capped(parse("AKo,AQo,AJs,KQo,TT,88,AKs,AQs"), board)` -> **True**. One cell of range notation reverses the whole sizing conclusion.
-villain = `87s,76s,65s,54s,T8s,T9s,98o,66,55` (48 combos): `best` = trips sixes, 184,320 units below -> **capped**.
+hero = `AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs` (63 combos, 66 as written) contains `99` -- 3 combos, not 6, because `9h` is on the board -- so `best` = trips nines = `C(B)` -> **not capped**.
+Delete `99`: `is_capped(parse("AKo,AQo,AJs,KQo,TT,88,AKs,AQs", exclude=board), board)` -> **True**. One cell of range notation reverses the whole sizing conclusion.
+villain = `87s,76s,65s,54s,T8s,T9s,98o,66,55` (39 combos, 48 as written): `best` = trips sixes, 184,320 units below -> **capped**.
 
-**Example 4 -- capped does not mean weak.** Example 3's villain, all 48 capped combos, holds **61.2680%** equity against hero's 66 combos while its nut share is **0.0000%** and the verdict is **capped**. It is the favourite on average and it owns nothing on the ceiling. That pair of numbers is the cheapest available separation of "upper bound" from "average".
+**Example 4 -- capped does not mean weak.** Example 3's villain, all 39 capped combos, holds **61.2680%** equity against hero's 63 combos while its nut share is **0.0000%** and the verdict is **capped**. It is the favourite on average and it owns nothing on the ceiling. That pair of numbers is the cheapest available separation of "upper bound" from "average".
 
 **Example 5 -- the roof moves with the card.** Sweeping all 49 possible turn cards after `9h6d3c`, hero is uncapped on exactly **3** of them (`9c`, `9d`, `9s`) and capped on the other **46**. The reason is plain: any non-nine turn either raises the ceiling (straights, full houses, quads arrive) or pushes `99` off the top. **"This line is capped" is a per-street proposition, not a verdict on the hand** -- which is `03-03`'s subject.
 
@@ -148,27 +148,27 @@ Three rules for reading it:
 
 1. With `regime = above` only hands whose equity is **at least** `e*` want to bet; `below` is the inverted bluff region (caused by the denominator changing sign, not a slip); `all` means the size decides for every hand.
 2. Two rows land exactly on `e* = 0.0000%`: one third pot at `f = 25.00%`, and pot at `f = 50.00%`. Not a coincidence -- that `f` is the fold frequency the size needs (`02-03`), at which air is indifferent between betting and checking. **A small size costs no capacity**, and that fact is why `04-02` exists.
-3. Two pot at `f = 25.00%` requires `e* = 45.4545%`. Now look back at Example 1's `Kh7s3d`: the capped villain's two strongest segments, `KQo,AJo` (24 combos), hold only **36.3348%** against hero's rooftop segment `77,99` (12 combos), which does not even reach the **40.0000%** a two-times-pot call requires -- `ev_call(4.4, 8.8, 0.363348) = **−0.8063 bb**` per attempt. **That is the concrete path from "this line contains no nuts" to "you may not use this size".**
+3. Two pot at `f = 25.00%` requires `e* = 45.4545%`. Now look back at Example 1's `Kh7s3d`: the capped villain's two strongest segments, `KQo,AJo` (21 legal combos, 24 as written), hold only **36.3348%** against hero's rooftop segment `77,99` (9 legal, 12 as written), which does not even reach the **40.0000%** a two-times-pot call requires -- `ev_call(4.4, 8.8, 0.363348) = **−0.8063 bb**` per attempt. **That is the concrete path from "this line contains no nuts" to "you may not use this size".**
 
 ## 实战牌局 / Live hands
 
-**Hand 1 (`hand.03-02-broadway-nut-cap`) -- heads up, turn `AsKsQh`, pot 12 bb. Hero holds 82 combos and fires the second barrel; Villain holds 92 combos.**
+**Hand 1 (`hand.03-02-broadway-nut-cap`) -- heads up, turn `AsKsQh`, pot 12 bb. Hero holds 65 legal combos (82 as written) and fires the second barrel; Villain holds 80 (92 as written).**
 
-The ranges are Example 2's. Verdicts: hero not capped (the 16 combos of `JT`, nut share 19.5122%), villain capped (its best is one pair kings).
+The ranges are Example 2's. Verdicts: hero not capped (the 16 combos of `JT`, all legal here, nut share 16/65 = 24.6154%), villain capped (its best is one pair kings).
 
-- **The decision: may hero bet two times pot, 24 bb?** After `is_capped` and the nut share, price the size. Villain's `MDF = 12/(12+24) = 0.333333` (`python -m pokergto mdf --pot 12 --bet 24`), so 30.67 of its 92 combos must continue. Betting 24 bb with `JT`, which wins always:
+- **The decision: may hero bet two times pot, 24 bb?** After `is_capped` and the nut share, price the size. Villain's `MDF = 12/(12+24) = 0.333333` (`python -m pokergto mdf --pot 12 --bet 24`), so 26.67 of its 80 legal combos must continue. Betting 24 bb with `JT`, which wins always:
   `ev_bet(12, 24, 2/3, 1.0) = **20.0 bb**` against `ev_check(12, 1.0) = **12.0 bb**` -> the big size is worth **+8.0 bb** more per hand. Those 8 bb come from exactly one place: the 16 combos that stand on the board's ceiling.
-- **What the wrong play costs: villain folds everything.** At `f = 1`, hero's air segment `T9` (16 combos) takes the whole pot uncontested every time: `ev_pure_bluff(12, 24, 1.0) = **+12.0 bb**` per attempt, **192.0 bb** across the 16 combos, which is **2.0870 bb** per combo of villain's 92-combo range. If villain instead defends exactly MDF (`f = 2/3`), `ev_pure_bluff(12, 24, 2/3) = **0.0**` -- that is `02-03`'s floor line, met in chapter 03.
-- **Where is villain's quota?** Suppose hero sizes 2x pot with a deliberately 1 : 1 mix (`JT` 16 + `T9` 16, bluff-heavy against the required 1.5 : 1). Villain's best available segment `K9,K8` (32 combos) holds **39.2917%** against that betting range while calling 24 bb into 60 bb needs **40.0000%**; it misses by **0.7083** percentage points and `ev_call(12, 24, 0.392917) = **−0.4250 bb**` per attempt. The other 60 combos (`98s,76s,54s,65,Q9,J9`) hold **27.4958%**. A capped range must pay its quota with the segment closest to the top, and here it is within 0.7083 pp of not being able to.
+- **What the wrong play costs: villain folds everything.** At `f = 1`, hero's air segment `T9` (16 combos) takes the whole pot uncontested every time: `ev_pure_bluff(12, 24, 1.0) = **+12.0 bb**` per attempt, **192.0 bb** across the 16 combos, which is **2.4000 bb** per combo of villain's 80-combo range. If villain instead defends exactly MDF (`f = 2/3`), `ev_pure_bluff(12, 24, 2/3) = **0.0**` -- that is `02-03`'s floor line, met in chapter 03.
+- **Where is villain's quota?** Suppose hero sizes 2x pot with a deliberately 1 : 1 mix (`JT` 16 + `T9` 16, bluff-heavy against the required 1.5 : 1). Villain's best available segment `K9,K8` (24 legal combos, 32 as written) holds **39.2917%** against that betting range while calling 24 bb into 60 bb needs **40.0000%**; it misses by **0.7083** percentage points and `ev_call(12, 24, 0.392917) = **−0.4250 bb**` per attempt. The other 56 legal combos (`98s,76s,54s,65,Q9,J9`, 60 as written) hold **27.4958%**. A capped range must pay its quota with the segment closest to the top, and here it is within 0.7083 pp of not being able to.
 
 **Hand 2 (`hand.03-02-capped-equals-not-weak`) -- 6-max, blinds 0.5/1, BTN opens 2.2 bb, BB calls 1.2 bb, pot 4.4 bb. Flop `9h6d3c`, BTN bets two times pot, 8.8 bb.**
 
-Use the `table.03-02` pair: BTN 66 combos, **not capped** (`99` is the board's ceiling); BB 48 combos, **capped** (best is trips sixes), nut share **0.0000%**.
+Use the `table.03-02` pair: BTN 63 legal combos (66 as written), **not capped** (`99` is the board's ceiling); BB 48 (60 as written), **capped** (best is trips sixes), nut share **0.0000%**. Against BTN's whole range BB holds **63.1846%** -- the equity this row is computed from, not Example 3's 48-combo spec.
 
-- **The counter-intuitive number**: those 48 capped combos hold **61.2680%** equity against BTN's 66. The capped side is the average favourite.
-- **The decision: should BB call?** Calling 8.8 bb into `4.4 + 8.8 + 8.8 = 22.0 bb` needs **40.0000%**; BB's whole range holds 61.2680% and MDF asks only 33.3333% (16 of 48). Segment by segment against BTN's value-plus-bluff `99,AJs`: `T9s,98o` (16 combos) **60.7492%**, `66,55` (12 combos) **48.1770%**, and the 20 draw combos `87s,76s,65s,54s,T8s` only **39.4966%** -- 0.5034 pp short.
-- **So the cap changes the direction, not the eligibility.** BTN's two-times-pot bet is licensed by owning the board's unique rooftop, but that rooftop is 6 combos and cannot carry 66. BB, though capped, can pay MDF with 40 combos and have spare. **"You are capped" deletes your raises and your big sizes; it does not delete your equity.**
-- **What the wrong play costs.** If BTN reads "BB is capped" as "BB folds two thirds of it" and bets 2x pot with its whole range, the air segment runs into those 40 call-worthy combos; the capacity-legal construction is `99` (6 combos) plus `AJs` (4 combos), and `6 : 4 = 1.5 : 1` is exactly what `table.02-04` demands at two times pot.
+- **The counter-intuitive number**: those 48 capped combos hold **63.1846%** equity against BTN's 63. The capped side is the average favourite.
+- **The decision: should BB call?** Calling 8.8 bb into `4.4 + 8.8 + 8.8 = 22.0 bb` needs **40.0000%**; BB's whole range holds 61.2680% and MDF asks only 33.3333% (16 of 48). Segment by segment against BTN's value-plus-bluff `99,AJs`: the two-pair-and-straight tier `T9s,98o,97o` (21 legal combos, 28 as written) **60.7937%**, the set tier `66,55` (9 of 12) **48.1770%**, and the 18 legal draw combos `87s,76s,65s,54s,T8s` (20 as written) only **39.4966%** -- 0.5034 pp short.
+- **So the cap changes the direction, not the eligibility.** BTN's two-times-pot bet is licensed by owning the board's unique rooftop, but that rooftop is 3 legal combos and cannot carry 63. BB, though capped, can pay its 16-combo quota with the 30 legal combos that beat BTN's value-plus-bluff segment and still have spare. **"You are capped" deletes your raises and your big sizes; it does not delete your equity.**
+- **What the wrong play costs.** If BTN reads "BB is capped" as "BB folds two thirds of it" and bets 2x pot with its whole range, the air segment runs into those 30 call-worthy combos; the capacity-legal construction is `99` (3 legal combos) plus two of the four `AJs` combos, and `3 : 2 = 1.5 : 1` is exactly what `table.02-04` demands at two times pot -- which two `AJs` combos is a free choice no artifact makes.
 
 ## 范围图 / Range chart
 
@@ -204,7 +204,7 @@ This chart is the 33.33% a defender must keep facing a double-pot bet: 442.0 of 
 
 - The quota question (the chart) says "keep 442.0 combos". The capacity question (`is_capped`) says "is the cell at `C(B)` among them". **The quota is always payable; the capacity is not.** This chart is filled by preflop rank and never looks at whether the board is `AsKsQh` or `9h6d3c`, so it cannot say one word about who owns the roof.
 - Which is why any "defend 33% here" style conclusion deserves two questions first: which board-relevant tiers make up that 33%, and does any of them reach `C(B)`? When the two answers differ you get Live hand 1's shape -- quota payable, size not.
-- Its denominator is likewise not narrowed to a board, the same assumption class as in `03-01`.
+- Its denominator is all 1,326 preflop combos, which is a different quantity from `03-01`'s board-narrowed share denominators: this chart asks "how much of the whole deck's starting hand space clears the quota", not "how much of *this range on this board".
 
 ## 为何成立、何时失效 / Why it works, when it breaks
 
@@ -213,26 +213,26 @@ This chart is the 33.33% a defender must keep facing a double-pot bet: 442.0 of 
 Where it stops meaning what you want:
 
 1. **The subject is this range, not this line.** The artifact's ranges are illustrative inputs authored here. A real CO opening range contains `KK`, so "hero is capped on `Kh7s3d`" is a property of this illustration, not of "CO is capped on a dry king-high flop". Turning it into the latter needs ranges generated from an equilibrium strategy plus an action line, and this repository has no such artifact (see the provenance table).
-2. **`tolerance`'s unit is not "hand types".** Measured above: minimum adjacent gap 16 on `Kh7s3d`, 1 on `AsKsQh`, while trips nines sit 368,640 units below trips kings. With `tolerance = 2` the test is effectively "strictly below".
+2. **`tolerance`'s unit is not "hand types".** Measured above: minimum adjacent gap 16 on `Kh7s3d`, 1 on `AsKsQh`, while trips nines sit 368,640 units below trips kings. The default is therefore 0: the test is exactly "strictly below". Even a tolerance of 2 would not change a single verdict on these boards, because no hand-type step is smaller than 184,320 units.
 3. **A cap is per street and can be reversed by a card.** Example 5: hero is capped on 46 of the 49 turn cards after `9h6d3c`, uncapped on 3 (`9c`, `9d`, `9s`). Carrying a flop verdict to the river is this lesson's most common misuse.
-4. **Nut advantage and capped can coexist, in opposite directions.** The `Kh7s3d` row is capped for **both** sides while hero still shows +11.5385% nut edge -- `nut_advantage` references the best of the two ranges, `is_capped` references `C(B)`. **One sentence that explains both columns is guaranteed to be wrong about one of them.**
+4. **Nut advantage and capped can coexist, in opposite directions.** The `Kh7s3d` row is capped for **both** sides while hero still shows +6.8182% nut edge -- `nut_advantage` references the best of the two ranges, `is_capped` references `C(B)`. **One sentence that explains both columns is guaranteed to be wrong about one of them.**
 5. **The ceiling is usually one cell.** On all four boards `C(B)` is reached by exactly one class (`KK`, `JT`, `99`, `AA`). Omitting or including that cell flips the verdict, so any "this range is probably not capped" estimate is unsafe; run it.
 6. **Nothing here extends to multiway pots.** `is_capped` takes one range and one board; three-way "who can raise to the top" is an interaction of three upper bounds and this repository has no generated table for it.
 
 ## 陷阱 / Common mistakes
 
-1. **Reading "capped" as "behind".** Example 4: BB is capped, nut share 0.0000%, and holds 61.2680% equity.
-   *Cost*: BTN reads the cap as mass folding and puts 2x pot on all 66 combos, walking into BB's 40 call-worthy combos; the capacity-legal mix is `99,AJs` at `1.5 : 1`. Conversely, the capped side folding its quota entirely is priced in Live hand 1: **+12.0 bb** per air attempt, **+192.0 bb** over 16 combos, **2.0870 bb** per combo of the defender's range.
-2. **Reading `tolerance = 2` as "up to two hand types below still counts as the ceiling".** The unit is the evaluator's integer scale: trips sixes sit **184,320** units below trips nines on `9h6d3c`.
+1. **Reading "capped" as "behind".** Example 4: BB is capped, nut share 0.0000%, and holds 61.2680% equity -- 63.1846% for the range Live hand 2 uses.
+   *Cost*: BTN reads the cap as mass folding and puts 2x pot on all 63 combos, walking into BB's 30 call-worthy combos; the capacity-legal mix is `99` with two `AJs` combos at `1.5 : 1`. Conversely, the capped side folding its quota entirely is priced in Live hand 1: **+12.0 bb** per air attempt, **+192.0 bb** over 16 combos, **2.4000 bb** per combo of the defender's 80-combo range.
+2. **Reading a small `tolerance` as "up to two hand types below still counts as the ceiling".** The unit is the evaluator's integer scale: trips sixes sit **184,320** units below trips nines on `9h6d3c`, and the default tolerance is 0.
    *Cost*: the verdict itself does not flip, but you invent a slope that does not exist and start treating "one tier below the roof" as almost good enough. Example 1 proves it is not: `+K7s` (two pair) stays capped, only `+KK` flips it.
 3. **Treating the verdict as permanent.** Example 5: 3 uncapped turn cards out of 49.
    *Cost*: BTN keeps the flop's rooftop conclusion and overbets the turn; measured after `5h` BTN's whole range holds **22.7588%** equity while a two-times-pot size is asking for `f* = 0.666667` folds, so BB needs no folding at all to make hero's air segment lose a full bet each time.
-4. **Carrying numbers between the two chapter-03 tables.** `table.03-01` and `table.03-02` both use `9h6d3c` with the labels "BTN opener vs BB caller" but different villain ranges (60 and 48 combos); BB's equity is 63.1846% and 61.2680%, **1.9166** percentage points apart.
+4. **Carrying numbers between the two chapter-03 tables.** `table.03-01` and `table.03-02` deliberately share one `9h6d3c` villain spec, and a `checks` entry asserts the two tables really do. This lesson's Example 3 then drops `97o` from that spec, and that is where the two numbers come from: BB's equity is 63.1846% on the artifact's range and 61.2680% on the lesson's own, **1.9166** percentage points apart.
    *Cost*: dividing a combo count from one table by the denominator of the other yields a share neither artifact produced.
 
 ## 练习 / Drills
 
-- Reproduce Example 1's three reversals: run `is_capped` on `AKs,AQs,ATs,KQs,AKo,AQo,99,77`, the same plus `KK`, and the same plus `K7s`, and report the verdict and combo counts (52 / 58 / 56).
+- Reproduce Example 1's three reversals: run `is_capped` on `AKs,AQs,ATs,KQs,AKo,AQo,99,77`, the same plus `KK`, and the same plus `K7s`, and report the verdict and combo counts -- capped True / False / True, over 44 / 47 / 46 legal combos (52 / 58 / 56 as written).
 - Find which class reaches `C(B)` on `As9s5d` (hint: one class per board, as in Example 4's list) and explain why adding `99` to hero there does **not** uncap it -- the roof is trips aces, and `99` is only trips nines.
 - Both ends of Live hand 1: `python -m pokergto mdf --pot 12 --bet 24`, then `ev_pure_bluff(12, 24, 1)` and `ev_pure_bluff(12, 24, 2/3)`, and explain why the second is 0.
 - Build your own board-and-range pair where **both** sides are capped, then say what `is_capped` still contributes to sizing there. (Hint: only relative information remains, which is `03-01`'s `nut_edge`.)
@@ -252,14 +252,14 @@ Where it stops meaning what you want:
 
 | Content | Source type | Location |
 |---|---|---|
-| The six rows of `best` / `C(B)` / `is_capped` | `derived` | `data/gen/tables/table.03-02.capped-range-check.json`; `pokergto.theory.range_advantage#is_capped` |
+| The six rows of `best` / `C(B)` / `is_capped`, with their board-narrowed `Combos` column (44, 58, 65, 80, 63, 48) | `derived` | `data/gen/tables/table.03-02.capped-range-check.json`; `pokergto.theory.range_advantage#is_capped` |
 | Break-even equity per size | `derived` | `data/gen/tables/table.04-05.bet-break-even-equity.json`; `pokergto.ev#break_even_equity_to_bet` |
 | The 2 : 1 and 1.5 : 1 mixes at pot and double pot | `derived` | `table.02-04.bluff-value-ratio.json` from `02-04` |
 | Double-pot MDF chart | `derived` | `data/gen/ranges/range.04-02.mdf-floor-vs-two-pot.json` (assumptions in `provenance.assumptions`) |
 | Ceiling-reaching classes, the 368,640 / 3,150,704 / 184,320 gaps, 91 strengths per board, minimum gaps of 16 and 1 | `derived` | computed in this session over `pokergto.cards.ALL_COMBOS` with `pokergto.evaluator.best_score` |
-| The cap reversals (`+KK`, `+K7s`, `-99`, `+JT`, `+T9s`, `+99` on `As9s5d`) | `derived` | `is_capped(parse(...), board)`, commands and results in the text |
-| 20.0 / 12.0 / +8.0 / +12.0 / +192.0 / 2.0870 / 0.0 bb | `derived` | `pokergto.ev.ev_bet`, `ev_check`, `ev_pure_bluff`, computed in this session |
-| 61.2680% / 48.1770% / 60.7492% / 39.4966% / 39.2917% / 27.4958% / 36.3348% | `derived`, exact enumeration | `pokergto.equity.range_equity(..., mode="exact")` |
+| The cap reversals (`+KK`, `+K7s`, `-99`, `+JT`, `+T9s`, `+99` on `As9s5d`) | `derived` | `is_capped(parse(spec, exclude=board), board)`, commands and results in the text |
+| 20.0 / 12.0 / +8.0 / +12.0 / +192.0 / 2.4000 / 0.0 bb | `derived` | `pokergto.ev.ev_bet`, `ev_check`, `ev_pure_bluff`, computed in this session |
+| 63.1846% / 61.2680% / 48.1770% / 60.7937% / 39.4966% / 39.2917% / 27.4958% / 36.3348% | `derived`, exact enumeration | `pokergto.equity.range_equity(..., mode="exact")` |
 | −0.8063 bb / −0.4250 bb | `derived` | `pokergto.ev.ev_call`, computed in this session |
 | 3 uncapped turn cards of 49 (`9c/9d/9s` on `9h6d3c`, `7c/7d/7h` on `Kh7s3d`) | `derived` | `is_capped` evaluated board by board in this session |
 | The six example ranges | `reference` | `CAPPED_SPOTS` in `tools/gen_tables.py`: illustrative inputs, not a range derived from any real line |
@@ -275,7 +275,7 @@ Where it stops meaning what you want:
 | — | 封顶范围 | capped range | `best(H,B) < C(B) - tolerance`; the subject is this range |
 | — | 牌面可达上限 | board ceiling | `C(B)`: the best score any of the 1,326 combos makes on this board |
 | — | 坚果 | the nuts | here the **absolute** top; in `03-01` the top of the two ranges |
-| — | 牌型容量 | capacity | how many combos a range can place at `C(B)` |
+| — | 牌型容量 | capacity | how many of a range's legal combos can place at `C(B)` |
 | — | 行动线 | line | where a real range would come from; this lesson can only inspect authored ones |
 | — | 下注尺度 | bet size | the degree of freedom capacity deletes |
 | — | 超池下注 | overbet | the size most dependent on the roof |

@@ -80,14 +80,14 @@ The table below is step one finished: chips behind, largest bet as a fraction of
 <!-- BEGIN AUTO:table.04-03.size-ceiling-by-stack -->
 | Stack behind (bb) | Max bet / pot | Largest standard size (bb) |   SPR   | Equity needed all-in | Pot bet commits |
 |---:|:---:|---:|:---:|---:|---:|
-|          8 combos |    1.3 : 1    |                 6.0 combos | 1.3 : 1 |             36.3636% |             yes |
-|         10 combos |    1.7 : 1    |                 9.0 combos | 1.7 : 1 |             38.4615% |             yes |
-|         15 combos |    2.5 : 1    |                12.0 combos | 2.5 : 1 |             41.6667% |              no |
-|         20 combos |    3.3 : 1    |                12.0 combos | 3.3 : 1 |             43.4783% |              no |
-|         30 combos |     5 : 1     |                12.0 combos |  5 : 1  |             45.4545% |              no |
-|         50 combos |    8.3 : 1    |                12.0 combos | 8.3 : 1 |             47.1698% |              no |
-|        100 combos |    17 : 1     |                12.0 combos | 17 : 1  |             48.5437% |              no |
-|        200 combos |    33 : 1     |                12.0 combos | 33 : 1  |             49.2611% |              no |
+|              8 bb |    1.3 : 1    |                     6.0 bb | 1.3 : 1 |             36.3636% |             yes |
+|             10 bb |    1.7 : 1    |                     9.0 bb | 1.7 : 1 |             38.4615% |             yes |
+|             15 bb |    2.5 : 1    |                    12.0 bb | 2.5 : 1 |             41.6667% |              no |
+|             20 bb |    3.3 : 1    |                    12.0 bb | 3.3 : 1 |             43.4783% |              no |
+|             30 bb |     5 : 1     |                    12.0 bb |  5 : 1  |             45.4545% |              no |
+|             50 bb |    8.3 : 1    |                    12.0 bb | 8.3 : 1 |             47.1698% |              no |
+|            100 bb |    17 : 1     |                    12.0 bb | 17 : 1  |             48.5437% |              no |
+|            200 bb |    33 : 1     |                    12.0 bb | 33 : 1  |             49.2611% |              no |
 
 <!-- provenance: kind=derived verified=true -->
 !!! unverified "Provenance: derived in this repository · verified · confidence high"
@@ -230,7 +230,7 @@ Every number in this lesson is computed in this repository. No commercial solver
 | The 442-combo defence quota | `derived` | `total_combos` in `data/gen/ranges/range.04-02.mdf-floor-vs-two-pot.json` |
 | Every `f` value | declared input | **UNVERIFIED**: the fold rates in Examples 3-4 are conditions set by this repository, not population measurements. Every "it pays / it does not pay" here holds only for the stated `f`. |
 | Re-raises and raise pressure against overbet sizes | **UNVERIFIED** | The one-street model here has bet/check and call/fold only, no re-raise branch, so no claim about it is made. |
-| Enumerated ranges are not thinned by board cards | measured limitation | **UNVERIFIED**: range parsing keeps combos that collide with the board, so combo counts and nut shares are upper-biased (same note as in `04-01`). This lesson uses only the truth value of `is_capped`, never its counts, as a quota. |
+| Ranges must be narrowed by the caller | engine behaviour, measured | `parse` keeps board-colliding combos unless `exclude=board` is passed, and `is_capped` refuses the un-narrowed input rather than quietly over-counting (same note as in `04-01`). This lesson uses only the truth value of `is_capped`, never its counts, as a quota. |
 
 ## 术语 / Terms
 
