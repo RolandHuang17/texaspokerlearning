@@ -46,6 +46,19 @@ def _targets(text: str) -> list[tuple[str, str]]:
     return found
 
 
+def _artifact_resolves(cited: str, known: set[str]) -> bool:
+    """Does a citation in prose name something that actually exists under ``data/gen``?
+
+    Authors write the bare id, the id with its file suffix, or the id up to the lesson number
+    (``table.02-04``). All three resolve. A citation that resolves to nothing is a claim about an
+    artifact that was never generated, and that is the case this gate exists to catch.
+    """
+    stem = cited.removesuffix(".json").removesuffix(".csv")
+    if stem in known:
+        return True
+    return any(name.startswith(f"{stem}.") for name in known)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--verbose", action="store_true")
@@ -70,7 +83,7 @@ def main(argv: list[str] | None = None) -> int:
                     problems.append(f"{relative}: {kind} target missing -> {target}")
         for artifact in ARTIFACT_CITED.findall(text):
             artifacts += 1
-            if artifact not in known:
+            if not _artifact_resolves(artifact, known):
                 problems.append(
                     f"{relative}: cites `{artifact}` which is not in data/gen "
                     "(run `python tools/gen_all.py`, or fix the id)"

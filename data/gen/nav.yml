@@ -1,0 +1,62 @@
+- English:
+  - Home: en/index.md
+  - 00 Orientation:
+    - 'How to use this curriculum: hole cards, board, the four streets and position names': en/00-orientation/how-to-use-this-repo.md
+    - 'Derivation before memory: every number must be recomputable by the engine': en/00-orientation/derivation-over-memory.md
+    - 'Set up the toolchain: the CLI, random seeds and deterministic output': en/00-orientation/setup-and-toolchain.md
+  - 01 Combinatorics and Equity:
+    - 'From hole combos to hand classes: how many combos each class really has': en/01-combinatorics-equity/combos-from-1326-to-169.md
+    - 'Blockers and removal effects: how one card rewrites the opponent''s combo count': en/01-combinatorics-equity/blockers-and-card-removal.md
+    - 'Exact equity by enumeration: turning outs into per-street probabilities': en/01-combinatorics-equity/exact-equity-by-enumeration.md
+    - 'Monte Carlo error: variance, standard error and pinned seeds': en/01-combinatorics-equity/monte-carlo-variance-and-seeds.md
+    - 'The seven-card evaluator: hand classification and kicker tie-breaks': en/01-combinatorics-equity/the-seven-card-evaluator.md
+    - 'Equity is not money: why realization falls short of raw equity': en/01-combinatorics-equity/equity-realization-vs-raw-equity.md
+    - 'Reading a 13x13 grid: what a cell counts and what the axes mean': en/01-combinatorics-equity/reading-a-13x13-grid.md
+  - 02 The Math of One Decision:
+    - 'Break-even percentage: the risk a call takes against the reward it buys': en/02-the-math-of-one-decision/break-even-percentage.md
+    - 'Pot odds into a call: required equity and where implied odds break the shortcut': en/02-the-math-of-one-decision/pot-odds-to-call-frequency.md
+    - 'Minimum defense frequency: why pot/(pot+bet)': en/02-the-math-of-one-decision/deriving-minimum-defense-frequency.md
+    - 'The bluff-to-value ratio: how indifference sets the mix': en/02-the-math-of-one-decision/bluff-to-value-ratio.md
+    - 'Fold equity: the only part of a bet the opponent can hand you': en/02-the-math-of-one-decision/fold-equity.md
+    - 'One notation for every action: call, bet, raise and shove': en/02-the-math-of-one-decision/ev-unified-formula.md
+    - 'Thin value bets: when winning only a little is still worth betting': en/02-the-math-of-one-decision/the-thin-value-bet.md
+    - 'Sizing asymmetry: raise risk against what a fold is worth': en/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md
+  - 08 Toy Solvers and CFR:
+    - 'Game trees, information sets and strategy profiles: what a player can actually see': en/08-toy-solvers/game-trees-infosets-strategies.md
+    - 'Regret matching: iterating only on what you should have done': en/08-toy-solvers/regret-matching.md
+    - Tracing CFR iterations by hand on the Kuhn game: en/08-toy-solvers/cfr-on-kuhn-hand-trace.md
+    - Convergence belongs to the average strategy, not the current one: en/08-toy-solvers/convergence-average-strategy-exploitability.md
+- 中文:
+  - Home: zh/index.md
+  - 00 导论:
+    - 怎么读这套教材：底牌、牌面、四条街与位置名称: zh/00-orientation/how-to-use-this-repo.md
+    - 先推导再记忆：一个数字必须能被引擎重算出来: zh/00-orientation/derivation-over-memory.md
+    - 装好工具链：命令行、随机种子与确定性输出: zh/00-orientation/setup-and-toolchain.md
+  - 01 组合数学与胜率:
+    - 从起手组合到手牌类别：每一类到底有几个组合: zh/01-combinatorics-equity/combos-from-1326-to-169.md
+    - 阻断牌与移除效应：一张牌如何改掉对手的组合计数: zh/01-combinatorics-equity/blockers-and-card-removal.md
+    - 穷举胜率：把补牌数换成每一街的精确概率: zh/01-combinatorics-equity/exact-equity-by-enumeration.md
+    - 模拟误差从哪来：方差、标准误与固定种子: zh/01-combinatorics-equity/monte-carlo-variance-and-seeds.md
+    - 七张牌评估器：牌型归类与踢脚判定的边界情形: zh/01-combinatorics-equity/the-seven-card-evaluator.md
+    - 胜率不等于拿到手的钱：胜率实现为何低于名义胜率: zh/01-combinatorics-equity/equity-realization-vs-raw-equity.md
+    - 读 13×13 网格：一格代表几个组合、行列轴是什么: zh/01-combinatorics-equity/reading-a-13x13-grid.md
+  - 02 单次决策的数学:
+    - 保本百分比：一次跟注承担的风险对应多少回报: zh/02-the-math-of-one-decision/break-even-percentage.md
+    - 底池赔率翻译成跟注：所需胜率与隐含赔率的适用边界: zh/02-the-math-of-one-decision/pot-odds-to-call-frequency.md
+    - 最低防守频率：为什么是 pot/(pot+bet): zh/02-the-math-of-one-decision/deriving-minimum-defense-frequency.md
+    - 诈唬与价值的配比：无差别条件如何定出比例: zh/02-the-math-of-one-decision/bluff-to-value-ratio.md
+    - 弃牌赢率：一次下注里唯一由对手决定的收益: zh/02-the-math-of-one-decision/fold-equity.md
+    - 一套符号管住所有动作：跟注、下注、加注与全下: zh/02-the-math-of-one-decision/ev-unified-formula.md
+    - 薄价值下注：只赢一点点也值得打的判定条件: zh/02-the-math-of-one-decision/the-thin-value-bet.md
+    - 尺度的不对称：被加注的风险与弃牌带来的收益: zh/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md
+  - 08 简化求解器:
+    - 博弈树、信息集与策略组合：一名玩家实际能看见什么: zh/08-toy-solvers/game-trees-infosets-strategies.md
+    - 遗憾匹配：只按当初该做什么来迭代: zh/08-toy-solvers/regret-matching.md
+    - 在 Kuhn 博弈上手工跑一遍 CFR 迭代: zh/08-toy-solvers/cfr-on-kuhn-hand-trace.md
+    - 收敛的是平均策略，不是当前策略: zh/08-toy-solvers/convergence-average-strategy-exploitability.md
+- Development:
+  - development/local-dev.md
+  - development/bilingual-style.md
+  - development/data-provenance.md
+  - development/solver-proof-policy.md
+  - development/adr.md

@@ -6,8 +6,8 @@
 ## 课时导航是生成的，不是手写的
 
 章节与课时清单由 `tools/gen_curriculum_index.py` 从 `data/src/curriculum.yaml` 生成，写入
-`data/gen/index.zh.json` 与 `data/gen/nav.zh.yml`，因此网站的目录与课程骨架不可能不一致。骨架尚未
-落笔，所以这一页不列课时，也不写课时数：在这里手写一份清单，正是
+`data/gen/index.zh.json` 与 `data/gen/nav.yml`（后者由构建钩子 `mkdocs_nav.py` 交给 mkdocs），因此网站的目录与课程骨架不可能
+不一致。这一页不手写课时清单：在这里手写一份清单，正是
 [adr/0001](https://github.com/RolandHuang17/texaspokerlearning/blob/main/adr/0001-generated-data-artifacts-as-single-source-of-truth.md)
 要禁止的那种"凭断言给出的数字"。页面上出现的任何数字——频率、比例、手数——都来自 `data/gen/`，由
 `tools/inject_doc_tables.py` 写进 AUTO 区块。

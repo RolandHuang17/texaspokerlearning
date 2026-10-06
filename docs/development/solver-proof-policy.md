@@ -100,31 +100,35 @@ is taught in structured form — range-vs-range equity, MDF balance, indifferenc
 
 Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
 inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two
-CFR variants, six games.
+CFR variants, and only the games that `proofs.PUBLISHED_PROOFS` can vouch for -- four today, listed in
+the next section.
 
 ## Current state, honestly
 
-The pieces that are not wired yet, so a contributor does not mistake a documented rule for a running
-gate:
+What is wired and running, so a contributor does not have to take a documented rule on faith:
 
-- `tools/run_solver.py` does not exist, so nothing generates `data/gen/solver/**` today, and
-  `gen_all.py`'s `solver` step is a no-op that returns nothing.
-- `ProofEntry.algorithm` (the string `"cfr_plus"`) is not yet bound to `cfr.solve(..., plus=True)`.
-  That binding is `run_solver.py`'s job. Until it exists, the algorithm field is a claim, not a
-  check.
-- `tools/cost_probe.py`, which ADR-0002 names as the thing that stops the scope from sliding silently
-  (a per-game runtime and memory budget enforced in CI), does not exist. The budget is therefore an
-  intention, and `solver-regression.yml` has a `# TODO(m2):` comment saying so instead of a fabricated
-  command.
-- The mechanism-4 property and metamorphic tests are not present: there is no `tests/` directory yet,
-  and `pytest` currently collects nothing. `pyproject.toml` already registers the `solver` marker that
-  they will live under.
-- One live mismatch to know about: in `proofs.PUBLISHED_PROOFS` the one-third-pot entry is stored
-  under the literal key `toy_1street_0p333333333333`, while `_one_street_entry(Fraction(1, 3))`
-  computes `game = "toy_1street_0p333333"` from `f"{Fraction(1,3):g}"`. `entry_for()` therefore raises
-  `ProofGateError` for the one-third toy's own name. Derived identifiers from float formatting are the
-  bug class; explicit names are the fix. Flagged to the maintainer, not patched here, because
-  `src/pokergto/**` is the maintainer's file.
+- `tools/run_solver.py` generates `data/gen/solver/**` for every entry in `PUBLISHED_PROOFS`, and
+  `run_solver.py --check` compares bytes against the committed artifacts. `gen_all.py`'s `solver` step
+  calls it.
+- `ProofEntry.algorithm` is bound: `run_solver.run_entry` builds `CFRSolver(tree, plus=entry.algorithm
+  == "cfr_plus")`, so the algorithm field is a constructor argument, not a caption.
+- `tools/cost_probe.py` enforces a per-family wall-clock and memory budget, and CI runs it. A family
+  with no declared budget fails the probe rather than passing silently.
+- `tests/test_solver.py` carries the `solver` marker: the canonical Kuhn shape and its analytic
+  `-1/18`, CFR+ beating CFR at equal iterations, best response checked against a brute force over pure
+  strategies, solver frequencies against the closed forms per bet size, byte-identical reruns, and a
+  proof gate demonstrated to be able to fail.
+
+What is *not* here yet, stated because the gap is where the next work is:
+
+- Four proof entries exist -- Kuhn and the one-third, half-pot and pot 1-street toys. The Leduc,
+  ruddy and 2-street games in the plan above are unwritten, so nothing in this repository has solved a
+  game with two betting streets. A lesson may not cite one until `PUBLISHED_PROOFS` does.
+- Push/fold Nash and the 1326-combo preflop model are unimplemented, which is why chapters 05, 10, 11
+  and 12 hold no range charts: an invented opening range would be the exact thing adr/0005 forbids.
+- The vectorised tree-walk is not the current implementation. `solver/cfr.py` is the textbook per-deal
+  traversal, chosen after it found two bugs the vector form hid; the vector idea is open work with
+  Kuhn's `-1/18` as its oracle.
 
 ## What this means for a lesson author
 

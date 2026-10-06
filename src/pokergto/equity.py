@@ -8,9 +8,10 @@ iteration count, so the number can be reproduced or refuted.
 
 Cost is the other half of the design:
 
-* **Exact** means enumerating every runout. Once only the board is known a flop has
-  ``C(47,2) = 1081`` completions (``C(45,2) = 990`` if the two hole cards are also known, and 44 on
-  the turn). The evaluation count is
+* **Exact** means enumerating every runout, and the count depends on how many cards the caller has
+  committed: after a three-card board there are ``C(49,2) = 1176`` completions if the board is all
+  we know, ``C(47,2) = 1081`` once one player's two hole cards are known too, and ``C(45,2) = 990``
+  once both hands are known (44 on a known turn). The evaluation count is
   ``runouts x (hero_combos + villain_combos)``, so exact is cheap for a few combos and absurd for a
   real range. :func:`range_equity` raises :class:`~pokergto.errors.BudgetExceeded` with the number
   and the alternative rather than hanging or quietly degrading.
@@ -98,8 +99,10 @@ def _remaining_cards(used: Sequence[Card]) -> list[Card]:
 def runout_boards(board: Board, *, known_hands: Sequence[Sequence[Card]] = ()) -> list[Board]:
     """Every completion of a 0..4 card board to five cards, given the hole cards in play.
 
-    The number of completions sets the exact-mode cost: ``C(47,2)=1081`` for a flop when only the
-    board is known, ``C(45,2)=990`` once the two hands are passed in as well, and 44 on a turn.
+    The number of completions sets the exact-mode cost. For a flop: ``C(49,2)=1176`` when the board
+    is all we know, ``C(47,2)=1081`` once one hand is excluded as well (which is the same number as
+    "how many hands can my opponent hold"), ``C(45,2)=990`` once both hands are excluded, and 44 on
+    a known turn. Preflop with both hands known it is ``C(48,5)=1712304``.
     """
     if not 0 <= len(board) <= 4:
         raise InputError(f"cannot complete a {len(board)}-card board to five cards")
@@ -292,32 +295,17 @@ def hand_equity(
     iterations: int = 20_000,
     seed: int = 0,
 ) -> EquityResult:
-    """Two specific hands. With a flop this is 1,081 runouts and exact is cheap, so exact is what
-    you get; preflop it is 2.6M and ``auto`` falls back to Monte Carlo and *says so* on the result.
+    """Two specific hands. With a flop this is 990 runouts and exact is cheap, so exact is what you
+    get; preflop it is 1,712,304 and ``auto`` falls back to Monte Carlo and *says so* on the result.
     """
     return range_equity(
-        _single_combo_range(hero),
-        _single_combo_range(villain),
+        Range.from_cards(hero),
+        Range.from_cards(villain),
         board,
         mode=mode,
         iterations=iterations,
         seed=seed,
     )
-
-
-def _single_combo_range(cards: Sequence[Card]) -> Range:
-    if len(cards) != 2:
-        raise InputError("a hand is exactly two cards")
-    indices = {c.index for c in cards}
-    if len(indices) != 2:
-        raise InputError("a hand cannot contain the same card twice")
-    weights = np.zeros(1326, dtype=np.float64)
-    target = (min(indices), max(indices))
-    for position, combo in enumerate(ALL_COMBOS):
-        if combo == target:
-            weights[position] = 1.0
-            return Range(weights)
-    raise InputError(f"{cards[0]}{cards[1]} is not a valid combo")  # pragma: no cover
 
 
 def vs_random(

@@ -48,8 +48,8 @@ chapters:
           streets: [n-a]
           concepts: [hole-cards, board, street, preflop, flop, turn, river, pot, bet, raise, call, fold, check, hero, villain, six-max, position, button, small-blind, big-blind]
         prereq: []
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "00-02"
         order: 2
         slug: derivation-over-memory
@@ -64,8 +64,8 @@ chapters:
           streets: [n-a]
           concepts: [gto, nash-equilibrium, exploitability, best-response, provenance, unverified-claim, derivation-ref]
         prereq: ["00-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "00-03"
         order: 3
         slug: setup-and-toolchain
@@ -80,8 +80,8 @@ chapters:
           streets: [n-a]
           concepts: [solver, determinism, generated-artifact, single-source-of-truth, rng-seed]
         prereq: ["00-01", "00-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
 
   - id: "01"
     order: 1
@@ -110,8 +110,8 @@ chapters:
           streets: [preflop]
           concepts: [combos, hand-class, suited, offsuit, pocket-pair, hole-cards]
         prereq: ["00-01", "00-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-02"
         order: 2
         slug: blockers-and-card-removal
@@ -126,8 +126,8 @@ chapters:
           streets: [multi-street]
           concepts: [blocker, removal-effect, combos, hand-class, range]
         prereq: ["01-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-03"
         order: 3
         slug: exact-equity-by-enumeration
@@ -142,8 +142,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [equity, win-probability, outs, rule-of-two-and-four, tie-chop, showdown]
         prereq: ["01-01", "01-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-04"
         order: 4
         slug: monte-carlo-variance-and-seeds
@@ -158,8 +158,8 @@ chapters:
           streets: [n-a]
           concepts: [monte-carlo-simulation, variance, standard-error, rng-seed, sample-size, determinism]
         prereq: ["01-03", "00-03"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-05"
         order: 5
         slug: the-seven-card-evaluator
@@ -174,8 +174,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [hand-ranking, hand-strength, kicker, showdown, flush, straight, trips, full-house]
         prereq: ["01-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-06"
         order: 6
         slug: equity-realization-vs-raw-equity
@@ -190,8 +190,8 @@ chapters:
           streets: [multi-street]
           concepts: [equity-realization, implied-odds, reverse-implied-odds, equity, showdown]
         prereq: ["01-03", "01-05"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "01-07"
         order: 7
         slug: reading-a-13x13-grid
@@ -206,8 +206,8 @@ chapters:
           streets: [preflop]
           concepts: [grid-13x13, range, range-chart, hand-class, combos]
         prereq: ["01-01", "01-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
 
   - id: "02"
     order: 2
@@ -236,8 +236,8 @@ chapters:
           streets: [multi-street]
           concepts: [expected-value, break-even-percentage, pot, bet, call, raise, fold, check]
         prereq: ["00-02", "01-07"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-02"
         order: 2
         slug: pot-odds-to-call-frequency
@@ -252,8 +252,8 @@ chapters:
           streets: [flop, turn]
           concepts: [pot-odds, required-equity, implied-odds, break-even-percentage, outs]
         prereq: ["02-01", "01-06"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-03"
         order: 3
         slug: deriving-minimum-defense-frequency
@@ -268,8 +268,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [minimum-defense-frequency, defend, fold-frequency, bet-size, pot-odds]
         prereq: ["02-01", "02-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-04"
         order: 4
         slug: bluff-to-value-ratio
@@ -284,8 +284,8 @@ chapters:
           streets: [river]
           concepts: [bluff, bluff-to-value-ratio, value-bet, bluff-range, value-range, indifference, mixed-strategy, pure-strategy, bluff-frequency]
         prereq: ["02-01", "02-03"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-05"
         order: 5
         slug: fold-equity
@@ -300,8 +300,8 @@ chapters:
           streets: [multi-street]
           concepts: [fold-equity, ev-decomposition, expected-value, bluff, fold-frequency]
         prereq: ["02-01", "02-04"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-06"
         order: 6
         slug: ev-unified-formula
@@ -316,8 +316,8 @@ chapters:
           streets: [multi-street]
           concepts: [ev-decomposition, expected-value, call, raise, shove, fold-equity]
         prereq: ["02-01", "02-05"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-07"
         order: 7
         slug: the-thin-value-bet
@@ -332,8 +332,8 @@ chapters:
           streets: [river]
           concepts: [thin-value, value-bet, value-range, indifference, required-equity]
         prereq: ["02-04", "02-06"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "02-08"
         order: 8
         slug: sizing-risk-and-fold-asymmetry
@@ -348,8 +348,8 @@ chapters:
           streets: [multi-street]
           concepts: [sizing-risk, fold-asymmetry, bet-size, minimum-defense-frequency, fold-equity]
         prereq: ["02-03", "02-06"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
 
   - id: "03"
     order: 3
@@ -1006,8 +1006,8 @@ chapters:
           streets: [n-a]
           concepts: [game-tree, information-set, strategy-profile, mixed-strategy, solver]
         prereq: ["00-02", "02-04"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "08-02"
         order: 2
         slug: regret-matching
@@ -1022,8 +1022,8 @@ chapters:
           streets: [n-a]
           concepts: [regret, regret-matching, cfr, information-set, ev-decomposition]
         prereq: ["08-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "08-03"
         order: 3
         slug: cfr-on-kuhn-hand-trace
@@ -1038,8 +1038,8 @@ chapters:
           streets: [n-a]
           concepts: [kuhn, regret-matching, cfr, strategy-profile, game-tree]
         prereq: ["08-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "08-04"
         order: 4
         slug: convergence-average-strategy-exploitability
@@ -1054,8 +1054,8 @@ chapters:
           streets: [n-a]
           concepts: [average-strategy, convergence, exploitability, game-value, best-response, nash-equilibrium]
         prereq: ["08-03", "00-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "08-05"
         order: 5
         slug: cfr-plus-and-why-faster

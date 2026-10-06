@@ -44,19 +44,6 @@ from pokergto.spr import all_in_equity_needed_from_spr, spr_commitment_table  # 
 SCHEMA_VERSION = "1.0.0"
 GENERATOR = "tools/gen_tables.py"
 
-#: The five-card category counts, derived by enumeration in :func:`build_hand_class_counts` rather
-#: than pasted here. Declaring them as the *expected* values is the test's job, not this file's.
-CATEGORY_NAMES: dict[int, tuple[str, str]] = {
-    8: ("同花顺", "straight flush"),
-    7: ("四条", "four of a kind"),
-    6: ("葫芦", "full house"),
-    5: ("同花", "flush"),
-    4: ("顺子", "straight"),
-    3: ("三条", "three of a kind"),
-    2: ("两对", "two pair"),
-    1: ("一对", "one pair"),
-    0: ("高牌", "high card"),
-}
 
 
 def _artifact(
@@ -449,7 +436,7 @@ def build_hand_class_counts() -> dict[str, Any]:
     from collections import Counter
 
     from pokergto.cards import standard_deck
-    from pokergto.evaluator import evaluate5
+    from pokergto.evaluator import Category, evaluate5
 
     deck = standard_deck()
     counts: Counter[int] = Counter()
@@ -473,12 +460,11 @@ def build_hand_class_counts() -> dict[str, Any]:
     total = sum(counts.values())
     rows = [
         {
-            "category": CATEGORY_NAMES[category][0],
-            "category_en": CATEGORY_NAMES[category][1],
+            "category": {"zh": Category(category).zh, "en": Category(category).en},
             "count": counts[category],
             "probability": round(counts[category] / total, 8),
         }
-        for category in sorted(CATEGORY_NAMES, reverse=True)
+        for category in sorted(counts, reverse=True)
     ]
     expected = {
         8: 40,

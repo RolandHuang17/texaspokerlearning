@@ -14,9 +14,9 @@ from collections.abc import Sequence
 from typing import Any
 
 from . import __version__
-from .cards import Card, parse_cards
-from .equity import hand_equity, range_equity
-from .errors import PokerGtoError
+from .cards import parse_cards
+from .equity import range_equity
+from .errors import InputError, PokerGtoError
 from .icm import icm
 from .matrix13 import Grid13
 from .notation import parse, to_spec
@@ -27,6 +27,7 @@ from .odds import (
     minimum_defense_frequency,
     sizing_table,
 )
+from .ranges import Range
 from .render import grid_to_text, markdown_table, table_from_artifact
 from .spr import all_in_equity_needed_from_spr, spr
 
@@ -106,26 +107,20 @@ def _cmd_mdf(args: argparse.Namespace) -> int:
 
 def _cmd_equity(args: argparse.Namespace) -> int:
     board = parse_cards(args.board) if args.board else ()
-    if args.range_villain is not None:
-        hero = parse(args.hero)
-        villain = parse(args.range_villain)
-        result = range_equity(
-            hero, villain, board, mode=args.mode, iterations=args.iterations, seed=args.seed
-        )
-    else:
-        hero_cards = _two_cards(args.hero)
-        villain_cards = _two_cards(args.villain)
-        result = hand_equity(
-            hero_cards,
-            villain_cards,
-            board,
-            mode=args.mode,
-            iterations=args.iterations,
-            seed=args.seed,
-        )
+    villain_spec = args.villain if args.range_villain is None else args.range_villain
+    if villain_spec is None:
+        raise SystemExit("equity needs an opponent: a second hand or range after your own")
+    result = range_equity(
+        _range_arg(args.hero),
+        _range_arg(villain_spec),
+        board,
+        mode=args.mode,
+        iterations=args.iterations,
+        seed=args.seed,
+    )
     payload = {
         "hero": args.hero,
-        "villain": args.range_villain or args.villain,
+        "villain": villain_spec,
         "board": args.board or "",
         "exact": result.exact,
         "equity": round(result.equity, 6),
@@ -145,11 +140,20 @@ def _cmd_equity(args: argparse.Namespace) -> int:
     return _emit(payload, as_json=args.json, text=f"{result}{note}")
 
 
-def _two_cards(text: str) -> list[Card]:
-    cards = parse_cards(text)
-    if len(cards) != 2:
-        raise SystemExit(f"{text!r} must be exactly two cards, e.g. 'AhAs' or 'Kd9c'")
-    return list(cards)
+def _range_arg(text: str) -> Range:
+    """Accept either one specific combo (``AdKd``) or a 169-class range (``88+,ATs+``).
+
+    A hand you are holding and a range you are teaching are the same object to the engine. Making
+    the learner use a different flag for each is how documentation ends up quoting commands that
+    fail, and every command in these lessons is run before it is written down.
+    """
+    try:
+        cards = parse_cards(text)
+    except InputError:
+        cards = ()
+    if len(cards) == 2:
+        return Range.from_cards(cards)
+    return parse(text)
 
 
 def _cmd_range(args: argparse.Namespace) -> int:
@@ -258,9 +262,11 @@ def build_parser() -> argparse.ArgumentParser:
     equity = sub.add_parser(
         "equity", help="hand or range equity on an optional board", parents=[common]
     )
-    equity.add_argument("hero", help="'AhAs' or a range spec like '22+,ATs+'")
-    equity.add_argument("villain", nargs="?", help="'KdQd' (omit when using --range-villain)")
-    equity.add_argument("--range-villain", dest="range_villain")
+    equity.add_argument("hero", help="'AhAs' (one combo) or a range spec like '22+,ATs+'")
+    equity.add_argument("villain", nargs="?", help="your opponent, hand or range")
+    equity.add_argument(
+        "--range-villain", dest="range_villain", help="explicit range for the opponent"
+    )
     equity.add_argument("--board", default="")
     equity.add_argument("--mode", choices=("exact", "mc", "auto"), default="auto")
     equity.add_argument("--iterations", type=int, default=20_000)

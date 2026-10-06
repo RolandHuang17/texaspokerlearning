@@ -131,12 +131,22 @@ class CurriculumRegistry:
     def find_orphans(self, docs_root: Path) -> dict[str, list[str]]:
         """Files on disk vs lessons in the spine, in both directions and per locale.
 
+        The two directions are deliberately asymmetric. ``missing_file`` counts only lessons whose
+        status in that language is beyond ``draft``, because a draft is an unwritten chapter and the
+        repository must build before it is finished. ``unregistered`` counts every lesson file on disk,
+        since a page that no chapter lists is unreachable and usually a forgotten registration.
+
         Returns ``{"missing_file:en": [...], "missing_file:zh": [...], "unregistered:en": [...],
         "unregistered:zh": [...]}``. Empty lists for every key is the passing state.
         """
         expected: dict[str, set[str]] = {"en": set(), "zh": set()}
         for lesson in self.ordered_lessons():
             for locale in ("en", "zh"):
+                # A draft is a promise not yet kept, so it owes the build no file. Only a lesson that
+                # claims a status beyond draft is required to have its file -- otherwise this gate is
+                # a list of unwritten chapters and can never pass before the last one lands.
+                if getattr(lesson, f"status_{locale}") == "draft":
+                    continue
                 expected[locale].add(lesson.path(locale))
         present: dict[str, set[str]] = {"en": set(), "zh": set()}
         for locale in ("en", "zh"):
@@ -149,7 +159,10 @@ class CurriculumRegistry:
                     continue
                 if relative.endswith("index.md") or relative.endswith("README.md"):
                     continue
-                present[locale].add(relative)
+                # ``Lesson.path`` is repo-relative ("docs/en/..."), and this scan starts inside
+                # docs/, so the two sides need the same frame of reference or every file on disk
+                # looks unregistered while every registered lesson looks missing.
+                present[locale].add(f"docs/{relative}")
         report: dict[str, list[str]] = {}
         for locale in ("en", "zh"):
             report[f"missing_file:{locale}"] = sorted(expected[locale] - present[locale])

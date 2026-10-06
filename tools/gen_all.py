@@ -83,22 +83,23 @@ def _step_solver(out: Path) -> list[Path]:
 def _step_index(out: Path) -> list[Path]:
     """Curriculum index artifacts, plus the generated nav the mkdocs build reads.
 
-    ``gen_curriculum_index.main`` also writes ``docs/gen/nav.<locale>.yml`` as a side effect: mkdocs cannot
-    include a nav fragment from outside ``docs/``, and ``docs/gen`` is gitignored and rebuilt here, so
-    the site's table of contents and the registry cannot drift apart -- which is the whole point of
-    generating it.
+    ``gen_curriculum_index.main`` writes ``data/gen/nav.yml`` alongside the JSON indexes, and the
+    ``mkdocs_nav`` build hook feeds it to mkdocs -- mkdocs has no ``!include`` constructor, so the nav
+    cannot be pulled into ``mkdocs.yml`` directly. The fragment lists only lessons whose file exists in
+    that language, so an unauthored spine entry does not turn ``mkdocs build --strict`` into a
+    missing-nav-target error.
     """
     src = REPO_ROOT / "data" / "src" / "curriculum.yaml"
     if not src.exists():
         return []
-    argv = ["--out", str(out), "--docs", str(REPO_ROOT), "--allow-unauthored"]
+    argv = ["--out", str(out), "--docs", str(REPO_ROOT / "docs")]
     gen_curriculum_index.main(argv)
     written = [
         out / f"index.{locale}.json"
         for locale in ("en", "zh")
         if (out / f"index.{locale}.json").exists()
     ]
-    written.extend(path for path in (REPO_ROOT / "docs" / "gen").glob("nav.*.yml") if path.exists())
+    written.extend(path for path in (out / "nav.yml",) if path.exists())
     return written
 
 

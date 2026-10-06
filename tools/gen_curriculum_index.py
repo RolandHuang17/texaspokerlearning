@@ -6,8 +6,8 @@ picker are built from. Nothing of the three is allowed to hold a hand-written le
 why an authored-but-unregistered lesson file shows up as a build error here instead of as a page
 nobody can reach.
 
-Also emits ``data/gen/nav.en.yml`` / ``nav.zh.yml`` fragments that ``mkdocs.yml`` includes, so the
-site's table of contents and the registry can never disagree.
+Also emits ``data/gen/nav.yml``, the whole ``mkdocs.yml`` nav, so the site's table of contents and the
+registry can never disagree.
 """
 
 from __future__ import annotations
@@ -74,17 +74,46 @@ def build_index(
     }
 
 
-def build_nav(registry: CurriculumRegistry, locale: str) -> list[dict[str, Any]]:
+def build_nav(registry: CurriculumRegistry, locale: str, docs_root: Path) -> list[dict[str, Any]]:
+    """The lesson tree for one locale, carrying only lessons that have a file.
+
+    Two decisions live here. A nav entry pointing at a missing file is a ``--strict`` error, so an
+    unauthored lesson must stay out of the fragment until its file lands -- the filter reads the same
+    docs tree ``check_bilingual.py`` reads. And a chapter with no authored lessons gets no section at
+    all, because mkdocs warns about an empty one.
+    """
     nav: list[dict[str, Any]] = [{"Home": f"{locale}/index.md"}]
     for chapter in registry.chapters:
-        entry: dict[str, Any] = {}
-        entry[f"{chapter.id} {chapter.title[locale]}"] = [
+        pages = [
             {lesson.title[locale]: f"{locale}/{chapter.slug}/{lesson.slug}.md"}
             for lesson in chapter.lessons
+            if (docs_root / locale / chapter.slug / f"{lesson.slug}.md").exists()
         ]
-        nav.append(entry)
-    nav.append({"Development": f"{locale}/development/index.md"})
+        if pages:
+            nav.append({f"{chapter.id} {chapter.title[locale]}": pages})
     return nav
+
+
+#: Contributor-facing engineering docs, single-language by design (adr/0005), so they sit outside
+#: both locale trees. They live here rather than in ``mkdocs.yml`` because the whole nav is generated
+#: from one fragment: mkdocs' ``!include`` constructor only resolves as a mapping value, not as a
+#: sequence item, so a per-locale include cannot be composed in the config file.
+DEVELOPMENT_PAGES = (
+    "development/local-dev.md",
+    "development/bilingual-style.md",
+    "development/data-provenance.md",
+    "development/solver-proof-policy.md",
+    "development/adr.md",
+)
+
+
+def build_site_nav(registry: CurriculumRegistry, docs_root: Path) -> list[dict[str, Any]]:
+    """The complete ``mkdocs.yml`` nav: two locale trees plus the development section."""
+    return [
+        {"English": build_nav(registry, "en", docs_root)},
+        {"中文": build_nav(registry, "zh", docs_root)},
+        {"Development": list(DEVELOPMENT_PAGES)},
+    ]
 
 
 def report_unauthored(registry: CurriculumRegistry, docs_root: Path) -> list[str]:
@@ -145,13 +174,14 @@ def main(argv: list[str] | None = None) -> int:
             build_index(registry, locale, extra_counts=counts),
             schema="index",
         )
-        nav_path = args.out / f"nav.{locale}.yml"
-        nav_path.parent.mkdir(parents=True, exist_ok=True)
-        nav_path.write_text(
-            yaml.safe_dump(build_nav(registry, locale), allow_unicode=True, sort_keys=False),
-            encoding="utf-8",
-            newline="\n",
-        )
+    nav_path = args.out / "nav.yml"
+    nav_path.write_text(
+        yaml.safe_dump(
+            build_site_nav(registry, args.docs), allow_unicode=True, sort_keys=False, width=100
+        ),
+        encoding="utf-8",
+        newline="\n",
+    )
     ok(
         f"curriculum index: {registry.totals['lessons']} lessons, "
         f"{registry.totals['lessons_ready']} ready in both languages"

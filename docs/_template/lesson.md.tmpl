@@ -1,0 +1,95 @@
+# <Chinese title> / <English title>
+
+<!--
+Copy this file TWICE, once per language, keeping the file name identical:
+
+    docs/zh/<chapter-slug>/<lesson-slug>.md
+    docs/en/<chapter-slug>/<lesson-slug>.md
+
+Rules that CI enforces, so read them before writing:
+
+1. The 15 H2 headings below must appear in this exact order with this exact text in BOTH files.
+   tools/check_bilingual.py compares section order and heading counts between the two languages.
+2. Line 3's hands count must equal the number of live-hand examples you actually wrote. Ready
+   lessons need at least two.
+3. Line 4 lists glossary ids used by this lesson; every one must exist in data/src/glossary.yaml.
+4. AUTO block interiors are machine-filled. Never type a table row and never edit between the
+   markers: run  python tools/inject_doc_tables.py --file <this file>
+   instead. Available ids are the file names under data/gen/tables and data/gen/ranges.
+5. Only cite numbers you produced with  PYTHONPATH=src python -m pokergto ...  or that already live
+   in a committed artifact. A number you cannot derive is a claim you must mark UNVERIFIED.
+6. Provenance markers below are emitted by the injector from the artifact's own metadata. Do not
+   write them by hand.
+
+Delete this comment block in both files when you start writing.
+-->
+
+<!-- hands: 0 -->
+<!-- terms: -->
+
+## 本节目标 / Objectives
+
+- One testable outcome per bullet. If a reader cannot check whether they achieved it, rewrite it.
+
+## 前置知识 / Prerequisites
+
+- `<lesson-id>` <what you need from it, in one line>
+
+## 核心原理 / The principle
+
+The claim, stated once, in one or two sentences, with its provenance kind named.
+
+## 推导 / Derivation
+
+The algebra. Every symbol defined before it is used, and the step that could fail is the step
+explained -- which is usually the one where a division assumes a quantity is positive, or where a
+difference stops being small.
+
+## 直觉 / Intuition
+
+What the math means, as a mental model a player can carry to a table.
+
+## 算例 / Worked examples
+
+At least three, computed with the engine rather than estimated.
+
+## 生成表 / Generated tables
+
+<!-- BEGIN AUTO:<table-id> -->
+<!-- END AUTO:<table-id> -->
+
+## 实战牌局 / Live hands
+
+At least two. A live hand is a seat-by-seat transcript, the decision point, the arithmetic that
+decides it, and the cost of the wrong play.
+
+## 范围图 / Range chart
+
+<!-- BEGIN AUTO:<range-chart-id> -->
+<!-- END AUTO:<range-chart-id> -->
+
+## 为何成立、何时失效 / Why it works, when it breaks
+
+The assumptions that make the principle true, and the spots where they stop holding. This section is
+the difference between teaching a method and teaching a table of results.
+
+## 陷阱 / Common mistakes
+
+Three items, each with its cost stated in a number where a number exists.
+
+## 练习 / Drills
+
+Questions with answers a reader can check against the engine or a committed artifact.
+
+## 自测清单 / Self-check
+
+Five yes/no items.
+
+## 来源与置信度 / Provenance and confidence
+
+Where each figure came from, and what remains UNVERIFIED / 未核验.
+
+## 术语 / Terms
+
+| Abbreviation | 中文 | English | Meaning in this lesson |
+|---|---|---|---|

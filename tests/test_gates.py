@@ -209,7 +209,8 @@ def test_a_ready_lesson_without_a_translation_is_reported() -> None:
 def test_draft_lessons_may_legally_have_no_files_yet() -> None:
     """The gate passes on an empty tree, which is what lets it exist from milestone zero.
 
-    A parity check that only passes when the work is finished is not a gate; it is a TODO list.
+    A parity check that only passes when the work is finished is not a gate; it is a TODO list. The
+    assertion below is the whole reason ``find_orphans`` reads status rather than the spine alone.
     """
     registry = _registry_with(
         [
@@ -225,10 +226,36 @@ def test_draft_lessons_may_legally_have_no_files_yet() -> None:
         ]
     )
     missing = registry.find_orphans(Path("docs-nonexistent-check-only"))
-    # Registered-but-unwritten is the expected state at milestone zero; files-without-registration is
-    # legitimately empty. Asserting both non-empty would be a wrong expectation, not a stronger test.
-    assert missing["missing_file:en"] and missing["missing_file:zh"]
-    assert not missing["unregistered:en"] and not missing["unregistered:zh"]
+    assert missing == {
+        "missing_file:en": [],
+        "missing_file:zh": [],
+        "unregistered:en": [],
+        "unregistered:zh": [],
+    }
+
+
+def test_a_ready_lesson_with_no_file_on_disk_is_orphaned() -> None:
+    """The other half of the same rule: ``ready`` is a claim, and a claim without a file fails.
+
+    Without this the status field would be decoration -- a lesson could be marked ready while its file
+    sat uncommitted, and every gate would still be green.
+    """
+    registry = _registry_with(
+        [
+            {
+                "id": "02-01",
+                "order": 1,
+                "slug": "probe",
+                "title": {"zh": "探针", "en": "probe"},
+                "tags": {"scenario": ["shared"]},
+                "status_zh": "ready",
+                "status_en": "ready",
+            }
+        ]
+    )
+    orphans = registry.find_orphans(Path("docs-nonexistent-check-only"))
+    assert orphans["missing_file:en"] == ["docs/en/02-probe/probe.md"]
+    assert orphans["missing_file:zh"] == ["docs/zh/02-probe/probe.md"]
     assert registry.unresolved_prerequisites() == []
     assert registry.duplicate_paths() == []
 
@@ -281,9 +308,8 @@ def test_the_committed_tree_is_byte_reproducible() -> None:
     """
     import subprocess
     import sys
-    from pathlib import Path as P
 
-    repo = P(__file__).resolve().parents[1]
+    repo = Path(__file__).resolve().parents[1]
     script = repo / "tools" / "gen_all.py"
     if not script.exists():  # pragma: no cover
         pytest.skip("gen_all.py missing")
@@ -306,13 +332,12 @@ def test_a_mutated_committed_artifact_is_detected() -> None:
     import shutil
     import subprocess
     import sys
-    from pathlib import Path as P
 
-    repo = P(__file__).resolve().parents[1]
+    repo = Path(__file__).resolve().parents[1]
     target = repo / "data" / "gen" / "tables" / "table.02-03.mdf-vs-sizing.json"
     if not target.exists():
         pytest.skip("no committed table artifact to corrupt")
-    backup = P(str(target) + ".test-backup")
+    backup = Path(str(target) + ".test-backup")
     shutil.copy2(target, backup)
     try:
         payload = copy.deepcopy(target.read_bytes())
@@ -329,3 +354,164 @@ def test_a_mutated_committed_artifact_is_detected() -> None:
         assert result.returncode != 0, "a changed committed artifact must fail the drift check"
     finally:
         shutil.move(backup, target)
+
+
+# --- the hand-count gate, and the renderer's locale contract --------------------------------
+
+
+def _tool(name: str) -> Any:
+    """Import a module from ``tools/`` inside the test process.
+
+    The gate functions are what CI calls, so a negative test has to reach the same code rather than
+    re-implement it. ``tools/_bootstrap.py`` expects ``src`` on the path, which the loop below
+    provides.
+    """
+    import importlib
+    import sys
+
+    repo = Path(__file__).resolve().parents[1]
+    for entry in (str(repo / "tools"), str(repo / "src")):
+        if entry not in sys.path:
+            sys.path.insert(0, entry)
+    return importlib.import_module(name)
+
+
+_TEMPLATE_H2 = (
+    "本节目标 / Objectives",
+    "前置知识 / Prerequisites",
+    "核心原理 / The principle",
+    "推导 / Derivation",
+    "直觉 / Intuition",
+    "算例 / Worked examples",
+    "生成表 / Generated tables",
+    "实战牌局 / Live hands",
+    "范围图 / Range chart",
+    "为何成立、何时失效 / Why it works, when it breaks",
+    "陷阱 / Common mistakes",
+    "练习 / Drills",
+    "自测清单 / Self-check",
+    "来源与置信度 / Provenance and confidence",
+    "术语 / Terms",
+)
+
+
+def _lesson_text(declared: int, hand_ids: tuple[str, ...]) -> str:
+    """A lesson that satisfies every other structural rule, so a failure points at the hands."""
+    body = "\n".join(f"## {heading}\n\nprose\n" for heading in _TEMPLATE_H2)
+    hands = "\n".join(f"**`{hand_id}`**" for hand_id in hand_ids)
+    before, _, after = body.partition("## 实战牌局 / Live hands\n\nprose\n")
+    return f"<!-- hands: {declared} -->\n{before}## 实战牌局 / Live hands\n\n{hands}\n{after}"
+
+
+def _ready_registry() -> Any:
+    return _registry_with(
+        [
+            {
+                "id": "02-01",
+                "order": 1,
+                "slug": "probe",
+                "title": {"zh": "探针", "en": "probe"},
+                "tags": {"scenario": ["shared"]},
+                "status_zh": "ready",
+                "status_en": "ready",
+            }
+        ]
+    )
+
+
+def _write_pair(tmp_path: Path, en: str, zh: str) -> Path:
+    for locale, text in (("en", en), ("zh", zh)):
+        lesson_dir = tmp_path / locale / "02-probe"
+        lesson_dir.mkdir(parents=True, exist_ok=True)
+        (lesson_dir / "probe.md").write_text(f"# probe\n\n{text}", encoding="utf-8")
+    return tmp_path
+
+
+def test_a_hand_declaration_that_does_not_match_the_files_is_reported(
+    monkeypatch: Any, tmp_path: Path
+) -> None:
+    """``<!-- hands: 2 -->`` used to be an unreadable promise, and that made this gate inert.
+
+    The first version of the check needed two spaces after ``<!--`` and matched nothing, so a lesson
+    could claim examples it had not written. Now the declaration is compared against the ``hand.*``
+    ids actually present, which is the difference between a rule and a decoration.
+    """
+    bilingual = _tool("check_bilingual")
+    good = _lesson_text(2, ("hand.02-01-a", "hand.02-01-b"))
+    overclaiming = _lesson_text(2, ("hand.02-01-a",))
+    monkeypatch.setattr(bilingual, "DOCS", _write_pair(tmp_path, overclaiming, good))
+    problems = bilingual.check(_ready_registry(), {})
+    assert any("declares 2 live hands" in problem for problem in problems), problems
+
+
+def test_the_two_languages_must_teach_the_same_live_hands(monkeypatch: Any, tmp_path: Path) -> None:
+    """Mirrored lessons that quietly use different example hands are the drift a reader cannot see.
+
+    Without this, the English author can swap in a hand they understand better and the lesson still
+    "passes bilingual parity" because every heading lines up.
+    """
+    bilingual = _tool("check_bilingual")
+    en = _lesson_text(2, ("hand.02-01-a", "hand.02-01-b"))
+    zh = _lesson_text(2, ("hand.02-01-a", "hand.02-01-c"))
+    monkeypatch.setattr(bilingual, "DOCS", _write_pair(tmp_path, en, zh))
+    problems = bilingual.check(_ready_registry(), {})
+    assert any("different live hands" in problem for problem in problems), problems
+
+
+def test_a_ready_lesson_that_declares_nothing_is_reported(monkeypatch: Any, tmp_path: Path) -> None:
+    """A lesson that omits the declaration cannot be audited, so omission is itself a failure."""
+    bilingual = _tool("check_bilingual")
+    text = "\n".join(f"## {heading}\n\nprose\n" for heading in _TEMPLATE_H2)
+    monkeypatch.setattr(bilingual, "DOCS", _write_pair(tmp_path, text, text))
+    problems = bilingual.check(_ready_registry(), {})
+    assert any("no <!-- hands: N --> declaration" in problem for problem in problems), problems
+
+
+def test_a_bilingual_table_cell_renders_in_the_requested_locale() -> None:
+    """A cell written as ``{zh, en}`` is a first-class shape; a single-lingual string is not.
+
+    The five-card category counts used to store the Chinese label in ``category`` and the English one
+    in an unused ``category_en`` key, so the English lesson shipped Chinese row labels under English
+    headers. Rendering refuses unknown cell shapes now, so the same class of bug cannot pass silently.
+    """
+    from pokergto.render import table_from_artifact
+
+    artifact = {
+        "schema_version": "1.0.0",
+        "id": "table.probe",
+        "title": {"zh": "探针", "en": "probe"},
+        "columns": [
+            {"key": "label", "header": {"zh": "名称", "en": "Label"}, "unit": "dimensionless"},
+            {"key": "count", "header": {"zh": "数量", "en": "Count"}, "unit": "count"},
+        ],
+        "rows": [{"label": {"zh": "同花顺", "en": "straight flush"}, "count": 40}],
+        "source": {"module": "pokergto.evaluator", "generator": "tools/gen_tables.py"},
+        "provenance": {
+            "kind": "derived",
+            "verified": True,
+            "note": {"zh": "探针", "en": "probe"},
+        },
+    }
+    assert "straight flush" in table_from_artifact(artifact, locale="en")
+    assert "同花顺" in table_from_artifact(artifact, locale="zh")
+
+
+def test_an_unrenderable_cell_raises_instead_of_stringifying() -> None:
+    from pokergto.errors import InvariantError
+    from pokergto.render import table_from_artifact
+
+    artifact = {
+        "schema_version": "1.0.0",
+        "id": "table.probe",
+        "title": {"zh": "探针", "en": "probe"},
+        "columns": [{"key": "x", "header": {"zh": "x", "en": "x"}, "unit": "dimensionless"}],
+        "rows": [{"x": {"unexpected": "shape"}}],
+        "source": {"module": "pokergto.render", "generator": "tools/gen_tables.py"},
+        "provenance": {
+            "kind": "derived",
+            "verified": True,
+            "note": {"zh": "探针", "en": "probe"},
+        },
+    }
+    with pytest.raises(InvariantError):
+        table_from_artifact(artifact, locale="en")

@@ -205,8 +205,11 @@ python -m mkdocs serve
 ```
 
 `docs/en/index.md` and `docs/zh/index.md` are the two landing pages; the header dropdown switches
-locale. Lesson nav is merged into `mkdocs.yml` by hand once `data/src/curriculum.yaml` exists — read
-the comment above the `nav:` block in `mkdocs.yml` before assuming a script does it.
+locale. The lesson tree is not in this file: `python tools/gen_all.py --only index` writes
+`data/gen/nav.yml` from `data/src/curriculum.yaml`, and the `mkdocs_nav.py` hook hands it to mkdocs at
+build time. mkdocs has no `!include` constructor, which is why a hook does the job instead of the config
+file -- and why a lesson that exists on disk but is missing from the nav is a curriculum problem, not an
+`mkdocs.yml` problem.
 
 ## Trainer
 

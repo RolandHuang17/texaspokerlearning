@@ -17,6 +17,7 @@ htmlcov/
 # Docs site build output
 /site/
 /mkdocs/.cache/
+/.release-notes.md
 
 # Trainer: public/data is a *generated copy* of data/gen (see ADR-0001); never commit it.
 trainer/node_modules/

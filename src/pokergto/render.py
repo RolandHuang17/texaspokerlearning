@@ -18,6 +18,7 @@ import unicodedata
 from collections.abc import Mapping, Sequence
 from typing import Any, cast
 
+from .errors import InvariantError
 from .matrix13 import AXIS, ORIENTATION, Grid13
 
 #: Fill characters for a frequency grid. Five bands, stated as bands so a learner reading a printed
@@ -90,8 +91,9 @@ def markdown_table(
 def table_from_artifact(artifact: Mapping[str, Any], *, locale: str = "en") -> str:
     """Render a ``table`` artifact for insertion into a lesson.
 
-    Cells may be plain scalars or ``{value, unit}`` objects; both are formatted here so no generator
-    has to think about presentation, and no translator has to retype a number.
+    Cells may be plain scalars, ``{value, unit}`` objects, or ``{zh, en}`` language strings; all
+    three are formatted here so no generator has to think about presentation, and no translator has
+    to retype a number.
     """
     columns = list(artifact["columns"])
     headers = [str(column["header"][locale]) for column in columns]
@@ -118,6 +120,8 @@ def _format_cell(cell: Any, column: Mapping[str, Any], *, locale: str) -> str:
         unit = str(cell.get("unit", column.get("unit", "dimensionless")))
         value = float(cast(float, cell["value"]))
         return _format_number(value, unit, int(column.get("digits", 2)))
+    if isinstance(cell, Mapping) and {"zh", "en"} <= cell.keys():
+        return str(cell[locale])
     if isinstance(cell, bool):
         return ("yes" if cell else "no") if locale == "en" else ("是" if cell else "否")
     if cell is None:
@@ -128,7 +132,10 @@ def _format_cell(cell: Any, column: Mapping[str, Any], *, locale: str) -> str:
         return _format_number(
             float(cell), str(column.get("unit", "dimensionless")), int(column.get("digits", 2))
         )
-    return str(cell)
+    # Reaching here means a cell shape this renderer does not know. The old fallback stringified it,
+    # which put a raw "{'zh': ...}" into a lesson table -- a rendering bug wearing the costume of a
+    # finished number. Refusing is the honest failure.
+    raise InvariantError(f"cannot render table cell of type {type(cell).__name__}: {cell!r}")
 
 
 def _format_number(value: float, unit: str, digits: int) -> str:

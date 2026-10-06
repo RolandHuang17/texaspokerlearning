@@ -18,41 +18,55 @@ anything is allowed to display its output.
 
 ---
 
-## M0 — Skeleton that passes its own CI
+## M0 — Skeleton that passes its own CI ✅
 
 No poker content. The scaffolding is proven *before* there is content to retrofit onto it.
 
-- [ ] Root files: `README`, `LICENSE`/`LICENSE-docs`/`NOTICE`, `CITATION.cff`, `CONTRIBUTING`,
-      `CHANGELOG`, `SECURITY`, `SUPPORT`, `CODE_OF_CONDUCT`, `ROADMAP`
-- [ ] `pyproject.toml` as the single Python config (ruff / mypy / pytest / coverage / entry point)
-- [ ] `setup/install.ps1`, `setup/install.sh`, `setup/doctor.py`
-- [ ] `data/schema/*.schema.json` drafted and enforced
-- [ ] `.github/workflows`: lint, test, data-drift, docs, bilingual, trainer, pages, release
-- [ ] `tools/check_bilingual.py` passes on an **empty** docs tree
-- [ ] `tools/gen_all.py --check` runs with zero artifacts
+- [x] Root files: `README`(+`.zh`), `LICENSE`/`LICENSE-docs`/`NOTICE`, `CITATION.cff`,
+      `CONTRIBUTING`(+`.zh`), `CHANGELOG`, `SECURITY`, `SUPPORT`, `CODE_OF_CONDUCT`, `ROADMAP`
+- [x] `pyproject.toml` as the single Python config (ruff / mypy / pytest / coverage / entry point)
+- [x] `setup/install.ps1`, `setup/install.sh`, `setup/doctor.py`
+- [x] `data/schema/*.schema.json` drafted and enforced (`check_artifact_schema.py`, 14 schemas)
+- [x] `.github/workflows`: lint, test, data-drift, docs, bilingual, trainer, pages, release
+- [x] `tools/check_bilingual.py` passes on an **empty** docs tree (a `draft` lesson owes no file --
+      `tests/test_gates.py` proves both halves of that rule)
+- [x] `tools/gen_all.py --check` runs, and compares bytes against a fresh generation
 
 **Exit test:** `pip install -e .` on win32 and ubuntu; `pre-commit run --all-files` green;
 a contributor pull request that adds a `docs/zh/` lesson without its `docs/en/` twin fails loudly.
 
-## M1 — Math core + the first bilingual proof point  ← first publishable state
+*Status: the win32 half is verified (editable install, all gates, full pytest on the author's machine).
+The ubuntu half and `pre-commit` are CI-only -- the hook environments need package downloads that were
+not available in the authoring environment, so this box is honest about being unverified locally rather
+than claimed.*
 
-- [ ] `cards`, `evaluator` (+ naive cross-check reference), `equity` (exact + seeded MC),
-      `notation`, `matrix13`, `ranges`, `board`, `odds`, `ev`, `mdf`, `spr`, `variance`
-- [ ] `artifacts`, `registry`, `render`, `cli`; `tools/gen_tables.py`,
+## M1 — Math core + the first bilingual proof point ✅ ← first publishable state
+
+- [x] `cards`, `evaluator` (+ naive cross-check reference), `equity` (exact + seeded MC),
+      `notation`, `matrix13`, `ranges`, `board`, `odds`, `ev`, `spr`, `variance`
+- [x] `artifacts`, `registry`, `render`, `cli`; `tools/gen_tables.py`,
       `tools/inject_doc_tables.py`
-- [ ] `data/src/glossary.yaml` v1 and `data/src/curriculum.yaml` v1 (all 92 lessons registered)
-- [ ] Chapters **00 Orientation**, **01 Combinatorics & Equity**, **02 The Math of One Decision**
-      complete in both languages (18 lessons / 36 files)
+- [x] `data/src/glossary.yaml` v1 (237 terms) and `data/src/curriculum.yaml` v1 (15 chapters,
+      all 92 lessons registered)
+- [x] Chapters **00 Orientation** (3), **01 Combinatorics & Equity** (7),
+      **02 The Math of One Decision** (8) complete in both languages -- 18 lessons / 36 files, every
+      one `status: ready`, with at least two live hands verified by counting them rather than trusting
+      the declaration
 
 **Exit test:** a learner computes MDF and range equity from the CLI; the AUTO-table drift check
-catches a hand-edited number; `status: ready` starts to mean something.
+catches a hand-edited number; `status: ready` starts to mean something. *All three are asserted in
+`tests/` and exercised by the `data` and `bilingual` CI jobs.*
 
-## M2 — Toy games: Kuhn + the 1-street model
+## M2 — Toy games: Kuhn + the 1-street model ✅
 
-- [ ] `solver/tree.py`, `cfr.py`, `games.py`, `exploitability.py`, `proofs.py`
-- [ ] Kuhn converges to game value `-1/18`; `toy1street` asserts bluff-indifference and MDF
-      equality against `odds.py` — the solver and the math chapters become each other's test
-- [ ] Chapter **08 Toy Solvers** lessons 01–04 bilingual, each with generated AUTO tables
+- [x] `solver/tree.py`, `cfr.py`, `games.py`, `exploitability.py`, `proofs.py`
+      (CFR+ is a mode of `CFRSolver`, not a separate module: `plus=True` switches regret-matching+ and
+      iteration-weighted averaging, which is what `tests/test_solver.py` compares against textbook CFR)
+- [x] Kuhn converges to game value `-1/18`; the 1-street toys assert bluff-indifference and MDF
+      equality against `odds.py` -- the solver and the math chapters become each other's test
+- [x] `tools/run_solver.py` writes `data/gen/solver/**` only for games registered in
+      `PUBLISHED_PROOFS`, and `tools/cost_probe.py` enforces a per-family runtime and memory budget
+- [x] Chapter **08 Toy Solvers** lessons 01–04 bilingual, each with generated AUTO tables
 
 ## M3 — CFR+, Leduc, and the visible differentiator  ← strongest early announcement
 

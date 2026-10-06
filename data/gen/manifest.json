@@ -9,16 +9,16 @@
       "sha256": "ef13691d3cb221cc88134b434d51e27e89a31e6b593610d44455e63efcb9ffed"
     },
     "index.en.json": {
-      "bytes": 71007,
+      "bytes": 71008,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "ef4c6d4ec576238a532f9e1631a5b3914a25e423eec3c0d6d23477e9d5881fa2"
+      "sha256": "e7d25b4764726e0ff1690369d42eef5716d5d80d27071db945ebd2028adaee39"
     },
     "index.zh.json": {
-      "bytes": 71007,
+      "bytes": 71008,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "6bcfd71106a4e1d1a71ca892588b32f2266e1b3686f903d34225cf6760c03e03"
+      "sha256": "2ab3907ade9545d35eca4798ce0ff67f222386106838afec53da16d748c9251b"
     },
     "ranges/range.02-03.mdf-floor-vs-half-pot.json": {
       "bytes": 6044,
@@ -63,10 +63,10 @@
       "sha256": "b93e1cbebefbc68f0694b64087799efa5857e4f5e27019cbb123e9bea26327a7"
     },
     "tables/table.01-05.hand-class-counts.json": {
-      "bytes": 2912,
+      "bytes": 3065,
       "kind": "table",
       "schema": "table",
-      "sha256": "a78b58d82666b38326cdd1b57f8cbab3898d0ce5c4221043fe3267143d2f3c15"
+      "sha256": "2fbdac339966aa2430c892d59a637b10cf2f7634a040f231b0bd566988985bee"
     },
     "tables/table.02-02.equity-needed-to-call.json": {
       "bytes": 2238,
@@ -112,7 +112,7 @@
     }
   },
   "generator": "tools/gen_all.py",
-  "git_sha": "7aabc6dbdc3168641724333216b703bf636bea53",
+  "git_sha": "0891108c2c7083f04eaea7abdac3142235cb7d12",
   "numpy": "1.26.4",
   "python": "3.12.13",
   "schema_version": "1.0.0"

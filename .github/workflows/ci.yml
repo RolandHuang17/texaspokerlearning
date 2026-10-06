@@ -165,19 +165,20 @@ jobs:
         shell: bash
         run: python tools/run_solver.py --check
 
-      # The solver marker exists in pyproject but no test carries it yet, and pytest exits 5 when
-      # nothing is collected -- which would read as a broken pipeline rather than as unbuilt content.
-      # TODO(m2): once tests/test_cfr_convergence.py (or equivalent) exists, remove the exit-5 branch.
+      # What the proofs are allowed to cost. A valid solve that takes eleven minutes is still a bad
+      # teaching artifact, and scope slides one street at a time; tools/cost_probe.py carries the
+      # per-family budget and fails when a game exceeds it or has none declared at all (adr/0002).
+      - name: Solver cost budget
+        shell: bash
+        run: python tools/cost_probe.py
+
+      # The solver marker exists in pyproject and tests/test_solver.py carries it: canonical Kuhn
+      # shape, the analytic -1/18, CFR+ beating CFR, best response against a brute force over pure
+      # strategies, solver-vs-algebra per bet size, byte-identical reruns, and a proof gate that is
+      # shown to be able to fail.
       - name: Solver behaviour tests
         shell: bash
-        run: |
-          python -m pytest -m solver -q
-          rc=$?
-          if [ "$rc" -eq 5 ]; then
-            echo "::notice::no tests carry the 'solver' marker yet (M2 work); behaviour gates are the run_solver check above"
-            exit 0
-          fi
-          exit "$rc"
+        run: python -m pytest -m solver -q
 
   data:
     name: generated data contract

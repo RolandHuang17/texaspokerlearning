@@ -78,6 +78,20 @@ class Range:
         return cls(np.ones(1326, dtype=np.float64))
 
     @classmethod
+    def from_cards(cls, cards: Sequence[Card]) -> Range:
+        """Build from one *specific* combo, like ``Ah As``. Ranges answer "how often do I hold this
+        class of hand?"; this answers "I hold exactly these two cards", which is what a live hand
+        played at the table is.
+        """
+        if len(cards) != 2:
+            raise InputError("a hand is exactly two cards")
+        if cards[0].index == cards[1].index:
+            raise InputError("a hand cannot contain the same card twice")
+        weights = np.zeros(1326, dtype=np.float64)
+        weights[combo_positions(cards)] = 1.0
+        return cls(weights)
+
+    @classmethod
     def from_classes(cls, entries: Iterable[str] | Mapping[str, float]) -> Range:
         """Build from 169-class keys. A bare key means the class is fully included; a mapping value
         is that class's *frequency*, so ``{"AKs": 0.5}`` holds half of its four combos = 2 combos.

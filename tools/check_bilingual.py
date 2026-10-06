@@ -14,9 +14,12 @@ Five checks, all fail-closed:
    same number of H2/H3, in both languages.
 4. **AUTO block ids match 1:1.** If the Chinese lesson embeds a generated table, the English one
    embeds the same table id, and neither embeds one the other lacks.
-5. **Declared terms are registered, and hands are sufficient.** Every term id listed under the
-   lesson's Terms section exists in ``glossary.yaml``; every ``ready`` lesson renders at least two
-   live-hand examples. "Lots of practical examples" is a gate here, not an aspiration in a README.
+5. **Declared terms registered, live hands counted for real.** Every term id listed under a lesson's
+   Terms section exists in ``glossary.yaml``. The ``<!-- hands: N -->`` declaration is *verified*
+   rather than trusted: the gate counts the ``hand.*`` ids actually written inside the Live hands
+   section, refuses a lesson whose declaration and content disagree, requires ``ready`` lessons to
+   carry at least two, and requires both languages to carry the *same* hands. "Lots of practical
+   examples" is a gate here, not an aspiration in a README.
 
 What this tool deliberately cannot prove: that the English text says what the Chinese text says.
 Heading parity proves structure. Semantic equivalence would need a translation-quality model, which
@@ -56,8 +59,27 @@ EXEMPT_PATTERNS = (
 AUTO_BEGIN = re.compile(r"<!--\s*BEGIN AUTO:([A-Za-z0-9._-]+)\s*-->")
 AUTO_END = re.compile(r"<!--\s*END AUTO:([A-Za-z0-9._-]+)\s*-->")
 HEADING = re.compile(r"^(#{1,3})\s+(.*)$", re.MULTILINE)
-HAND_COUNT = re.compile(r"<!--\s hands:\s*(\d+)\s*-->")
+HAND_COUNT = re.compile(r"<!--\s*hands:\s*(\d+)\s*-->")
 TERMS_LIST = re.compile(r"<!--\s*terms:\s*([A-Za-z0-9,._-]*)\s*-->")
+#: A live hand is a backticked ``hand.*`` id written inside the Live hands section. Counting them is
+#: what turns ``<!-- hands: 2 -->`` from an author's promise into a checked fact.
+LIVE_HANDS_HEADING = re.compile(r"^##\s+[^\n]*(?:Live hands|实战牌局)[^\n]*$", re.MULTILINE)
+HAND_ID = re.compile(r"`(hand\.[A-Za-z0-9._-]+)`")
+NEXT_H2 = re.compile(r"^## ", re.MULTILINE)
+
+
+def _live_hand_ids(text: str) -> list[str]:
+    """Distinct hand ids in the Live hands section, in order of first appearance."""
+    heading = LIVE_HANDS_HEADING.search(text)
+    if heading is None:
+        return []
+    rest = text[heading.end() :]
+    nxt = NEXT_H2.search(rest)
+    body = rest[: nxt.start()] if nxt else rest
+    seen: dict[str, None] = {}
+    for hand_id in HAND_ID.findall(body):
+        seen.setdefault(hand_id, None)
+    return list(seen)
 
 
 def _is_exempt(relative: str) -> bool:
@@ -145,11 +167,32 @@ def check(registry: CurriculumRegistry, glossary: dict[str, object]) -> list[str
             )
         if len(_headings(en_text)) != len(_headings(zh_text)):
             problems.append(f"{relative}: heading count differs between languages")
+        en_hands = _live_hand_ids(en_text)
+        zh_hands = _live_hand_ids(zh_text)
+        if sorted(en_hands) != sorted(zh_hands):
+            problems.append(
+                f"{relative}: the two languages teach different live hands "
+                f"(en={en_hands} zh={zh_hands}); a mirrored lesson walks the reader through the "
+                "same decisions"
+            )
         for text, locale in ((en_text, "en"), (zh_text, "zh")):
             counts = HAND_COUNT.findall(text)
-            if counts and int(counts[-1]) < 2 and _lesson_is_ready(registry, relative):
+            declared = sum(int(value) for value in counts)
+            written = len(_live_hand_ids(text))
+            if not counts:
+                if _lesson_is_ready(registry, relative):
+                    problems.append(
+                        f"docs/{locale}/{relative}: ready lesson has no "
+                        "<!-- hands: N --> declaration, so its example count is unauditable"
+                    )
+            elif declared != written:
                 problems.append(
-                    f"docs/{locale}/{relative}: {int(counts[-1])} live-hand examples, ready lessons "
+                    f"docs/{locale}/{relative}: declares {declared} live hands but the Live hands "
+                    f"section contains {written} distinct hand.* ids"
+                )
+            elif written and written < 2 and _lesson_is_ready(registry, relative):
+                problems.append(
+                    f"docs/{locale}/{relative}: {written} live-hand examples, ready lessons "
                     "need at least 2 (see adr/0005 and CONTRIBUTING.md)"
                 )
             listed = TERMS_LIST.findall(text)

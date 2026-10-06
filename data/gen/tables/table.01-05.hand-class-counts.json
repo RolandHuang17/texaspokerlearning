@@ -58,56 +58,74 @@
   },
   "rows": [
     {
-      "category": "同花顺",
-      "category_en": "straight flush",
+      "category": {
+        "en": "straight flush",
+        "zh": "同花顺"
+      },
       "count": 40,
       "probability": 1.539e-05
     },
     {
-      "category": "四条",
-      "category_en": "four of a kind",
+      "category": {
+        "en": "four of a kind",
+        "zh": "四条"
+      },
       "count": 624,
       "probability": 0.0002401
     },
     {
-      "category": "葫芦",
-      "category_en": "full house",
+      "category": {
+        "en": "full house",
+        "zh": "葫芦"
+      },
       "count": 3744,
       "probability": 0.00144058
     },
     {
-      "category": "同花",
-      "category_en": "flush",
+      "category": {
+        "en": "flush",
+        "zh": "同花"
+      },
       "count": 5108,
       "probability": 0.0019654
     },
     {
-      "category": "顺子",
-      "category_en": "straight",
+      "category": {
+        "en": "straight",
+        "zh": "顺子"
+      },
       "count": 10200,
       "probability": 0.00392465
     },
     {
-      "category": "三条",
-      "category_en": "three of a kind",
+      "category": {
+        "en": "three of a kind",
+        "zh": "三条"
+      },
       "count": 54912,
       "probability": 0.02112845
     },
     {
-      "category": "两对",
-      "category_en": "two pair",
+      "category": {
+        "en": "two pair",
+        "zh": "两对"
+      },
       "count": 123552,
       "probability": 0.04753902
     },
     {
-      "category": "一对",
-      "category_en": "one pair",
+      "category": {
+        "en": "one pair",
+        "zh": "一对"
+      },
       "count": 1098240,
       "probability": 0.42256903
     },
     {
-      "category": "高牌",
-      "category_en": "high card",
+      "category": {
+        "en": "high card",
+        "zh": "高牌"
+      },
       "count": 1302540,
       "probability": 0.50117739
     }

@@ -143,31 +143,34 @@ plugins:
 # nav
 # ---------------------------------------------------------------------------
 #
-# Lesson navigation is NOT authored here, and cannot be included automatically today.
+# Lesson navigation is generated, not authored here.
 #
-# tools/gen_curriculum_index.py reads data/src/curriculum.yaml and emits data/gen/nav.en.yml and
-# data/gen/nav.zh.yml — the same fragments the site's table of contents should be built from, so the
-# spine and the nav can never disagree (adr/0001). But mkdocs 1.6.1 has no `!include` constructor:
-# `nav: !include data/gen/nav.en.yml` fails with "could not determine a constructor for the tag
-# '!include'" before docs_dir resolution is ever considered, so there is no way to pull a YAML
-# fragment from outside docs/ into this file. A fragment inside docs/ would have to be generated
-# there, which contradicts `data/gen` being the single generated tree.
+# tools/gen_curriculum_index.py reads data/src/curriculum.yaml and emits data/gen/nav.yml next to the
+# JSON indexes; mkdocs_nav.py (a build hook, registered below) reads that file back and hands it to
+# mkdocs' own get_navigation(). That is what keeps the spine and the nav from ever disagreeing
+# (adr/0001): adding a lesson to the curriculum puts it in the site the next time the index is
+# generated -- provided its file exists -- and `gen_all --check` is the gate that notices if the
+# committed nav no longer matches the curriculum plus the docs tree.
 #
-# Therefore: the entries below are the stable, hand-authored part of the nav, and once
-# data/src/curriculum.yaml exists, the generated lesson tree from data/gen/nav.<locale>.yml is merged
-# into this block by hand and reviewed as a diff. That is a manual step, not automation we have
-# built, and it is stated plainly instead of implied by a comment that promises a script.
-# Until lessons are authored there is nothing to merge: docs/en and docs/zh each hold a landing page
-# and the chapters arrive with milestone M1.
+# A hook rather than an include, because mkdocs 1.6.1 has no `!include` YAML constructor: both
+# `nav: !include x.yml` and `- Section: !include x.yml` fail to parse the config. The `nav:` block
+# below is therefore only the fallback for a tree with no generated fragment yet (milestone M0), and
+# it is deliberately the shape the generator produces, so the two cannot disagree about what a section
+# is called.
+#
+# A lesson appears in the generated nav only once its file exists in that language, so an unauthored
+# part of the spine does not produce a --strict error about a missing nav target. Contributor docs are
+# single-language by design (adr/0005), which is why they appear once, outside either locale tree, and
+# why tools/check_bilingual.py exempts `development/` from the mirroring rule.
 nav:
   - English: en/index.md
   - 中文: zh/index.md
-  # Contributor-facing engineering docs are single-language by design (see adr/0005 and the note at
-  # the top of each file), which is why they appear once, outside either locale tree, and why
-  # tools/check_bilingual.py exempts `development/` from the mirroring rule.
   - Development:
       - development/local-dev.md
       - development/bilingual-style.md
       - development/data-provenance.md
       - development/solver-proof-policy.md
       - development/adr.md
+
+hooks:
+  - mkdocs_nav.py

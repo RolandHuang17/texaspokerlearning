@@ -6,9 +6,9 @@ This is the landing page of the English half of a bilingual curriculum. The Chin
 ## The lesson navigation is generated, not typed
 
 The chapter and lesson list is produced by `tools/gen_curriculum_index.py` from
-`data/src/curriculum.yaml` into `data/gen/index.en.json` and `data/gen/nav.en.yml`, so the site's
-table of contents and the curriculum spine can never disagree. The spine is not authored yet, which
-is why this page holds no lesson list and no lesson counts: an invented list here would be exactly
+`data/src/curriculum.yaml` into `data/gen/index.en.json` and `data/gen/nav.yml` (which the
+`mkdocs_nav.py` build hook feeds to mkdocs), so the site's table of contents and the curriculum spine
+can never disagree. This page holds no hand-typed lesson list: an invented list here would be exactly
 the hand-typed assertion that [adr/0001](https://github.com/RolandHuang17/texaspokerlearning/blob/main/adr/0001-generated-data-artifacts-as-single-source-of-truth.md)
 exists to forbid. Numbers you see on this site — frequencies, ratios, hand counts — arrive from
 `data/gen/` inside AUTO blocks written by `tools/inject_doc_tables.py`.
