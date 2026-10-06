@@ -1,0 +1,330 @@
+{
+  "algorithm": "cfr_plus",
+  "average_strategy": {
+    "0:0:J": {
+      "bet": 0.213282,
+      "check": 0.786718
+    },
+    "0:0:K": {
+      "bet": 0.639918,
+      "check": 0.360082
+    },
+    "0:0:Q": {
+      "bet": 0.0,
+      "check": 1.0
+    },
+    "1:1:J": {
+      "bet": 0.333346,
+      "check": 0.666654
+    },
+    "1:1:K": {
+      "bet": 1.0,
+      "check": 0.0
+    },
+    "1:1:Q": {
+      "bet": 0.0,
+      "check": 1.0
+    },
+    "2:0:J": {
+      "call": 0.0,
+      "fold": 1.0
+    },
+    "2:0:K": {
+      "call": 1.0,
+      "fold": 0.0
+    },
+    "2:0:Q": {
+      "call": 0.5467,
+      "fold": 0.4533
+    },
+    "3:1:J": {
+      "call": 0.0,
+      "fold": 1.0
+    },
+    "3:1:K": {
+      "call": 1.0,
+      "fold": 0.0
+    },
+    "3:1:Q": {
+      "call": 0.333365,
+      "fold": 0.666635
+    }
+  },
+  "checks": [
+    {
+      "detail": "chips per hand, half-sum convention",
+      "kind": "exploitability",
+      "pass": true,
+      "threshold": 5e-05,
+      "value": 1.0833322e-05
+    },
+    {
+      "detail": "game_value_closed_form: measured -0.0555556, expected -0.0555556",
+      "kind": "game_value_closed_form",
+      "pass": true,
+      "threshold": 0.0001,
+      "value": -0.055555556673
+    },
+    {
+      "detail": "king_calls_when_faced: measured 1, expected 1",
+      "kind": "frequency_bounds",
+      "pass": true,
+      "threshold": 0.001,
+      "value": 1.0
+    },
+    {
+      "detail": "jack_never_calls: measured 0, expected 0",
+      "kind": "frequency_bounds",
+      "pass": true,
+      "threshold": 0.001,
+      "value": 0.0
+    },
+    {
+      "detail": "jack_bluff_in_family: measured 0.213282, expected 0.333333",
+      "kind": "frequency_bounds",
+      "pass": true,
+      "threshold": 0.34,
+      "value": 0.213282
+    }
+  ],
+  "closed_form_value": -0.055555555556,
+  "config": {
+    "game": "kuhn",
+    "measure_every": 500,
+    "tree": {
+      "deals": 6,
+      "decision_nodes": 4,
+      "infosets": 12,
+      "nodes": 9,
+      "terminal_nodes": 5
+    }
+  },
+  "curve": [
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0002450499,
+      "iteration": 500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0001361341,
+      "iteration": 1000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.57218e-05,
+      "iteration": 1500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 4.69214e-05,
+      "iteration": 2000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 6.69777e-05,
+      "iteration": 2500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 4.10379e-05,
+      "iteration": 3000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.01876e-05,
+      "iteration": 3500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 2.9349e-05,
+      "iteration": 4000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 3.27447e-05,
+      "iteration": 4500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 3.75002e-05,
+      "iteration": 5000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 2.71901e-05,
+      "iteration": 5500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.19802e-05,
+      "iteration": 6000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.28889e-05,
+      "iteration": 6500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.11313e-05,
+      "iteration": 7000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 2.21342e-05,
+      "iteration": 7500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.00449e-05,
+      "iteration": 8000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 8.506e-06,
+      "iteration": 8500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.8722e-06,
+      "iteration": 9000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.81874e-05,
+      "iteration": 9500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.71155e-05,
+      "iteration": 10000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.94007e-05,
+      "iteration": 10500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.11372e-05,
+      "iteration": 11000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.5173e-06,
+      "iteration": 11500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.5966e-06,
+      "iteration": 12000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.35482e-05,
+      "iteration": 12500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.51234e-05,
+      "iteration": 13000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.7387e-06,
+      "iteration": 13500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.32306e-05,
+      "iteration": 14000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.13664e-05,
+      "iteration": 14500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 6.1761e-06,
+      "iteration": 15000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 9.8464e-06,
+      "iteration": 15500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.01145e-05,
+      "iteration": 16000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.7708e-06,
+      "iteration": 16500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 4.4105e-06,
+      "iteration": 17000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 9.4229e-06,
+      "iteration": 17500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.16115e-05,
+      "iteration": 18000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 6.1127e-06,
+      "iteration": 18500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.0367e-05,
+      "iteration": 19000
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.3975e-06,
+      "iteration": 19500
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.08333e-05,
+      "iteration": 20000
+    }
+  ],
+  "determinism_verified": true,
+  "exploitability_bb_per_hand": 1.08333e-05,
+  "exploitability_threshold": 5e-05,
+  "game": "kuhn",
+  "game_description": {
+    "en": "Kuhn poker: three cards, one street, no raises. The bluffing game with a complete analytic solution.",
+    "zh": "库恩扑克：三张牌、单街、无再加注。唯一有完整解析解的含诈唬博弈。"
+  },
+  "game_value_bb_per_hand": -0.0555555567,
+  "id": "solver.kuhn",
+  "iterations": 20000,
+  "peak_memory_mb": null,
+  "proof_entry": "kuhn",
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "src/pokergto/solver/proofs.py#kuhn",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": "data/gen/solver/kuhn.json",
+    "upstream": null,
+    "verified": true
+  },
+  "schema_version": "1.0.0",
+  "seed": 0,
+  "timing_seconds": null
+}

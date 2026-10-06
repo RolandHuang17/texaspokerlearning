@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/board_taxonomy.schema.json",
+  "title": "Board texture classes and the rule that assigns them",
+  "description": "Board texture is where poker teaching gets vaguest, so the classification rule is code: src/pokergto/board.py implements exactly the predicates declared here, and every generated table labels a board by these classes. A lesson may not say 'wet board' without the class it means.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "axes", "classes"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "axes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "name", "values"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z_]+$" },
+          "name": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["key", "label", "predicate"],
+              "properties": {
+                "key": { "type": "string" },
+                "label": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "predicate": {
+                  "type": "string",
+                  "description": "Callable in pokergto.board, e.g. 'is_monotone(board)' or 'max_gap(board) <= 2'"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "label", "rule"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "label": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "rule": { "type": "string" },
+          "example_boards": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 5,
+              "items": { "type": "string", "pattern": "^(A|K|Q|J|T|9|8|7|6|5|4|3|2)[shdc]$" }
+            }
+          },
+          "strategy_consequences": { "$ref": "common.schema.json#/$defs/lang_string" }
+        }
+      }
+    }
+  }
+}

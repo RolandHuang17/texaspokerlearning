@@ -1,0 +1,173 @@
+{
+  "caption": {
+    "en": "Nine-out flush draw: 19.15% on the turn exactly (the rule says 18%), 34.97% by the river exactly (the rule says 36%). The rule is an approximation, not the maths.",
+    "zh": "同花听牌 9 outs：转牌精确 19.15%（法则说 18%），河牌精确 34.97%（法则说 36%）。记法则是近似，不是数学。"
+  },
+  "checks": [
+    {
+      "detail": "9 outs by the river equals 1 - C(38,2)/C(47,2) exactly",
+      "kind": "ev_matches_direct_calculation",
+      "pass": false
+    },
+    {
+      "detail": "the rule of 4 always over-states, which is the point of showing the error column",
+      "kind": "frequency_bounds",
+      "pass": false
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Outs",
+        "zh": "补牌数"
+      },
+      "key": "outs",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Exact, next card",
+        "zh": "转牌精确"
+      },
+      "key": "exact_turn",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Rule of 2",
+        "zh": "x2 法则"
+      },
+      "key": "rule_of_two",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Exact, two cards",
+        "zh": "两张精确"
+      },
+      "key": "exact_by_river",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Rule of 4",
+        "zh": "x4 法则"
+      },
+      "key": "rule_of_four",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.01-03.draw-probability-exact-vs-rule",
+  "lesson": "01-03",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.equity#draw_probability",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "exact_by_river": 0.124884,
+      "exact_turn": 0.06383,
+      "outs": 3,
+      "river_error": -0.004884,
+      "rule_of_four": 0.12,
+      "rule_of_two": 0.06,
+      "turn_error": -0.00383
+    },
+    {
+      "exact_by_river": 0.164662,
+      "exact_turn": 0.085106,
+      "outs": 4,
+      "river_error": -0.004662,
+      "rule_of_four": 0.16,
+      "rule_of_two": 0.08,
+      "turn_error": -0.005106
+    },
+    {
+      "exact_by_river": 0.203515,
+      "exact_turn": 0.106383,
+      "outs": 5,
+      "river_error": -0.003515,
+      "rule_of_four": 0.2,
+      "rule_of_two": 0.1,
+      "turn_error": -0.006383
+    },
+    {
+      "exact_by_river": 0.241443,
+      "exact_turn": 0.12766,
+      "outs": 6,
+      "river_error": -0.001443,
+      "rule_of_four": 0.24,
+      "rule_of_two": 0.12,
+      "turn_error": -0.00766
+    },
+    {
+      "exact_by_river": 0.314524,
+      "exact_turn": 0.170213,
+      "outs": 8,
+      "river_error": 0.005476,
+      "rule_of_four": 0.32,
+      "rule_of_two": 0.16,
+      "turn_error": -0.010213
+    },
+    {
+      "exact_by_river": 0.349676,
+      "exact_turn": 0.191489,
+      "outs": 9,
+      "river_error": 0.010324,
+      "rule_of_four": 0.36,
+      "rule_of_two": 0.18,
+      "turn_error": -0.011489
+    },
+    {
+      "exact_by_river": 0.383904,
+      "exact_turn": 0.212766,
+      "outs": 10,
+      "river_error": 0.016096,
+      "rule_of_four": 0.4,
+      "rule_of_two": 0.2,
+      "turn_error": -0.012766
+    },
+    {
+      "exact_by_river": 0.449584,
+      "exact_turn": 0.255319,
+      "outs": 12,
+      "river_error": 0.030416,
+      "rule_of_four": 0.48,
+      "rule_of_two": 0.24,
+      "turn_error": -0.015319
+    },
+    {
+      "exact_by_river": 0.541166,
+      "exact_turn": 0.319149,
+      "outs": 15,
+      "river_error": 0.058834,
+      "rule_of_four": 0.6,
+      "rule_of_two": 0.3,
+      "turn_error": -0.019149
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "draw_probability",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.equity",
+    "seed": null
+  },
+  "title": {
+    "en": "Draw probability: exact values against the rule of 2 and 4",
+    "zh": "抽牌胜率：精确值 与 2/4 法则"
+  },
+  "unverified_claims": []
+}

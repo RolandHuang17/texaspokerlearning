@@ -1,0 +1,1825 @@
+# The bilingual terminology authority. Chinese poker vocabulary has no standard, so this file is the
+# standard: docs, 13x13 axis labels, generated tables and CLI output all render from these labels.
+# first_seen names the lesson where the term first appears; tools/gen_glossary.py --check enforces it.
+schema_version: "1.0.0"
+
+terms:
+  # --- 00 orientation: the objects on the table -----------------------------------------
+  - id: hole-cards
+    en: Hole cards
+    zh: 底牌
+    first_seen: "00-01"
+    avoid: ["私牌", "手牌"]
+    note_zh: "底牌指发给自己的两张牌；“手牌”留给整手牌的含义，不拿来指这两张，否则“看手牌”与“看底牌”分不清。"
+    related: [board, street, hand-class]
+  - id: board
+    en: Board
+    zh: 公共牌面
+    first_seen: "00-01"
+    avoid: ["公牌", "桌面"]
+    note_zh: "统一写“公共牌面”，简称“牌面”；“桌面”在中文里容易被理解成整张牌桌。"
+    related: [hole-cards, board-texture, runout]
+  - id: street
+    en: Street
+    zh: 街
+    first_seen: "00-01"
+    avoid: ["下注轮次"]
+    note_zh: "一条街就是一次发牌后的下注回合；中文用“街”，不用“轮”，“轮”容易和 round（回合）混淆。"
+    related: [preflop, flop, turn, river]
+  - id: preflop
+    en: Preflop
+    zh: 翻前
+    first_seen: "00-01"
+    avoid: ["预翻牌", "翻牌前"]
+    note_zh: "统一“翻前”；“翻牌前”只是同义拉长，写进表头会撑坏 13×13 的轴标签。"
+    related: [street, flop, rfi]
+  - id: flop
+    en: Flop
+    zh: 翻牌圈
+    first_seen: "00-01"
+    avoid: ["翻牌阶段"]
+    note_zh: "指前三张公共牌及其下注回合，统一叫“翻牌圈”；单说“翻牌”容易和发牌动作混。"
+    related: [street, preflop, turn, board-texture]
+  - id: turn
+    en: Turn
+    zh: 转牌圈
+    first_seen: "00-01"
+    avoid: ["河牌前"]
+    note_zh: "第四张公共牌及其回合；不说“河牌前”，那种说法把重点放错了地方。"
+    related: [street, flop, river, double-barrel]
+  - id: river
+    en: River
+    zh: 河牌圈
+    first_seen: "00-01"
+    avoid: ["最后一轮"]
+    note_zh: "第五张公共牌及其回合；“最后一轮”是描述不是术语，遇到加赛局就失效。"
+    related: [street, turn, showdown, alpha]
+  - id: pot
+    en: Pot
+    zh: 底池
+    first_seen: "00-01"
+    avoid: ["奖池", "彩池"]
+    note_zh: "统一“底池”；“奖池”属于彩票语境，“彩池”是粤语区用法，两者都不进正文。"
+    related: [pot-odds, bet, dead-money]
+  - id: bet
+    en: Bet
+    zh: 下注
+    first_seen: "00-01"
+    avoid: ["投注"]
+    note_zh: "无人下注时率先放入筹码叫 bet，统一“下注”；“投注”带赌场色彩。"
+    related: [raise, call, bet-size]
+  - id: raise
+    en: Raise
+    zh: 加注
+    first_seen: "00-01"
+    avoid: ["加价"]
+    note_zh: "对已有下注的抬价是 raise；“加价”听起来像商品定价。"
+    related: [bet, three-bet, cold-call]
+  - id: call
+    en: Call
+    zh: 跟注
+    first_seen: "00-01"
+    avoid: ["跟入", "跟牌"]
+    note_zh: "补齐差额叫跟注；“跟牌”在中文扑克里常指摊牌亮牌，含义不同。"
+    related: [bet, fold, calling-range, cold-call]
+  - id: fold
+    en: Fold
+    zh: 弃牌
+    first_seen: "00-01"
+    avoid: ["放牌", "投降"]
+    note_zh: "统一“弃牌”；“投降”是比喻，会让弃牌频率读起来像情绪描述。"
+    related: [call, fold-frequency, fold-equity]
+  - id: check
+    en: Check
+    zh: 过牌
+    first_seen: "00-01"
+    avoid: ["让牌"]
+    note_zh: "面前无人下注时不下注叫过牌；“让牌”在部分地区指让位，语义不稳。"
+    related: [check-back, check-raise, betting-frequency]
+  - id: hero
+    en: Hero
+    zh: 我方
+    first_seen: "00-01"
+    avoid: ["主角"]
+    note_zh: "牌局记录的视角方；一律写“我方”，“主角”会把技术文本写成故事。"
+    related: [villain, hole-cards]
+  - id: villain
+    en: Villain
+    zh: 对手
+    first_seen: "00-01"
+    avoid: ["坏人"]
+    note_zh: "被分析的另一方；本仓库不评判对手，所以只写“对手”，不写“坏人”。"
+    related: [hero, population]
+  - id: six-max
+    en: Six-max
+    zh: 六人桌
+    first_seen: "00-01"
+    avoid: ["6人桌"]
+    note_zh: "现金局默认牌桌形态；数字与汉字之间不加空格的写法只此一种，避免生成表轴标签出现两种。"
+    related: [position, multiway, heads-up]
+  - id: position
+    en: Position
+    zh: 位置
+    first_seen: "00-01"
+    avoid: ["座位"]
+    note_zh: "“位置”指行动顺序带来的信息优势，不是椅子；因此不说“座位”。"
+    related: [button, initiative, late-position]
+  - id: button
+    en: Button
+    zh: 按钮位
+    abbrev: BTN
+    first_seen: "00-01"
+    avoid: ["庄家位", "庄位"]
+    note_zh: "BTN 是名义庄家但不负责发牌，中文统一“按钮位”；“庄家位”会与实际发牌者（dealer）混在一起。"
+    related: [position, cutoff, button-vs-big-blind]
+  - id: small-blind
+    en: Small blind
+    zh: 小盲注
+    abbrev: SB
+    first_seen: "00-01"
+    avoid: ["小盲金"]
+    note_zh: "强制注叫盲注；“金”字不用，因为单位本来就是大盲注。"
+    related: [big-blind, ante, position]
+  - id: big-blind
+    en: Big blind
+    zh: 大盲注
+    abbrev: BB
+    first_seen: "00-01"
+    avoid: ["大盲金"]
+    note_zh: "全仓库的筹码单位默认以大盲计，写作 bb；术语本身统一“大盲注”。"
+    related: [small-blind, big-blind-unit, big-blind-defense]
+
+  # --- 00 orientation: what a claim has to carry ----------------------------------------
+  - id: gto
+    en: Game theory optimal
+    zh: 博弈论最优
+    abbrev: GTO
+    first_seen: "00-02"
+    avoid: ["游戏理论最优", "理论最优打法"]
+    note_zh: "缩写一律保留拉丁 GTO，不译成“游戏理论”，那是 game 的错译；中文全称用“博弈论最优”。"
+    related: [nash-equilibrium, exploitability, balanced-exploitation]
+  - id: nash-equilibrium
+    en: Nash equilibrium
+    zh: 纳什均衡
+    first_seen: "00-02"
+    avoid: ["纳什平衡", "均衡点"]
+    note_zh: "人名译法固定为“纳什”，不写“纳什平衡”；“均衡点”是数学语境的另一个概念。"
+    related: [gto, exploitability, cfr]
+  - id: exploitability
+    en: Exploitability
+    zh: 可剥削度
+    symbol: "ε = 对手最优应对收益 − 博弈值"
+    first_seen: "00-02"
+    avoid: ["剥削性", "可被攻击度"]
+    note_zh: "它是一个有单位的量（通常以 bb/底池或大盲计），不是形容词，所以不说“剥削性”。"
+    related: [best-response, nash-equilibrium, game-value]
+    derivation_ref: src/pokergto/solver/exploitability.py#exploitability
+  - id: best-response
+    en: Best response
+    zh: 最优应对
+    first_seen: "00-02"
+    avoid: ["最佳反应", "最好回应"]
+    note_zh: "针对一个固定策略的期望值最大策略；术语固定“最优应对”，与“最优策略”区分开。"
+    related: [exploitability, nash-equilibrium]
+    derivation_ref: src/pokergto/solver/exploitability.py#best_response_value
+  - id: provenance
+    en: Provenance
+    zh: 来源标注
+    first_seen: "00-02"
+    avoid: ["出处", "溯源"]
+    note_zh: "指工件里必填的 provenance 字段，“出处”太轻，“溯源”像流程动作。"
+    related: [unverified-claim, derivation-ref, generated-artifact]
+  - id: unverified-claim
+    en: Unverified claim
+    zh: 未核验声明
+    first_seen: "00-02"
+    avoid: ["待验证说法", "未证实结论"]
+    note_zh: "渲染成双语徽章 UNVERIFIED；它是诚实标注，不是待办便签，所以不写“待验证说法”。"
+    related: [provenance, derivation-ref, generated-artifact]
+  - id: derivation-ref
+    en: Derivation reference
+    zh: 推导指针
+    first_seen: "00-02"
+    avoid: ["推导引用"]
+    note_zh: "指向 src/pokergto 里可执行的符号，让“derived”这个词有处可查；“引用”容易和文献引用混。"
+    related: [provenance, single-source-of-truth]
+
+  # --- 00 orientation: the toolchain -----------------------------------------------------
+  - id: solver
+    en: Solver
+    zh: 求解器
+    first_seen: "00-03"
+    avoid: ["外挂", "辅助软件"]
+    note_zh: "本仓库的求解器是自己跑的 CFR 实现，不是牌桌辅助工具，因此绝不写“外挂”。"
+    related: [cfr, solver-output, determinism]
+  - id: determinism
+    en: Determinism
+    zh: 确定性输出
+    first_seen: "00-03"
+    avoid: ["可重复性"]
+    note_zh: "指的是同输入必同字节，比“可重复”更强；这是 gen_all.py --check 能当门禁用前提。"
+    related: [rng-seed, generated-artifact, monte-carlo-simulation]
+  - id: generated-artifact
+    en: Generated artifact
+    zh: 生成物
+    first_seen: "00-03"
+    avoid: ["产物", "工件"]
+    note_zh: "data/gen 下的 JSON；“工件”在中文制造语境里另有含义，“产物”过于宽泛。"
+    related: [single-source-of-truth, determinism, provenance]
+  - id: single-source-of-truth
+    en: Single source of truth
+    zh: 唯一数据源
+    first_seen: "00-03"
+    avoid: ["单一真相来源"]
+    note_zh: "每个数字只在一处计算，其他地方引用；直译“单一真相来源”把工程约定说成了哲学。"
+    related: [generated-artifact, derivation-ref]
+  - id: rng-seed
+    en: Random seed
+    zh: 随机种子
+    first_seen: "00-03"
+    avoid: ["种子值"]
+    note_zh: "模拟类生成物必须记 seed；“种子值”把参数名当成了数值。"
+    related: [determinism, monte-carlo-simulation, sample-size]
+
+  # --- 01 counting ----------------------------------------------------------------------
+  - id: combos
+    en: Combos
+    zh: 组合数
+    first_seen: "01-01"
+    avoid: ["变化数", "排列数"]
+    note_zh: "起手牌是组合不是排列，顺序无意义；“变化数”是英文 variations 的旧译，不带计数单位。"
+    related: [hand-class, removal-effect, capacity]
+    derivation_ref: src/pokergto/cards.py#combos_for_class
+  - id: hand-class
+    en: Hand class
+    zh: 手牌类别
+    first_seen: "01-01"
+    avoid: ["手牌种类", "牌类"]
+    note_zh: "169 类是按等价关系归并出来的类别（如 AKo），“种类”会让人以为只有花色之别。"
+    related: [combos, suited, offsuit, grid-13x13]
+    derivation_ref: src/pokergto/cards.py#class_key
+  - id: suited
+    en: Suited
+    zh: 起手同花
+    abbrev: s
+    first_seen: "01-01"
+    avoid: ["花色相同"]
+    note_zh: "写成 AKs 里的 s；必须与成牌“同花”区分，所以术语全称带“起手”。"
+    related: [offsuit, flush, hand-class]
+  - id: offsuit
+    en: Offsuit
+    abbrev: o
+    zh: 起手不同花
+    first_seen: "01-01"
+    avoid: ["杂花起手", "非同花"]
+    note_zh: "统一“起手不同花”；“非同花”是逻辑补集的说法，会把两张贴牌与成牌混淆。"
+    related: [suited, hand-class, combos]
+  - id: pocket-pair
+    en: Pocket pair
+    zh: 手对
+    first_seen: "01-01"
+    avoid: ["口袋对子", "底对"]
+    note_zh: "起手成对；“底对”在中文里常特指用公共牌成对的那一对，会与 trips 撞车。"
+    related: [hand-class, combos, trips]
+  - id: blocker
+    en: Blocker
+    zh: 阻断牌
+    first_seen: "01-02"
+    avoid: ["挡牌", "阻塞牌"]
+    note_zh: "指我持有（或牌面出现）因而无法在对手范围里出现的牌；“阻塞牌”是电路语境的词。"
+    related: [removal-effect, combos, range]
+    derivation_ref: src/pokergto/cards.py#remove_cards
+  - id: removal-effect
+    en: Removal effects
+    zh: 移除效应
+    first_seen: "01-02"
+    avoid: ["卡牌效应", "删除效应"]
+    note_zh: "任何已知牌都会删掉组合空间，包含自己的底牌；“删除效应”太宽，“卡牌效应”易与卡断混淆。"
+    related: [blocker, combos, independent-defender-assumption]
+    derivation_ref: src/pokergto/cards.py#remove_cards
+
+  # --- 01 equity ------------------------------------------------------------------------
+  - id: range
+    en: Range
+    zh: 范围
+    first_seen: "01-02"
+    avoid: ["手牌范围", "范围表"]
+    note_zh: "范围就是范围，加“手牌”二字既冗余又与手牌类别混淆；“范围表”留给 range chart。"
+    related: [hand-class, range-advantage, range-chart, capped-range]
+    derivation_ref: src/pokergto/ranges.py#Range
+  - id: equity
+    en: Equity
+    zh: 胜率
+    symbol: "e = P(赢) + ½ · P(平分)"
+    first_seen: "01-03"
+    avoid: ["底池权益", "权益"]
+    note_zh: "本仓库的胜率是底池份额期望（含平分摊牌），不是纯赢率；不译成“权益”，那会让人以为是抽象权利。"
+    related: [win-probability, equity-realization, pot-odds]
+    derivation_ref: src/pokergto/equity.py#hand_equity
+  - id: win-probability
+    en: Win probability
+    zh: 纯赢率
+    symbol: "P(赢)"
+    first_seen: "01-03"
+    avoid: ["赢面"]
+    note_zh: "赢面是口语，无法区分独赢与平分；需要严格说 P(win) 时统一写“纯赢率”。"
+    related: [equity, tie-chop, hand-strength]
+    derivation_ref: src/pokergto/evaluator.py#showdown
+  - id: outs
+    en: Outs
+    zh: 补牌
+    first_seen: "01-03"
+    avoid: ["出牌", "有效牌"]
+    note_zh: "能让手牌升到更优类别的、尚未出现的牌；“出牌”在中文里是动作，会被读成“打出一张牌”。"
+    related: [rule-of-two-and-four, equity, flush-draw]
+    derivation_ref: src/pokergto/equity.py#draw_probability
+  - id: rule-of-two-and-four
+    en: Rule of two and four
+    zh: 二四法则
+    first_seen: "01-03"
+    avoid: ["翻倍法则", "二四规则"]
+    note_zh: "它只是近似；本仓库一律给穷举值并把误差一起渲染，所以不能把它当结论引用。"
+    related: [outs, equity, monte-carlo-simulation]
+  - id: tie-chop
+    en: Chop
+    zh: 平分底池
+    first_seen: "01-03"
+    avoid: ["平局分池"]
+    note_zh: "胜率里那半份钱来自平分；术语固定“平分底池”，因为“平局”在锦标赛语境另有含义。"
+    related: [equity, showdown, win-probability]
+    derivation_ref: src/pokergto/evaluator.py#split_pot
+  - id: showdown
+    en: Showdown
+    zh: 摊牌
+    first_seen: "01-03"
+    avoid: ["亮牌", "比牌"]
+    note_zh: "摊牌是终局状态，“亮牌”只是它的可见动作，且常用来指摊牌前的暴露。"
+    related: [tie-chop, hand-ranking, wtsd]
+    derivation_ref: src/pokergto/evaluator.py#showdown
+
+  # --- 01 simulation --------------------------------------------------------------------
+  - id: monte-carlo-simulation
+    en: Monte Carlo simulation
+    zh: 蒙特卡洛模拟
+    first_seen: "01-04"
+    avoid: ["随机抽样法"]
+    note_zh: "地名照通行译法写“蒙特卡洛”；“随机抽样法”会把有偏抽样与穷举的差别抹平。"
+    related: [variance, standard-error, rng-seed]
+  - id: variance
+    en: Variance
+    zh: 方差
+    symbol: "σ²"
+    first_seen: "01-04"
+    avoid: ["波动性"]
+    note_zh: "方差是可计算的量，“波动性”在金融语境另有定义，二者不能互换。"
+    related: [standard-error, downswing, sample-size]
+    derivation_ref: src/pokergto/variance.py#std_per_100
+  - id: standard-error
+    en: Standard error
+    zh: 标准误
+    symbol: "SE = σ / √n"
+    first_seen: "01-04"
+    avoid: ["标准偏差"]
+    note_zh: "标准误衡量估计量的离散度，与单次观测的标准差不是同一个东西，不能混写。"
+    related: [variance, sample-size, monte-carlo-simulation]
+    derivation_ref: src/pokergto/variance.py#standard_error
+  - id: sample-size
+    en: Sample size
+    zh: 样本量
+    first_seen: "01-04"
+    avoid: ["样本数"]
+    note_zh: "指观测手数；“样本数”会被读成样本个数（几个样本），单位就错了。"
+    related: [standard-error, hud, leak-audit]
+    derivation_ref: src/pokergto/variance.py#hands_for_significance
+
+  # --- 01 evaluation --------------------------------------------------------------------
+  - id: hand-ranking
+    en: Hand ranking
+    zh: 牌型等级
+    first_seen: "01-05"
+    avoid: ["牌力排名"]
+    note_zh: "指的是类别序（顺子大于三条）；“牌力”是说具体一手牌的强弱，两者不是一回事。"
+    related: [hand-strength, straight, flush, trips, full-house]
+    derivation_ref: src/pokergto/evaluator.py#Category
+  - id: hand-strength
+    en: Hand strength
+    zh: 牌力
+    first_seen: "01-05"
+    avoid: ["手牌强度"]
+    note_zh: "一个字的“牌力”足够；“手牌强度”太长且常被人误解为胜率高低。"
+    related: [hand-ranking, equity, kicker]
+    derivation_ref: src/pokergto/evaluator.py#best_score
+  - id: kicker
+    en: Kicker
+    zh: 踢脚
+    first_seen: "01-05"
+    avoid: ["脚牌", "陪牌"]
+    note_zh: "同型比较时的附带大牌；“陪牌”在部分方言里指第三家入局，含义完全跑偏。"
+    related: [hand-strength, hand-ranking]
+    derivation_ref: src/pokergto/evaluator.py#evaluate5
+  - id: flush
+    en: Flush
+    zh: 同花
+    first_seen: "01-05"
+    avoid: ["同花牌"]
+    note_zh: "成牌五张同花色；与起手“同花”的区别靠“牌”字区分不可靠，所以起手一侧统一写“起手同花”。"
+    related: [suited, monochrome-board, hand-ranking]
+  - id: straight
+    en: Straight
+    zh: 顺子
+    first_seen: "01-05"
+    avoid: ["顺牌"]
+    note_zh: "顺式点数成牌；单字“顺”会在“听顺”这类短语里丢主语，因此成牌统一说“顺子”。"
+    related: [connected-board, broadway-board, hand-ranking]
+  - id: trips
+    en: Trips
+    zh: 三条
+    first_seen: "01-05"
+    avoid: ["三张", "刻子"]
+    note_zh: "三条 = 牌面一张 + 手牌两张；暗三条（牌面两张）另有其名，不能都简写成“三张”。"
+    related: [hand-ranking, pocket-pair, full-house]
+  - id: full-house
+    en: Full house
+    zh: 葫芦
+    first_seen: "01-05"
+    avoid: ["满堂红", "夫鲁豪斯"]
+    note_zh: "中文牌桌通行“葫芦”；“满堂红”是麻将借用且和牌型无关，音译一律不用。"
+    related: [trips, hand-ranking]
+
+  # --- 01 realization -------------------------------------------------------------------
+  - id: equity-realization
+    en: Equity realization
+    zh: 胜率实现
+    abbrev: EqR
+    symbol: "胜率实现率 = 实际赢到的底池份额 / 名义胜率"
+    first_seen: "01-06"
+    avoid: ["权益实现", "实现率"]
+    note_zh: "跟 equity 的译法一致，只用“胜率”；“实现率”单独出现时无法说明实现的是什么。"
+    related: [equity, implied-odds, reverse-implied-odds, protection-bet]
+  - id: implied-odds
+    en: Implied odds
+    zh: 隐含赔率
+    first_seen: "01-06"
+    avoid: ["暗示赔率", "未来赔率"]
+    note_zh: "指未来能赢到的额外钱；“未来赔率”丢失了“谁付钱”这个前提，容易被当成纯时间贴现。"
+    related: [reverse-implied-odds, pot-odds, equity-realization]
+    derivation_ref: src/pokergto/spr.py#implied_odds_break_even_equity
+  - id: reverse-implied-odds
+    en: Reverse implied odds
+    zh: 反向隐含赔率
+    first_seen: "01-06"
+    avoid: ["负隐含赔率", "反赔率"]
+    note_zh: "统一“反向”；“负隐含”在中文里常被误当成负期望值，那是两个不同的量。"
+    related: [implied-odds, equity-realization, outs]
+    derivation_ref: src/pokergto/spr.py#reverse_implied_odds_penalty
+
+  # --- 01 reading grids -----------------------------------------------------------------
+  - id: grid-13x13
+    en: 13x13 grid
+    zh: 13×13 网格
+    first_seen: "01-07"
+    avoid: ["扑克矩阵", "十三格表"]
+    note_zh: "行列轴都按 13 个点数排；“矩阵”在数学语境里暗示可运算对象，其实它只是一张频率表。"
+    related: [range, range-chart, hand-class, combos]
+    derivation_ref: src/pokergto/matrix13.py#Grid13
+  - id: range-chart
+    en: Range chart
+    zh: 范围图
+    first_seen: "01-07"
+    avoid: ["范围表图"]
+    note_zh: "课节模板里的“范围图 / Range chart”与“生成表 / Generated tables”分属两类对象，名称不混用。"
+    related: [range, grid-13x13, decision-plan]
+    derivation_ref: src/pokergto/ranges.py#from_chart
+
+  # --- 02 the arithmetic of one decision --------------------------------------------------
+  - id: expected-value
+    en: Expected value
+    zh: 期望值
+    abbrev: EV
+    symbol: "EV = Σ pᵢ · xᵢ"
+    first_seen: "02-01"
+    avoid: ["预期值", "平均收益"]
+    note_zh: "缩写 EV 在中文正文里原样保留；“平均收益”丢掉了概率加权这一层，是财报用语。"
+    related: [break-even-percentage, ev-decomposition, chip-ev]
+    derivation_ref: src/pokergto/ev.py#ev_call
+  - id: break-even-percentage
+    en: Break-even percentage
+    zh: 保本百分比
+    symbol: "保本 = 风险 / (风险 + 回报)"
+    first_seen: "02-01"
+    avoid: ["盈亏平衡点", "止损点"]
+    note_zh: "它是一个频率，不是一个价格位置；“止损点”是资金管理的另一回事。"
+    related: [pot-odds, required-equity, expected-value]
+    derivation_ref: src/pokergto/odds.py#break_even_percentage
+  - id: pot-odds
+    en: Pot odds
+    zh: 底池赔率
+    symbol: "P : B"
+    first_seen: "02-02"
+    avoid: ["池赔率", "底池比"]
+    note_zh: "统一“底池赔率”；“底池比”会被当成底池与筹码之比。"
+    related: [required-equity, break-even-percentage, offered-odds]
+    derivation_ref: src/pokergto/odds.py#pot_odds
+  - id: required-equity
+    en: Equity needed to call
+    zh: 所需胜率
+    symbol: "e_req = B / (P + 2B)"
+    first_seen: "02-02"
+    avoid: ["最低胜率", "需要的胜率"]
+    note_zh: "它是跟注的门槛值，不是一般意义上的“最低胜率”；后者常被误用来指 MDF。"
+    related: [pot-odds, equity, minimum-defense-frequency]
+    derivation_ref: src/pokergto/odds.py#equity_needed_to_call
+  - id: minimum-defense-frequency
+    en: Minimum defense frequency
+    zh: 最低防守频率
+    abbrev: MDF
+    symbol: "MDF = P / (P + B)"
+    first_seen: "02-03"
+    avoid: ["防守频率", "防御频率"]
+    note_zh: "MDF 是理论下限，防守频率是实际做法；中文里两者常都写成“防守频率”，本仓库严格区分，因为差值就是剥削空间。"
+    related: [defend, fold-frequency, required-equity, big-blind-defense]
+    derivation_ref: src/pokergto/odds.py#minimum_defense_frequency
+  - id: defend
+    en: Defend
+    zh: 防守
+    first_seen: "02-03"
+    avoid: ["保卫", "抵抗"]
+    note_zh: "防守 = 不弃牌（跟注或加注）；“抵抗”听情绪，“保卫”听位置，都不说明动作。"
+    related: [minimum-defense-frequency, big-blind-defense, calling-range]
+  - id: fold-frequency
+    en: Fold frequency
+    zh: 弃牌频率
+    symbol: "f_fold = 1 − MDF"
+    first_seen: "02-03"
+    avoid: ["弃掉率"]
+    note_zh: "口语“弃牌率”只指实际弃牌频率；若要表达 fold equity，必须写“弃牌赢率”，不能写“弃牌率”。"
+    related: [minimum-defense-frequency, fold, fold-equity, overfold]
+    derivation_ref: src/pokergto/odds.py#required_fold_frequency
+  - id: bet-size
+    en: Bet size
+    zh: 下注尺度
+    first_seen: "02-03"
+    avoid: ["下注大小", "下注额"]
+    note_zh: "“尺度”是本仓库对 size 的唯一译法；“下注额”只在指具体金额时使用，不作为术语。"
+    related: [bet, pot-fraction, sizing-risk, overbet]
+    derivation_ref: src/pokergto/odds.py#sizing_table
+  - id: bluff
+    en: Bluff
+    zh: 诈唬
+    first_seen: "02-04"
+    avoid: ["偷鸡", "虚张声势"]
+    note_zh: "“偷鸡”暗含道德判断且常特指河牌一搏；术语统一“诈唬”，派生词见 bluff-catching、semi-bluff。"
+    related: [bluff-range, semi-bluff, bluff-to-value-ratio]
+    derivation_ref: src/pokergto/ev.py#ev_pure_bluff
+  - id: bluff-to-value-ratio
+    en: Bluff-to-value ratio
+    zh: 诈唬与价值比
+    abbrev: B:V
+    first_seen: "02-04"
+    note_zh: "写作“诈唬与价值比”，不写“诈唬价值比”，后者容易被读成一个比值名称的形容词短语。"
+    related: [bluff, value-bet, alpha, bluff-frequency]
+    derivation_ref: src/pokergto/odds.py#value_to_bluff_ratio
+  - id: value-bet
+    en: Value bet
+    zh: 价值下注
+    first_seen: "02-04"
+    avoid: ["实值下注", "赢钱下注"]
+    note_zh: "定义是“指望对手以更差牌跟注”，不是“这手牌会赢”；后者是薄价值争议的根源。"
+    related: [thin-value, value-range, bluff, protection-bet]
+    derivation_ref: src/pokergto/ev.py#ev_pure_value
+  - id: bluff-range
+    en: Bluff range
+    zh: 诈唬范围
+    first_seen: "02-04"
+    note_zh: "下注范围里以弃牌收益为目的的那一部分；与半诈唬区别在于是否还有改进空间。"
+    related: [value-range, bluff, polarized, capacity]
+  - id: value-range
+    en: Value range
+    zh: 价值范围
+    first_seen: "02-04"
+    note_zh: "与诈唬范围互补；说“我的价值”而不说“价值范围”会让频率表失去主语。"
+    related: [bluff-range, value-bet, thin-value, polarized]
+  - id: indifference
+    en: Indifference
+    zh: 无差别
+    first_seen: "02-04"
+    avoid: ["等值原则", "无所谓"]
+    note_zh: "指两个行动的期望值相等这一条件，不是态度；“无所谓”让推导读起来像建议。"
+    related: [mixed-strategy, best-response, bluff-to-value-ratio]
+    derivation_ref: src/pokergto/odds.py#indifference_check
+  - id: mixed-strategy
+    en: Mixed strategy
+    zh: 混合策略
+    first_seen: "02-04"
+    avoid: ["混和策略", "随机化策略"]
+    note_zh: "“混合”指同一信息集上的频率分配，是均衡要求的结构，不是随手乱打，所以不写“随机化策略”。"
+    related: [indifference, pure-strategy, size-set, information-set]
+  - id: pure-strategy
+    en: Pure strategy
+    zh: 纯策略
+    first_seen: "02-04"
+    avoid: ["单一策略"]
+    note_zh: "在某信息集上以概率一取值一个行动；“单一策略”容易被读成全局只有一套打法。"
+    related: [mixed-strategy, information-set, indifference]
+  - id: bluff-frequency
+    en: Bluff frequency
+    zh: 诈唬频率
+    first_seen: "02-04"
+    avoid: ["诈唬率"]
+    note_zh: "频率是范围内的占比，率常被人当成每手牌的次数；本仓库一律用频率。"
+    related: [bluff-range, alpha, bluff-to-value-ratio, over-bluffing]
+  - id: fold-equity
+    en: Fold equity
+    zh: 弃牌赢率
+    abbrev: FE
+    symbol: "弃牌赢率 = 对手弃牌概率 × 当下可收的底池"
+    first_seen: "02-05"
+    avoid: ["弃牌率收益", "过牌赢率"]
+    note_zh: "固定“弃牌赢率”；它和“弃牌频率”只差一个字，却一个是收益、一个是频率，术语表用 avoid 把两种误写都拦住。"
+    related: [fold-frequency, expected-value, bluff, sizing-risk]
+    derivation_ref: src/pokergto/ev.py#ev_bet
+  - id: ev-decomposition
+    en: EV decomposition
+    zh: 期望值分解
+    first_seen: "02-05"
+    avoid: ["EV 拆分"]
+    note_zh: "把一个动作按对手后续分支写成几项之和；“拆分”听起来像算术练习，不强调分支含义。"
+    related: [expected-value, fold-equity, decision-point, regret]
+  - id: shove
+    en: Shove
+    zh: 全下
+    first_seen: "02-06"
+    avoid: ["梭哈", "推牌"]
+    note_zh: "“梭哈”是游戏名（五张 stud），“推牌”是牌桌动作；all-in 的唯一术语写法是“全下”。"
+    related: [raise, three-bet-shove, shoving-range, pot-commitment]
+    derivation_ref: src/pokergto/ev.py#ev_shove
+  - id: thin-value
+    en: Thin value
+    zh: 薄价值
+    first_seen: "02-07"
+    avoid: ["边缘价值", "微弱价值"]
+    note_zh: "指赢面很窄但仍为正的价值；“边缘”在中文里常被当成 borderline 的“临界”，方向会反。"
+    related: [value-bet, value-range, blocking-bet, bluff-catching]
+  - id: sizing-risk
+    en: Sizing risk
+    zh: 尺度风险
+    first_seen: "02-08"
+    avoid: ["下注风险"]
+    note_zh: "特指因尺度改变而多承担的被反超与被加注风险，不是泛指下注本身的方差。"
+    related: [bet-size, fold-asymmetry, minimum-defense-frequency, offered-odds]
+  - id: fold-asymmetry
+    en: Fold asymmetry
+    zh: 弃牌不对称
+    first_seen: "02-08"
+    avoid: ["弃牌差异"]
+    note_zh: "指弃牌让出的价值与继续承担的风险不成比例，是尺度选择的约束条件。"
+    related: [sizing-risk, fold-frequency, fold-equity]
+
+  # --- 03 ranges against ranges ---------------------------------------------------------
+  - id: range-advantage
+    en: Range advantage
+    zh: 范围优势
+    first_seen: "03-01"
+    avoid: ["区间优势", "牌力范围优势"]
+    note_zh: "两个范围的整体比较才叫范围优势；“区间”是数学说法，与牌局无关。"
+    related: [nut-advantage, equity-advantage, capacity, capped-range]
+  - id: nut-advantage
+    en: Nut advantage
+    zh: 坚果优势
+    first_seen: "03-01"
+    avoid: ["最强牌优势", "坚果牌优势"]
+    note_zh: "指谁的范围更可能持有最优成牌，决定大尺度与全下；与“谁的牌更强”无关。"
+    related: [the-nuts, range-advantage, overbet, capacity]
+  - id: equity-advantage
+    en: Equity advantage
+    zh: 胜率优势
+    first_seen: "03-01"
+    avoid: ["胜率领先"]
+    note_zh: "范围平均胜率的差；它能解释小尺度频率，解释不了大尺度，那是坚果优势的活。"
+    related: [equity, range-advantage, betting-frequency]
+  - id: the-nuts
+    en: The nuts
+    zh: 坚果
+    first_seen: "03-01"
+    avoid: ["坚果牌", "最大牌"]
+    note_zh: "坚果是当前牌面下的最优成牌；“最大牌”会与底牌里的最大点数冲突。"
+    related: [nut-advantage, capped-range, blocker]
+  - id: capacity
+    en: Capacity
+    zh: 牌型容量
+    first_seen: "03-01"
+    avoid: ["范围容量", "承载力"]
+    note_zh: "一个范围能装下多少强成牌；“范围容量”与 combos 的计数含义撞车，所以补上“牌型”。"
+    related: [combos, nut-advantage, overbet, multiway]
+  - id: capped-range
+    en: Capped range
+    zh: 封顶范围
+    first_seen: "03-02"
+    avoid: ["上限范围", "被封顶的牌"]
+    note_zh: "某条线让范围缺少顶端牌；“上限范围”听上去像范围有天花板这一事实本身，不指明是线造成的。"
+    related: [range-advantage, the-nuts, overbet, initiative]
+  - id: line
+    en: Line
+    zh: 行动线
+    first_seen: "03-02"
+    avoid: ["路线", "打法流程"]
+    note_zh: "一串按顺序的动作；“路线”在中文里更像计划而非已经走过的一串动作。"
+    related: [decision-plan, initiative, runout, capped-range]
+  - id: runout
+    en: Runout
+    zh: 发展牌序
+    first_seen: "03-03"
+    avoid: ["跑牌", "河牌走势"]
+    note_zh: "后续公共牌的序列；“跑牌”是口头简称，写成术语会失去可枚举的意味。"
+    related: [turn, river, board-texture, static-board]
+    derivation_ref: src/pokergto/equity.py#runout_boards
+  - id: board-texture
+    en: Board texture
+    zh: 牌面质地
+    first_seen: "03-04"
+    avoid: ["牌面结构", "公牌质地"]
+    note_zh: "质地指花色与点数分布；“结构”容易只想到连张，丢掉同花这条轴。"
+    related: [board, monochrome-board, range-advantage, dynamic-board]
+    derivation_ref: src/pokergto/board.py#classify
+  - id: monochrome-board
+    en: Monochrome board
+    zh: 单色面
+    first_seen: "03-04"
+    avoid: ["同花面", "纯同花牌面"]
+    note_zh: "三张同花色；说“同花面”会让人以为已经存在同花成牌。"
+    related: [board-texture, flush, flush-draw, two-tone-board]
+    derivation_ref: src/pokergto/board.py#is_monochrome
+  - id: two-tone-board
+    en: Two-tone board
+    zh: 双色面
+    first_seen: "03-04"
+    avoid: ["两色面"]
+    note_zh: "两花色；与单色面的区别在于同花听牌的数量，分类谓词由引擎给。"
+    related: [monochrome-board, rainbow-board, flush-draw]
+    derivation_ref: src/pokergto/board.py#is_two_tone
+  - id: rainbow-board
+    en: Rainbow board
+    zh: 彩虹面
+    first_seen: "03-04"
+    avoid: ["三色面"]
+    note_zh: "三花色；“三色面”是几何说法，且抹掉了同花完全不可能这一关键。"
+    related: [two-tone-board, monochrome-board, static-board]
+    derivation_ref: src/pokergto/board.py#is_rainbow
+  - id: paired-board
+    en: Paired board
+    zh: 对子面
+    first_seen: "03-04"
+    avoid: ["成对牌面", "公牌成对"]
+    note_zh: "牌面出现对子；“成对牌面”与手牌成对不分，容易和口袋对混淆。"
+    related: [board-texture, static-board, trips]
+    derivation_ref: src/pokergto/board.py#is_paired
+  - id: connected-board
+    en: Connected board
+    zh: 连张面
+    first_seen: "03-04"
+    avoid: ["连接面", "连牌面"]
+    note_zh: "点数彼此邻近；“连接面”是网络语，且不含间距信息。"
+    related: [dynamic-board, straight, board-texture]
+    derivation_ref: src/pokergto/board.py#is_connected
+  - id: static-board
+    en: Static board
+    zh: 静态面
+    first_seen: "03-04"
+    avoid: ["死面", "不动面"]
+    note_zh: "后续牌很难改变领先关系；“死面”也指无听牌的牌面，覆盖范围不同。"
+    related: [dynamic-board, runout, paired-board]
+  - id: dynamic-board
+    en: Dynamic board
+    zh: 动态面
+    first_seen: "03-04"
+    avoid: ["危险面", "活面"]
+    note_zh: "发展牌序能大量改变牌力；“危险面”是主观判断，动态面则由可枚举的听牌数量决定。"
+    related: [static-board, connected-board, runout, wet-board]
+  - id: wet-board
+    en: Wet board
+    zh: 湿面
+    first_seen: "03-04"
+    avoid: ["水面", "湿润牌面"]
+    note_zh: "听牌与成牌都很多；与动态面区别在于湿面强调牌力密度，不强调后续变化量。"
+    related: [dry-board, dynamic-board, bet-size]
+  - id: dry-board
+    en: Dry board
+    zh: 干面
+    first_seen: "03-04"
+    avoid: ["旱面", "干燥牌面"]
+    note_zh: "听牌稀少；“干燥牌面”只是同义拉长，进表格轴标签会撑坏列宽。"
+    related: [wet-board, static-board, min-bet]
+  - id: broadway-board
+    en: Broadway board
+    zh: broadway 面
+    first_seen: "03-04"
+    avoid: ["百老汇面", "宽牌面"]
+    note_zh: "broadway 不音译，“百老汇面”让读者找不到定义；也不写“宽牌面”，那与宽范围撞车。"
+    related: [straight, connected-board, board-texture]
+  - id: backdoor-draw
+    en: Backdoor draw
+    zh: 后门听牌
+    first_seen: "03-04"
+    avoid: ["二次听牌", "隐蔽听牌"]
+    note_zh: "需要后两张牌才成的听牌；runner-runner 也指同一件事，中文统一“后门”。"
+    related: [runout, flush-draw, outs]
+  - id: flush-draw
+    en: Flush draw
+    zh: 同花听牌
+    first_seen: "03-04"
+    avoid: ["同花抽牌", "卡同花"]
+    note_zh: "“抽牌”是 draw 的直译但含动作意味；听牌一词已经表示差一张成牌的状态。"
+    related: [outs, monochrome-board, semi-bluff]
+  - id: spr
+    en: Stack-to-pot ratio
+    zh: 筹码底池比
+    abbrev: SPR
+    symbol: "SPR = 有效筹码 / 底池"
+    first_seen: "03-07"
+    avoid: ["筹码与底池比率", "有效筹码比"]
+    note_zh: "缩写 SPR 保留拉丁；“有效筹码比”会和 effective stack 混，缩写展开统一为“筹码底池比”。"
+    related: [effective-stack, pot-commitment, shove, required-equity]
+    derivation_ref: src/pokergto/spr.py#spr
+  - id: effective-stack
+    en: Effective stack
+    zh: 有效筹码
+    first_seen: "03-07"
+    avoid: ["实际筹码", "剩余筹码"]
+    note_zh: "双方中最小的那个筹码量才是决策依据；“剩余筹码”不含取最小值这一步。"
+    related: [spr, big-blind-unit, pot-commitment, big-stack]
+    derivation_ref: src/pokergto/spr.py#spr
+  - id: pot-commitment
+    en: Pot commitment
+    zh: 套池
+    first_seen: "03-08"
+    avoid: ["底池承诺", "已投入"]
+    note_zh: "指继续投入的期望合理性，不是沉没成本；“已投入”正好把错误论证写进了术语。"
+    related: [spr, pot-control, shove, implied-odds]
+  - id: multiway
+    en: Multiway
+    zh: 多人底池
+    first_seen: "03-09"
+    avoid: ["多头池", "多人入池"]
+    note_zh: "“多人入池”描述的是翻前事实，多人底池描述的是当前决策环境，二者不同。"
+    related: [independent-defender-assumption, heads-up, capacity, six-max]
+
+  # --- 04 sizing -------------------------------------------------------------------------
+  - id: frequency-approach
+    en: Frequency-based sizing logic
+    zh: 频率法
+    first_seen: "04-01"
+    avoid: ["频率策略", "按频率下注"]
+    note_zh: "与“范围法”配对使用；单独说“频率策略”会被理解成只看频率不看牌力。"
+    related: [range-approach, betting-frequency, size-set]
+  - id: range-approach
+    en: Range-based sizing logic
+    zh: 范围法
+    first_seen: "04-01"
+    avoid: ["范围策略", "按范围下注"]
+    note_zh: "由范围形状决定尺度那条路径；不要与 range（范围）本身混写成“范围策略”。"
+    related: [frequency-approach, polarized, capacity, range]
+  - id: betting-frequency
+    en: Betting frequency
+    zh: 下注频率
+    first_seen: "04-01"
+    avoid: ["下注率"]
+    note_zh: "同一节点上下注的范围占比；AF 之类的统计量另有口径，不用“下注率”混指。"
+    related: [checking-frequency, bet-size, aggression-frequency, continuation-bet]
+  - id: checking-frequency
+    en: Checking frequency
+    zh: 过牌频率
+    first_seen: "04-01"
+    avoid: ["过牌率"]
+    note_zh: "与下注频率互补；“过牌率”常指翻前 limp 的统计，含义不同。"
+    related: [betting-frequency, check-back, checking-range, overfold]
+  - id: pot-fraction
+    en: Pot fraction
+    zh: 底池比例
+    first_seen: "04-02"
+    avoid: ["池比例", "底池分数"]
+    note_zh: "尺度以底池的分数表达；“分数”在中文是数学对象，比例才是被比较的两端。"
+    related: [bet-size, min-bet, overbet, offered-odds]
+  - id: min-bet
+    en: Minimum bet
+    zh: 最小下注
+    first_seen: "04-02"
+    avoid: ["最小加注", "超小下注"]
+    note_zh: "规则允许的最低下注；“最小加注”是另一件事（加注须超过前一下注额）。"
+    related: [pot-fraction, minimum-defense-frequency, bluff-to-value-ratio]
+  - id: overbet
+    en: Overbet
+    zh: 超池下注
+    first_seen: "04-03"
+    avoid: ["大于底池的下注", "超池"]
+    note_zh: "下注额超过当前底池；单独说“超池”在很多牌桌记录里被当成金额单位，缩写不用。"
+    related: [capped-range, nut-advantage, pot-fraction, shove]
+  - id: size-set
+    en: Size set
+    zh: 尺度集合
+    first_seen: "04-04"
+    avoid: ["下注尺寸组"]
+    note_zh: "一条街被允许使用的尺度全集；生成表按它展开，所以不能简写成“尺寸”。"
+    related: [bet-size, mixed-strategy, frequency-approach]
+  - id: polarized
+    en: Polarized
+    zh: 极化
+    first_seen: "04-05"
+    avoid: ["两极分化", "极端化"]
+    note_zh: "范围只含顶端与底端；“两极分化”是社会语境的词，“极端化”不含中间为空这一结构。"
+    related: [merged, linear, bluff-range, overbet]
+  - id: merged
+    en: Merged
+    zh: 合并
+    first_seen: "04-05"
+    avoid: ["混合范围", "中间化"]
+    note_zh: "价值段与诈唬段相邻、连成一片的形状；与“混合策略”是两回事，勿写成“混合范围”。"
+    related: [polarized, linear, value-range, bet-size]
+  - id: linear
+    en: Linear
+    zh: 线性
+    first_seen: "04-05"
+    avoid: ["渐变范围"]
+    note_zh: "牌力与尺度单调对应；“渐变”不说明是否连续，也常被当成 merged 的同义词。"
+    related: [polarized, merged, pot-fraction]
+  - id: protection-bet
+    en: Protection bet
+    zh: 保护性下注
+    first_seen: "04-06"
+    avoid: ["护牌下注", "防守性下注"]
+    note_zh: "protect 的宾语是己方权益，不是牌面；“防守性下注”与 defend 撞词，语义正好相反。"
+    related: [semi-bluff, value-bet, equity-realization, dynamic-board]
+  - id: semi-bluff
+    en: Semi-bluff
+    zh: 半诈唬
+    first_seen: "04-06"
+    avoid: ["半偷鸡", "听牌加注"]
+    note_zh: "现在较差但可能反超的诈唬；它不限于听牌，所以“听牌加注”把外延缩窄了。"
+    related: [bluff, protection-bet, flush-draw, bluff-to-value-ratio]
+  - id: checking-range
+    en: Checking range
+    zh: 过牌范围
+    first_seen: "04-07"
+    note_zh: "过牌不是残差集合：它同样要有顶端与底端，否则对手可以用任意尺度攻击。"
+    related: [checking-frequency, capped-range, check-raise, probe]
+
+  # --- 05 preflop actions ----------------------------------------------------------------
+  - id: rfi
+    en: Raise first in
+    zh: 率先加注
+    abbrev: RFI
+    first_seen: "05-01"
+    avoid: ["开池加注", "开局加注"]
+    note_zh: "统一“率先加注”；“开池”与 limp 的“入池”只差一个字，频率表里两家会同时出现。"
+    related: [limp, steal, position, button-vs-big-blind]
+    derivation_ref: src/pokergto/notation.py#parse
+  - id: limp
+    en: Limp
+    zh: 平跟入池
+    first_seen: "05-01"
+    avoid: ["跛入", "慢入"]
+    note_zh: "只跟大盲注额入池；“跛入”是音义夹带的旧译，“慢入”与慢打混。"
+    related: [rfi, call, multiway]
+  - id: tight
+    en: Tight
+    zh: 紧
+    first_seen: "05-01"
+    avoid: ["保守范围"]
+    note_zh: "形容范围窄、参与少；“保守”带价值判断，且常被用来形容弃牌倾向。"
+    related: [loose, narrow-range, stack-zone]
+  - id: loose
+    en: Loose
+    zh: 松
+    first_seen: "05-01"
+    avoid: ["宽松范围"]
+    note_zh: "形容范围宽、参与多；与“被动”不是同义词，被动对应的是 aggression。"
+    related: [tight, wide-range, vpip]
+  - id: under-the-gun
+    en: Under the gun
+    zh: 枪口位
+    abbrev: UTG
+    first_seen: "05-01"
+    avoid: ["首置位"]
+    note_zh: "缩写 UTG 保留拉丁；“枪口位”是通行译法，“首置位”无人使用且丢了被迫先行动的压力含义。"
+    related: [position, early-position, rfi]
+  - id: hijack
+    en: Hijack
+    zh: 劫持位
+    abbrev: HJ
+    first_seen: "05-01"
+    avoid: ["劫位", "中间前位"]
+    note_zh: "HJ 原样保留；“劫位”简称不稳，且与“截断位”只差一个字。"
+    related: [cutoff, early-position, rfi]
+  - id: cutoff
+    en: Cutoff
+    zh: 截断位
+    abbrev: CO
+    first_seen: "05-01"
+    avoid: ["关门位", "右庄位"]
+    note_zh: "CO 原样保留；“右庄位”会被当成按钮位，“关门位”是粤语区说法。"
+    related: [button, hijack, steal]
+  - id: early-position
+    en: Early position
+    zh: 前位
+    abbrev: EP
+    first_seen: "05-01"
+    avoid: ["早位"]
+    note_zh: "以行动顺序定义，不同人数桌包含的座位不同，所以术语表不把它绑定到某个具体座位名。"
+    related: [late-position, under-the-gun, position, tight]
+  - id: late-position
+    en: Late position
+    zh: 后位
+    abbrev: LP
+    first_seen: "05-01"
+    avoid: ["晚位"]
+    note_zh: "同前位，按顺序定义；“晚位”不成词。"
+    related: [early-position, button, steal, position]
+  - id: steal
+    en: Steal
+    zh: 抢盲
+    first_seen: "05-01"
+    avoid: ["偷盲"]
+    note_zh: "后位对盲注位的加注；与 bluff 不同，抢盲的价值主要来自弃牌赢率而非摊牌。"
+    related: [rfi, fold-equity, big-blind-defense]
+  - id: big-blind-defense
+    en: Big blind defense
+    zh: 大盲防守
+    first_seen: "05-02"
+    avoid: ["大盲跟注防守"]
+    note_zh: "防守包括跟注与加注两条线，加“跟注”二字会把范围算小一半。"
+    related: [defend, calling-range, minimum-defense-frequency, pot-odds]
+  - id: calling-range
+    en: Calling range
+    zh: 跟注范围
+    first_seen: "05-02"
+    note_zh: "某节点上选择跟注的那部分范围；跟全下另有专名 call-shove-range，避免混用。"
+    related: [call, big-blind-defense, cold-call, call-shove-range]
+  - id: three-bet
+    en: Three-bet
+    zh: 3-bet
+    first_seen: "05-03"
+    avoid: ["三层加注", "第三次加注"]
+    note_zh: "计数从盲注算起，译成中文会把编号体系说错，故 3-bet 不译，拉丁原样保留。"
+    related: [raise, four-bet, three-bet-shove, squeeze]
+    derivation_ref: src/pokergto/notation.py#parse
+  - id: three-bet-shove
+    en: Three-bet shove
+    zh: 3-bet 全下
+    first_seen: "05-03"
+    avoid: ["三层 shove", "3bet 全推"]
+    note_zh: "指再加注直接全下；写法固定“3-bet 全下”，连字符与空格也是生成表轴标签的一部分。"
+    related: [three-bet, shove, spr, nash-shove-ranges]
+  - id: squeeze
+    en: Squeeze
+    zh: 挤压加注
+    first_seen: "05-04"
+    avoid: ["三明治加注", "夹击加注"]
+    note_zh: "对加注者加至少一家跟注者再加注；“三明治”不表达“把两家的范围同时压紧”这层含义。"
+    related: [three-bet, cold-call, capped-range, fold-equity]
+  - id: cold-call
+    en: Cold call
+    zh: 冷跟注
+    first_seen: "05-04"
+    avoid: ["冷牌跟注", "未入池跟注"]
+    note_zh: "面对加注者在行动前尚未入池的跟注；“未入池跟注”把条件说反了一半。"
+    related: [call, squeeze, multiway]
+  - id: four-bet
+    en: Four-bet
+    zh: 4-bet
+    first_seen: "05-05"
+    avoid: ["四层加注"]
+    note_zh: "与 3-bet 同一理由不译；范围只到顶端一段，容量约束在这里最要紧。"
+    related: [three-bet, five-bet, capacity, shove]
+  - id: five-bet
+    en: Five-bet
+    zh: 5-bet
+    first_seen: "05-05"
+    avoid: ["五层加注"]
+    note_zh: "再加注层级；5-bet 之后通常只剩全下，术语保留拉丁以便与生成表列名一致。"
+    related: [four-bet, shove, nash-shove-ranges]
+  - id: big-blind-unit
+    en: Big blind unit
+    abbrev: bb
+    zh: 大盲单位
+    first_seen: "05-06"
+    avoid: ["盲注倍数"]
+    note_zh: "所有深度与 EV 都以 bb 表达；“盲注倍数”没有说明以哪个盲为单位。"
+    related: [big-blind, effective-stack, spr, bb-ante]
+
+  # --- 06 postflop grammar ---------------------------------------------------------------
+  - id: continuation-bet
+    en: Continuation bet
+    zh: 持续下注
+    abbrev: c-bet
+    first_seen: "06-01"
+    avoid: ["延续下注", "连下"]
+    note_zh: "翻前加注者在翻后继续进攻；缩写 c-bet 原样保留拉丁，不译成“C 码”也不写“连下”。"
+    related: [initiative, betting-frequency, double-barrel, delayed-continuation-bet]
+  - id: initiative
+    en: Initiative
+    zh: 主动权
+    first_seen: "06-01"
+    avoid: ["先手权", "进攻权"]
+    note_zh: "上一条街的下注者保有加注威胁；“先手”在围棋语境含义不同，容易串味。"
+    related: [continuation-bet, position, capped-range, float]
+  - id: check-raise
+    en: Check-raise
+    zh: 过牌加注
+    first_seen: "06-02"
+    avoid: ["让牌加注", "过牌反加"]
+    note_zh: "两个动作都要写全：先过牌、再加注；“反加”无法说明加注发生在过牌之后。"
+    related: [check-back, slow-play, checking-range, polarized]
+  - id: check-back
+    en: Check back
+    zh: 过牌收池
+    first_seen: "06-02"
+    avoid: ["过牌到底", "慢打收池"]
+    note_zh: "同一条街上双方都过牌、底池不收加注地进入下一张牌；“过牌到底”跨了两条街，是慢打。"
+    related: [checking-frequency, pot-control, free-card, slow-play]
+  - id: slow-play
+    en: Slow play
+    zh: 慢打
+    first_seen: "06-02"
+    avoid: ["埋伏", "过牌陷阱"]
+    note_zh: "强牌故意不下注以引对手入局；“埋伏”不指明是否让出底池增长的机会。"
+    related: [check-raise, check-back, protection-bet]
+  - id: float
+    en: Float
+    zh: 试探性跟注
+    first_seen: "06-03"
+    avoid: ["浮牌跟注", "漂浮跟注"]
+    note_zh: "为了在下一条街接管进攻而跟注；中文音译会丢掉“为了之后打”这一目的，写作时可直接保留 float。"
+    related: [probe, initiative, fold-equity, position]
+  - id: probe
+    en: Probe bet
+    zh: 探查下注
+    first_seen: "06-03"
+    avoid: ["探测下注", "反持续下注"]
+    note_zh: "对手上一条街过牌后，本条街率先下注；“反持续下注”把 c-bet 的定义带进了不该有的地方。"
+    related: [float, initiative, delayed-continuation-bet, checking-range]
+  - id: delayed-continuation-bet
+    en: Delayed continuation bet
+    zh: 延迟持续下注
+    abbrev: delayed c-bet
+    first_seen: "06-04"
+    avoid: ["延后持续下注", "二次持续下注"]
+    note_zh: "翻牌过牌、转牌才下注；“二次持续下注”与 double barrel 撞名，那条线的前提是翻牌已经下过注。"
+    related: [continuation-bet, probe, pot-control, runout]
+  - id: pot-control
+    en: Pot control
+    zh: 底池控制
+    first_seen: "06-04"
+    avoid: ["控池"]
+    note_zh: "主动把底池留在能安全摊牌的规模；简称“控池”只在口语用，正文与表头统一全称。"
+    related: [check-back, free-card, blocking-bet, spr]
+  - id: free-card
+    en: Free card
+    zh: 免费牌
+    first_seen: "06-04"
+    avoid: ["白牌"]
+    note_zh: "过牌换来的、不必付钱就能看到下一张牌的机会；“白牌”看不出与下一条街的因果。"
+    related: [pot-control, check-back, runout]
+  - id: double-barrel
+    en: Double barrel
+    zh: 二次开火
+    first_seen: "06-05"
+    avoid: ["双枪", "第二轮开火"]
+    note_zh: "连续两条街下注；“第二轮开火”听上去像第三次，编号起点在中文里最容易被读错。"
+    related: [triple-barrel, continuation-bet, line, range-advantage]
+  - id: offered-odds
+    en: Odds offered
+    zh: 给对手的赔率
+    symbol: "对手所需胜率 = B / (P + 2B)"
+    first_seen: "06-06"
+    avoid: ["提供的底池赔率"]
+    note_zh: "从下注方视角写的同一个量：你给的赔率就是对手能用来跟注的理由。"
+    related: [pot-odds, required-equity, bet-size, sizing-risk]
+  - id: blocking-bet
+    en: Blocking bet
+    zh: 拦截下注
+    first_seen: "06-07"
+    avoid: ["阻挡下注", "止损下注"]
+    note_zh: "用小额先手买断对手的大注权；“止损”是资金管理术语，会把这层含义说成认错。"
+    related: [thin-value, pot-control, bet-size, bluff-catching]
+  - id: alpha
+    en: Alpha
+    zh: 河牌诈唬率
+    abbrev: Alpha
+    symbol: "α = 诈唬组合数 / (价值组合数 + 诈唬组合数)"
+    first_seen: "06-08"
+    avoid: ["阿尔法值", "河牌诈唬比例"]
+    note_zh: "α 不音译；它的定义是河牌下注范围里的诈唬份额，与诈唬频率（整个范围的口径）不同层级。"
+    related: [bluff-frequency, bluff-to-value-ratio, minimum-defense-frequency, bluff-catching]
+    derivation_ref: src/pokergto/odds.py#bluff_fraction_at_indifference
+  - id: triple-barrel
+    en: Triple barrel
+    zh: 第三轮开火
+    first_seen: "06-08"
+    avoid: ["三枪", "第三桶"]
+    note_zh: "三条街连续下注到河牌；桶、枪一类的直译都不如按轮次说清楚。"
+    related: [double-barrel, alpha, bluff-range, runout]
+  - id: bluff-catching
+    en: Bluff catching
+    zh: 抓诈唬
+    first_seen: "06-09"
+    avoid: ["抓偷鸡", "跟诈唬"]
+    note_zh: "以击败对手诈唬为唯一目的的跟注；“跟诈唬”把目的丢了，读起来像被动应付。"
+    related: [bluff-catcher, required-equity, indifference, alpha]
+  - id: bluff-catcher
+    en: Bluff catcher
+    zh: 抓诈唬牌
+    first_seen: "06-09"
+    avoid: ["抓唬牌"]
+    note_zh: "只能赢诈唬、赢不了价值的那一类牌；薄价值牌正相反，两者不可混写。"
+    related: [bluff-catching, thin-value, value-range, over-bluffing]
+
+  # --- 07 more players -------------------------------------------------------------------
+  - id: independent-defender-assumption
+    en: Independent defender assumption
+    zh: 独立防守假设
+    first_seen: "07-01"
+    avoid: ["各自防守假设"]
+    note_zh: "多人防守公式假设各家弃牌互不相干；移除效应让这条假设不成立，因此公式必须写成假设而不是结论。"
+    related: [minimum-defense-frequency, multiway, removal-effect]
+    derivation_ref: src/pokergto/odds.py#defense_frequency_multiway
+  - id: rake
+    en: Rake
+    zh: 抽水
+    first_seen: "07-04"
+    avoid: ["手续费", "台费"]
+    note_zh: "牌局按底池抽取的部分；“台费”是固定时间收费，“手续费”在中文里不含按池抽取的含义。"
+    related: [bankroll, expected-value, pot]
+    derivation_ref: src/pokergto/variance.py#rake_adjustment
+
+  # --- 08 computing equilibrium ----------------------------------------------------------
+  - id: game-tree
+    en: Game tree
+    zh: 博弈树
+    first_seen: "08-01"
+    avoid: ["决策树", "游戏树"]
+    note_zh: "决策树在机器学习里是另一种模型；博弈树强调对抗与回合交替，本仓库不互换使用。"
+    related: [information-set, strategy-profile, solver]
+    derivation_ref: src/pokergto/solver/tree.py#GameTree
+  - id: information-set
+    en: Information set
+    zh: 信息集
+    first_seen: "08-01"
+    avoid: ["信息集合", "已知信息组"]
+    note_zh: "玩家无法区分的决策点集合；策略按信息集定义，所以“集合”与“组”这类松写法会丢掉定义性。"
+    related: [game-tree, mixed-strategy, card-abstraction]
+    derivation_ref: src/pokergto/solver/tree.py#GameTree.infoset_of
+  - id: strategy-profile
+    en: Strategy profile
+    zh: 策略组合
+    first_seen: "08-01"
+    avoid: ["策略集合"]
+    note_zh: "每位玩家策略的完整指派；“组合”是 profile 的译法，与 combos（组合数）不是一回事。"
+    related: [information-set, nash-equilibrium, cfr]
+  - id: regret
+    en: Regret
+    zh: 遗憾值
+    symbol: "遗憾值 = 该行动反事实价值 − 当前反事实价值"
+    first_seen: "08-02"
+    avoid: ["后悔值"]
+    note_zh: "算法量，不是情绪描述；全仓库统一“遗憾”，与 regret matching、CFR 的中文展开保持一致。"
+    related: [regret-matching, cfr, ev-decomposition]
+    derivation_ref: src/pokergto/ev.py#regret
+  - id: regret-matching
+    en: Regret matching
+    zh: 遗憾匹配
+    first_seen: "08-02"
+    avoid: ["后悔值匹配", "遗憾配比"]
+    note_zh: "按正遗憾值的比例分配下一轮频率；“配比”是工程配比，不含匹配含义。"
+    related: [regret, cfr, mixed-strategy]
+    derivation_ref: src/pokergto/solver/tree.py#regret_matching
+  - id: cfr
+    en: Counterfactual regret minimization
+    zh: 反事实遗憾最小化
+    abbrev: CFR
+    first_seen: "08-02"
+    avoid: ["反事实后悔最小化", "遗憾最小化算法"]
+    note_zh: "缩写 CFR 保留拉丁；中文展开固定为“反事实遗憾最小化”，与 regret 的译法保持一致。"
+    related: [regret-matching, average-strategy, solver, nash-equilibrium]
+    derivation_ref: src/pokergto/solver/cfr.py#CFRSolver
+  - id: kuhn
+    en: Kuhn poker
+    zh: Kuhn 博弈
+    first_seen: "08-03"
+    avoid: ["库恩扑克", "库恩博弈"]
+    note_zh: "人名不音译，保留 Kuhn；这是可手算收敛的最小博弈，用来验证 CFR 而不是用来类比真实牌局。"
+    related: [cfr, game-tree, leduc]
+    derivation_ref: src/pokergto/solver/games.py#kuhn
+  - id: average-strategy
+    en: Average strategy
+    zh: 平均策略
+    first_seen: "08-04"
+    avoid: ["均值策略"]
+    note_zh: "按迭代加权的历史策略，才是收敛到均衡的那个量；“均值策略”常被人当成各频率取平均。"
+    related: [cfr, convergence, exploitability]
+    derivation_ref: src/pokergto/solver/cfr.py#CFRSolver.average_strategy
+  - id: convergence
+    en: Convergence
+    zh: 收敛
+    first_seen: "08-04"
+    avoid: ["聚敛"]
+    note_zh: "以可剥削度下降来判定，而不是看策略数值是否稳定。"
+    related: [average-strategy, exploitability, cfr-plus]
+  - id: game-value
+    en: Game value
+    zh: 博弈值
+    symbol: "v = 均衡下先手的期望"
+    first_seen: "08-04"
+    avoid: ["游戏价值"]
+    note_zh: "零和博弈里先手在均衡下的期望收益；“游戏价值”在中文里像商业术语。"
+    related: [nash-equilibrium, exploitability, average-strategy]
+    derivation_ref: src/pokergto/solver/games.py#game_value
+  - id: cfr-plus
+    en: CFR+
+    zh: CFR+
+    first_seen: "08-05"
+    avoid: ["改良 CFR", "CFR 加"]
+    note_zh: "算法名保留拉丁与加号，不译；两处改动（遗憾截零与线性加权）都在同一个类里可选。"
+    related: [cfr, regret, average-strategy]
+    derivation_ref: src/pokergto/solver/cfr.py#CFRSolver
+  - id: leduc
+    en: Leduc poker
+    zh: Leduc 博弈
+    first_seen: "08-06"
+    avoid: ["勒杜克扑克", "莱德克博弈"]
+    note_zh: "游戏名保留拉丁；它是带公共牌的极简博弈，用来说明抽象的作用域。"
+    related: [kuhn, card-abstraction, game-tree]
+  - id: card-abstraction
+    en: Card abstraction
+    zh: 牌力抽象
+    first_seen: "08-06"
+    avoid: ["牌的抽象", "分组抽象"]
+    note_zh: "把若干牌归为同一决策依据；补上“牌力”是为了与抽象代数里的抽象区分。"
+    related: [information-set, leduc, solver]
+  - id: solver-output
+    en: Solver output
+    zh: 求解器输出
+    first_seen: "08-07"
+    avoid: ["解算结果"]
+    note_zh: "指策略与 EV 的原始数值表；它本身是 reference 级的证据，必须配可剥削度才可读。"
+    related: [solver, average-strategy, exploitability, node-locking]
+    derivation_ref: src/pokergto/solver/cfr.py#SolveResult.strategy_report
+
+  # --- 09 practice and review ------------------------------------------------------------
+  - id: node-locking
+    en: Node locking
+    zh: 节点锁定
+    first_seen: "09-01"
+    avoid: ["锁节点", "定点锁定"]
+    note_zh: "把某个决策的频率或策略固定成假设再重算；“定点锁定”听上去像只锁一处，实际可锁多层。"
+    related: [solver-output, exploit, information-set, decision-plan]
+  - id: decision-plan
+    en: Decision plan
+    zh: 决策计划
+    first_seen: "09-02"
+    avoid: ["策略表"]
+    note_zh: "跨街的条件化行动安排；“策略表”是查表结果，计划强调的是分支之间的耦合。"
+    related: [line, range-chart, node-locking, strategy-profile]
+  - id: hand-review
+    en: Hand review
+    zh: 复盘
+    first_seen: "09-03"
+    avoid: ["手牌回顾"]
+    note_zh: "单说“回顾”不含逐决策点的结构；本仓库的复盘有固定流程，术语用“复盘”并在文中说明步骤。"
+    related: [decision-point, leak, provenance, decision-loop]
+  - id: decision-point
+    en: Decision point
+    zh: 决策点
+    first_seen: "09-03"
+    avoid: ["选择点"]
+    note_zh: "轮到我方且可用动作不止一个的节点；“选择点”会把被动过牌的节点也算进去。"
+    related: [hand-review, information-set, ev-decomposition]
+  - id: leak
+    en: Leak
+    zh: 漏洞
+    first_seen: "09-04"
+    avoid: ["漏点", "弱点项"]
+    note_zh: "可量化的系统性偏差，不是风格差异；“弱点”过宽，包含本就合理的选择。"
+    related: [leak-audit, overfold, over-bluffing, deviation]
+  - id: leak-audit
+    en: Leak audit
+    zh: 漏洞审计
+    first_seen: "09-04"
+    avoid: ["漏点检查"]
+    note_zh: "把自己的频率与生成频率逐项对照的过程；“检查”不强调对照的基准来自计算。"
+    related: [leak, betting-frequency, hud, sample-size]
+  - id: training-block
+    en: Training block
+    zh: 训练周期
+    first_seen: "09-05"
+    avoid: ["训练块"]
+    note_zh: "有明确起止与检验标准的一段时间；“训练块”看不出是否可复核。"
+    related: [spot-repetition, training-plan, leak-audit]
+  - id: spot-repetition
+    en: Spot repetition
+    zh: 定点重复练习
+    first_seen: "09-05"
+    avoid: ["刷题"]
+    note_zh: "同一 spot 反复作答以求频率贴近计算值；“刷题”不含反馈来源，容易被理解成题量竞赛。"
+    related: [training-block, decision-point, hud]
+
+  # --- 10 two-player ---------------------------------------------------------------------
+  - id: heads-up
+    en: Heads-up
+    zh: 单挑
+    first_seen: "10-01"
+    avoid: ["一对一", "单挑局"]
+    note_zh: "两人的对局形态；“一对一”是数量描述而非形态名， HUD 语境里还另有所指。"
+    related: [multiway, six-max, button-vs-big-blind]
+  - id: wide-range
+    en: Wide range
+    zh: 宽范围
+    first_seen: "10-02"
+    avoid: ["大范围"]
+    note_zh: "包含更多类别的范围；“大范围”常被人用来指幅度大，与尺度混淆。"
+    related: [narrow-range, loose, position, initiative]
+  - id: narrow-range
+    en: Narrow range
+    zh: 窄范围
+    first_seen: "10-02"
+    avoid: ["小范围", "紧范围"]
+    note_zh: "术语用“窄”，与“宽”成对；“紧”形容打法风格，不形容集合大小。"
+    related: [wide-range, tight, capped-range, capacity]
+  - id: button-vs-big-blind
+    en: Button vs big blind
+    zh: 按钮位对大盲
+    abbrev: BvB
+    first_seen: "10-03"
+    avoid: ["BTN-BB 大战"]
+    note_zh: "翻前最常见的对抗结构；写成“对”而不写“大战”，因为它是结构名不是氛围词。"
+    related: [heads-up, rfi, three-bet, position]
+
+  # --- 11 tournament core ----------------------------------------------------------------
+  - id: tournament
+    en: Tournament
+    zh: 锦标赛
+    first_seen: "11-01"
+    avoid: ["淘汰赛", "奖金赛"]
+    note_zh: "筹码清零即出局的结构统一叫锦标赛；“淘汰赛”丢失奖金结构这一决定性的输入。"
+    related: [icm, in-the-money, payout-structure, bubble]
+  - id: chip-leadership
+    en: Chip leadership
+    zh: 筹码领先价值
+    first_seen: "11-01"
+    avoid: ["筹码领先优势"]
+    note_zh: "领先本身值多少取决于奖金结构；“优势”会把它当成不变的量。"
+    related: [icm, tournament, bubble-factor, big-stack]
+  - id: bankroll
+    en: Bankroll
+    zh: 资金
+    first_seen: "11-01"
+    avoid: ["本金", "钱包"]
+    note_zh: "可供承担波动的总额；“本金”含投资回报预期，“钱包”只是存放处。"
+    related: [risk-of-ruin, downswing, rake]
+  - id: risk-of-ruin
+    en: Risk of ruin
+    zh: 破产风险
+    first_seen: "11-01"
+    avoid: ["破产率"]
+    note_zh: "资金归零的概率，是一个由方差与资金规模共同决定的量，“破产率”把它说成统计频率。"
+    related: [bankroll, variance, downswing]
+    derivation_ref: src/pokergto/variance.py#risk_of_ruin
+  - id: downswing
+    en: Downswing
+    zh: 下风期
+    first_seen: "11-01"
+    avoid: ["连败期", "回撤"]
+    note_zh: "一段显著低于期望的结果；“回撤”在金融里指峰值差，“连败”指连续输的局数。"
+    related: [variance, bankroll, sample-size]
+  - id: icm
+    en: Independent chip model
+    zh: 独立筹码模型
+    abbrev: ICM
+    first_seen: "11-02"
+    avoid: ["独立筹码价值模型", "独立筹码度量"]
+    note_zh: "缩写 ICM 保留拉丁；中文名固定“独立筹码模型”，多两个字会让 abbreviation 对不上。"
+    related: [eicm, bubble-factor, chip-ev, tournament]
+    derivation_ref: src/pokergto/icm.py#icm
+  - id: m-factor
+    en: M-factor
+    zh: M 倍数
+    abbrev: M
+    symbol: "M = 有效筹码 / (大盲注 + 前注)"
+    first_seen: "11-03"
+    avoid: ["M 值", "M 数"]
+    note_zh: "它是一个倍数（还能打多少轮），所以写“M 倍数”；“M 值”把单位说成了无量纲分数。"
+    related: [stack-zone, ante, effective-stack, big-blind-unit]
+  - id: stack-zone
+    en: Stack zone
+    zh: 筹码区间
+    first_seen: "11-03"
+    avoid: ["栈区", "深度分段"]
+    note_zh: "决策模式随筹码量变化的分段；“栈区”看不出分区依据，“分段”则与牌力分档混。"
+    related: [m-factor, short-stack, big-stack, spr]
+  - id: short-stack
+    en: Short stack
+    zh: 短码
+    first_seen: "11-03"
+    avoid: ["小码", "短筹码"]
+    note_zh: "相对盲注与前注而言；“短筹码”没有基准，无法判断有多短。"
+    related: [big-stack, stack-zone, push-fold, shove]
+  - id: big-stack
+    en: Big stack
+    zh: 大码
+    first_seen: "11-03"
+    avoid: ["长码", "筹码领先者"]
+    note_zh: "同桌内筹码较多的一方；“筹码领先者”是 chip leader 的译法，含排名意味。"
+    related: [short-stack, big-blind, survival-premium, chip-leadership]
+  - id: ante
+    en: Ante
+    zh: 前注
+    first_seen: "11-04"
+    avoid: ["底注"]
+    note_zh: "在盲注之外人人先付的注；“底注”在中文里指最低投注额，是另一个概念。"
+    related: [bb-ante, dead-money, m-factor, pot]
+  - id: bb-ante
+    en: Big blind ante
+    zh: 大盲前注
+    first_seen: "11-04"
+    avoid: ["强制前注"]
+    note_zh: "由大盲方替全桌付的前注；“强制前注”掩盖了它只由一家支付这一关键。"
+    related: [ante, big-blind, dead-money, pot-odds]
+  - id: dead-money
+    en: Dead money
+    zh: 死钱
+    first_seen: "11-04"
+    avoid: ["桌上的钱"]
+    note_zh: "不属于任何人在决策中的筹码（前注、已弃牌者投入）；它改变赔率而不改变任何人的策略强度。"
+    related: [ante, pot, pot-odds, steal]
+  - id: bubble
+    en: Bubble
+    zh: 泡沫期
+    first_seen: "11-05"
+    avoid: ["气泡期", "钱圈边"]
+    note_zh: "距进圈仅剩少数人的阶段；“气泡”是直译，“钱圈边”不含距离这一变量。"
+    related: [in-the-money, bubble-factor, tournament, survival-premium]
+  - id: in-the-money
+    en: In the money
+    zh: 进圈
+    abbrev: ITM
+    first_seen: "11-05"
+    avoid: ["入赏", "进入奖励圈"]
+    note_zh: "已确保拿到奖金的状态；两个字够用，“入赏”偏书面，“进入奖励圈”是描述不是术语。"
+    related: [bubble, tournament, payout-structure]
+  - id: pay-jump
+    en: Pay jump
+    zh: 奖金跳档
+    first_seen: "11-06"
+    avoid: ["奖励阶梯", "支付跳跃"]
+    note_zh: "淘汰一人带来的奖金差；“支付跳跃”是 pay 的错译，这里的 pay 指奖金本身。"
+    related: [payout-structure, icm, bubble-factor]
+  - id: payout-structure
+    en: Payout structure
+    zh: 奖金结构
+    first_seen: "11-06"
+    avoid: ["派奖结构"]
+    note_zh: "名次到奖金的映射，ICM 的输入；“派奖”含分配动作，不是这份映射。"
+    related: [pay-jump, icm, final-table, tournament]
+    derivation_ref: src/pokergto/icm.py#payout_structure_from_prize_table
+  - id: equal-skill-assumption
+    en: Equal skill assumption
+    zh: 等强度假设
+    first_seen: "11-06"
+    avoid: ["同水平假设"]
+    note_zh: "ICM 默认各家期望价值相同，因此筹码只按兑现概率计价；假设不成立时结论会偏向某一侧。"
+    related: [icm, payout-structure, population]
+
+  # --- 12 ICM and push/fold --------------------------------------------------------------
+  - id: push-fold
+    en: Push/fold
+    zh: 全下或弃牌
+    first_seen: "12-01"
+    avoid: ["推弃游戏", "全推"]
+    note_zh: "动作集合只有两个的简化打法；“全推”只说了推的那一半，丢掉了决策的对称结构。"
+    related: [two-action-model, shove, short-stack, nash-shove-ranges]
+  - id: two-action-model
+    en: Two-action model
+    zh: 两动作模型
+    first_seen: "12-01"
+    avoid: ["简化两动作模型"]
+    note_zh: "删掉了中间尺度与跟注后再行动的可能，所以它的解不能直接搬到深筹码场景。"
+    related: [push-fold, nash-equilibrium, spr, game-tree]
+  - id: nash-shove-ranges
+    en: Nash shoving ranges
+    zh: 纳什全下范围
+    first_seen: "12-02"
+    avoid: ["纳什推倒范围"]
+    note_zh: "两动作模型的均衡解；“推倒”是牌桌动作，与人名译法混在一起会让术语无法检索。"
+    related: [nash-equilibrium, push-fold, shoving-range, call-shove-range]
+  - id: shoving-range
+    en: Shoving range
+    zh: 全下范围
+    first_seen: "12-02"
+    avoid: ["推牌范围"]
+    note_zh: "以全下为最佳行动的那些类别；它随有效筹码与身后人数一起变化，不能当常数背。"
+    related: [shove, call-shove-range, range, required-equity]
+  - id: call-shove-range
+    en: Calling range against a shove
+    zh: 跟全下范围
+    first_seen: "12-02"
+    avoid: ["call 全下范围"]
+    note_zh: "面对全下的跟注门槛；所需胜率由摊牌赔率决定，与平常的底池赔率不同式。"
+    related: [shoving-range, calling-range, required-equity, icm]
+    derivation_ref: src/pokergto/spr.py#all_in_equity_needed
+  - id: chip-ev
+    en: Chip expected value
+    zh: 筹码期望值
+    abbrev: chip EV
+    first_seen: "12-03"
+    avoid: ["点数期望"]
+    note_zh: "以筹码计量的 EV；与 ICM 值并列出现时，两者都要写明单位，否则读者无从判断哪个是结论。"
+    related: [expected-value, icm, eicm, big-blind-unit]
+  - id: eicm
+    en: Expected independent chip model
+    zh: 期望 ICM 值
+    abbrev: EICM
+    first_seen: "12-03"
+    avoid: ["ICM 期望"]
+    note_zh: "把 ICM 当作逐决策的期望来用的写法；语序颠倒后与 chip EV 难以区分。"
+    related: [icm, chip-ev, bubble-factor]
+  - id: bubble-factor
+    en: Bubble factor
+    zh: 泡沫因子
+    symbol: "泡沫因子 = 筹码份额 / 奖金份额"
+    first_seen: "12-04"
+    avoid: ["气泡因子", "边界因子"]
+    note_zh: "把筹码换算成钱的乘数；它大于某个值时正 chip EV 的全下也可能是负 ICM 值。"
+    related: [bubble, icm, survival-premium, chip-ev]
+    derivation_ref: src/pokergto/icm.py#bubble_factor
+  - id: survival-premium
+    en: Survival premium
+    zh: 存活溢价
+    first_seen: "12-04"
+    avoid: ["生存加成"]
+    note_zh: "多活一手本身带来的价值，是泡沫因子的来源；“加成”会被理解成附加奖励。"
+    related: [bubble-factor, chip-leadership, risk-of-ruin]
+  - id: final-table
+    en: Final table
+    zh: 决赛桌
+    first_seen: "12-05"
+    avoid: ["终审桌"]
+    note_zh: "人数与奖金结构同时变小的阶段；“终审”是裁判语境的词。"
+    related: [payout-structure, icm, big-stack, table-avoidance]
+  - id: table-avoidance
+    en: Big-stack avoidance tendency
+    zh: 大码回避倾向
+    first_seen: "12-05"
+    avoid: ["避开筹码领先者"]
+    note_zh: "短码普遍不愿与大码碰撞，这会系统性收窄跟全下范围；它是模型外的人群倾向。"
+    related: [big-stack, survival-premium, shoving-range, population]
+
+  # --- 13 population and exploitation ----------------------------------------------------
+  - id: population
+    en: Population
+    zh: 群体
+    first_seen: "13-01"
+    avoid: ["人群", "大盘"]
+    note_zh: "同一级别所有被记录玩家的整体；“大盘”是市场语，“人群”不含统计口径。"
+    related: [exploit, hud, equilibrium-baseline]
+  - id: exploit
+    en: Exploit
+    zh: 剥削
+    first_seen: "13-01"
+    avoid: ["打击漏洞", "针对打法"]
+    note_zh: "针对可测量的偏离改变自己的策略；“针对打法”不含期望值提升这层意思。"
+    related: [population, deviation, exploitability, node-locking]
+  - id: equilibrium-baseline
+    en: Equilibrium baseline
+    zh: 均衡基线
+    first_seen: "13-01"
+    avoid: ["标准答案"]
+    note_zh: "用作对照的计算策略，不是正确打法；叫“标准答案”会把偏离本身也变成错误。"
+    related: [nash-equilibrium, exploit, solver-output, leak]
+  - id: hud
+    en: Heads-up display
+    zh: HUD
+    abbrev: HUD
+    first_seen: "13-02"
+    avoid: ["抬头显示", "数据面板"]
+    note_zh: "缩写保留拉丁，不译；“抬头显示”是车载术语，“数据面板”不含逐对手的口径。"
+    related: [vpip, pfr, aggression-frequency, wtsd, sample-size]
+  - id: vpip
+    en: Voluntarily put money in pot
+    zh: 主动入池率
+    abbrev: VPIP
+    first_seen: "13-02"
+    avoid: ["入池率"]
+    note_zh: "强调主动：盲注被迫投入不计入；省掉“主动”两字会让数值口径整体偏高。"
+    related: [pfr, hud, limp, loose]
+  - id: pfr
+    en: Pre-flop raise
+    zh: 翻前加注率
+    abbrev: PFR
+    first_seen: "13-02"
+    avoid: ["加注率"]
+    note_zh: "只统翻前；不带“翻前”的“加注率”与翻后 AF 撞名。"
+    related: [vpip, rfi, hud, aggression-frequency]
+  - id: aggression-frequency
+    en: Aggression frequency
+    zh: 激进度
+    abbrev: AF
+    first_seen: "13-02"
+    avoid: ["攻击频率", "激进指数"]
+    note_zh: "下注加注次数与跟注次数之比；“攻击”带情绪，“指数”会被当成标准化分数。"
+    related: [betting-frequency, pfr, hud]
+  - id: wtsd
+    en: Went to showdown
+    zh: 摊牌率
+    abbrev: WTSD
+    first_seen: "13-02"
+    avoid: ["进摊率"]
+    note_zh: "进入翻后后看到摊牌的比例；口径必须写明分母，否则与摊牌胜率混淆。"
+    related: [w-sd, showdown, hud, bluff-catching]
+  - id: w-sd
+    en: Won money at showdown
+    zh: 摊牌胜率
+    abbrev: W$SD
+    first_seen: "13-02"
+    avoid: ["摊牌赢率"]
+    note_zh: "在已摊牌的局里赢到钱的比例，含平分；“赢率”在本仓库专指纯赢率，不用在这里。"
+    related: [wtsd, win-probability, showdown, hud]
+  - id: overfold
+    en: Over-folding
+    zh: 过度弃牌
+    first_seen: "13-03"
+    avoid: ["弃牌过多"]
+    note_zh: "弃牌频率高于 MDF 的系统性偏离；写成短语而不是术语就无法与一次性错误区分。"
+    related: [fold-frequency, minimum-defense-frequency, leak, check-back]
+  - id: over-bluffing
+    en: Over-bluffing
+    zh: 过度诈唬
+    first_seen: "13-04"
+    avoid: ["诈唬过多"]
+    note_zh: "诈唬份额高于 α；它与诈唬不足需要相反的应对，所以两个词必须成对存在。"
+    related: [under-bluffing, alpha, bluff-frequency, bluff-catching]
+  - id: under-bluffing
+    en: Under-bluffing
+    zh: 诈唬不足
+    first_seen: "13-04"
+    avoid: ["不够诈唬"]
+    note_zh: "面对这类对手，抓诈唬牌该弃；术语顺序固定为“诈唬＋程度词”，便于表格列名对齐。"
+    related: [over-bluffing, alpha, bluff-range]
+  - id: tell
+    en: Tell
+    zh: 马脚
+    first_seen: "13-05"
+    avoid: ["破绽动作"]
+    note_zh: "与手牌相关的可观测行为；“破绽”暗含必定吃亏，而有些马脚是无害的。"
+    related: [sizing-tell, population, metagame]
+  - id: sizing-tell
+    en: Sizing tell
+    zh: 尺度马脚
+    first_seen: "13-05"
+    avoid: ["下注马脚"]
+    note_zh: "由尺度泄露的范围信息；尺度与底池规模的对照关系写在 note 里，避免读者把它当固定规律。"
+    related: [tell, bet-size, capped-range, deviation]
+  - id: deviation
+    en: Deviation
+    zh: 偏离
+    first_seen: "13-06"
+    avoid: ["偏差", "背离"]
+    note_zh: "有意识、有条件的策略改动；“偏差”在统计里指误差，与本仓库的频率对照口径冲突。"
+    related: [exploit, balanced-exploitation, node-locking, leak]
+  - id: balanced-exploitation
+    en: Balanced exploitation
+    zh: 平衡式剥削
+    first_seen: "13-06"
+    avoid: ["均衡剥削", "剥削平衡"]
+    note_zh: "剥削时保留足够的次优行动，使对手无法反制；“均衡”会被读成回到 GTO。"
+    related: [deviation, exploit, mixed-strategy, equilibrium-baseline]
+
+  # --- 14 capstone -----------------------------------------------------------------------
+  - id: decision-loop
+    en: Decision loop
+    zh: 决策闭环
+    first_seen: "14-01"
+    avoid: ["反馈循环"]
+    note_zh: "从建模、计算到复核的完整回路；“反馈循环”不含计算这一环，也不要求留下可核对的痕迹。"
+    related: [hand-review, training-plan, provenance]
+  - id: training-plan
+    en: Training plan
+    zh: 训练计划
+    first_seen: "14-02"
+    avoid: ["学习路线"]
+    note_zh: "带检验标准的计划；“路线”只描述顺序，不承诺可复核的结果。"
+    related: [training-block, decision-loop, leak-audit, spot-repetition]
+  - id: spot-mix
+    en: Spot mix
+    zh: 场次配比
+    first_seen: "14-03"
+    avoid: ["场景分布"]
+    note_zh: "练习里各类 spot 的权重安排；“场景”在软件语境另有含义，本仓库统一写 spot 或场次。"
+    related: [training-plan, spot-repetition, decision-plan]
+  - id: metagame
+    en: Metagame
+    zh: 元层面
+    first_seen: "14-04"
+    avoid: ["元游戏"]
+    note_zh: "对手对你策略的预期这一层；“元游戏”在国内语境已被游戏设计占用，且不含对抗含义。"
+    related: [population, exploit, tell]
+
+
+

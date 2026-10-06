@@ -1,0 +1,113 @@
+{
+  "artifact_count": 17,
+  "engine_version": "0.1.0",
+  "files": {
+    "glossary.json": {
+      "bytes": 124211,
+      "kind": "glossary",
+      "schema": "glossary",
+      "sha256": "ef13691d3cb221cc88134b434d51e27e89a31e6b593610d44455e63efcb9ffed"
+    },
+    "index.en.json": {
+      "bytes": 71007,
+      "kind": "curriculum_index",
+      "schema": "index",
+      "sha256": "ef4c6d4ec576238a532f9e1631a5b3914a25e423eec3c0d6d23477e9d5881fa2"
+    },
+    "index.zh.json": {
+      "bytes": 71007,
+      "kind": "curriculum_index",
+      "schema": "index",
+      "sha256": "6bcfd71106a4e1d1a71ca892588b32f2266e1b3686f903d34225cf6760c03e03"
+    },
+    "solver/kuhn.json": {
+      "bytes": 7091,
+      "kind": "solver_run",
+      "schema": "solver_run",
+      "sha256": "0d1dac2fb29c44d0ddc1059752cd71063b236274b89ffcbe1934bf34e2a0d2f7"
+    },
+    "solver/toy_1street_0p333333333333.json": {
+      "bytes": 4968,
+      "kind": "solver_run",
+      "schema": "solver_run",
+      "sha256": "05be84296c58911ff9026ce458db6852b47939dd874ed12f2a78dd074258b185"
+    },
+    "solver/toy_1street_0p5.json": {
+      "bytes": 4951,
+      "kind": "solver_run",
+      "schema": "solver_run",
+      "sha256": "cd1f91eb5c1cda49952429cc6c0b7d1cddee4187f9ea724477eaae161af99baf"
+    },
+    "solver/toy_1street_1.json": {
+      "bytes": 4933,
+      "kind": "solver_run",
+      "schema": "solver_run",
+      "sha256": "3a37922e3161b903d5c0c588b881f8401d1d55f58ab42e7f693f5d5e22764446"
+    },
+    "tables/table.01-01.combo-decomposition.json": {
+      "bytes": 2182,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "081580d37bac0bb72188cee82b640e9a62699f96b8f498ae61b80f74b06a9f12"
+    },
+    "tables/table.01-03.draw-probability-exact-vs-rule.json": {
+      "bytes": 4152,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "b93e1cbebefbc68f0694b64087799efa5857e4f5e27019cbb123e9bea26327a7"
+    },
+    "tables/table.01-05.hand-class-counts.json": {
+      "bytes": 2912,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "a78b58d82666b38326cdd1b57f8cbab3898d0ce5c4221043fe3267143d2f3c15"
+    },
+    "tables/table.02-02.equity-needed-to-call.json": {
+      "bytes": 2238,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "d1be69bed679e2b55faa94458c744e4e7fdd76f4c2ed317f9bbfde31bd297fab"
+    },
+    "tables/table.02-03.mdf-vs-sizing.json": {
+      "bytes": 3764,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "a80c28dd78877dfd4d8f89f5bcd8d9a4066108c00e37464a6eded2b6d4f10224"
+    },
+    "tables/table.02-04.bluff-value-ratio.json": {
+      "bytes": 2856,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "f53b6de823168eb643a1d120c21e293a8dec08eb9bde3d1e9df363e659d00bcf"
+    },
+    "tables/table.03-07.spr-commitment.json": {
+      "bytes": 3123,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "c5aa0e48fedd2ff80b552747eb496012aff7f0c0a757f12d2464a4ffd530e7af"
+    },
+    "tables/table.07-01.multiway-defense.json": {
+      "bytes": 5569,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "deb9fb185e9ce2475da00aa22bee3fb657d00f82491ae4bc1f8df59148f94e2d"
+    },
+    "tables/table.08-04.solver-vs-algebra.json": {
+      "bytes": 4142,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "185d25ad8e47a75494a5d5ae20db0a0b6b2371e18ae631db2c1491edf1a82458"
+    },
+    "tables/table.12-03.icm-vs-chip-share.json": {
+      "bytes": 3031,
+      "kind": "table",
+      "schema": "table",
+      "sha256": "c065dd813fc460fc8439bf5766097b46dacb799d1ad04a10f5160ebd33368890"
+    }
+  },
+  "generator": "tools/gen_all.py",
+  "git_sha": null,
+  "numpy": "1.26.4",
+  "python": "3.12.13",
+  "schema_version": "1.0.0"
+}

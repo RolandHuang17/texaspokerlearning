@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/table.schema.json",
+  "title": "A generated numeric table embedded in lessons via an AUTO block",
+  "description": "Every number that appears in lesson prose comes from one of these. The .md rendering and this .json are generated from the same run, so docs/en, docs/zh and the trainer cannot disagree about what MDF is at a one-third-pot bet.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "title", "columns", "rows", "source", "provenance"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "caption": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "lesson": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" },
+    "columns": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["key", "header", "unit"],
+        "properties": {
+          "key": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+          "header": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "unit": { "$ref": "common.schema.json#/$defs/numeric_value/properties/unit" },
+          "digits": { "type": "integer", "minimum": 0, "maximum": 8 }
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": {
+          "type": ["number", "string", "boolean", "null", "object"],
+          "description": "A cell is either a raw scalar or a numeric_value object carrying its unit."
+        }
+      }
+    },
+    "source": {
+      "description": "What computed this table. A table with no resolvable source is a hand-typed number wearing a generated costume.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module", "generator"],
+      "properties": {
+        "module": { "type": "string", "pattern": "^pokergto(\\.[a-z_][a-z0-9_]*)+$" },
+        "function": { "type": ["string", "null"] },
+        "generator": { "type": "string", "pattern": "^tools/[a-z_]+\\.py$" },
+        "args": { "type": "object" },
+        "seed": { "type": ["integer", "null"] }
+      }
+    },
+    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "unverified_claims": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unverified_claim" }
+    },
+    "checks": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/check" }
+    },
+    "markdown": {
+      "type": ["string", "null"],
+      "description": "Cached rendered markdown for one locale; regenerated and byte-compared by inject_doc_tables.py --check, never edited."
+    }
+  }
+}

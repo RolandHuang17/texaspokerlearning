@@ -1,0 +1,151 @@
+{
+  "caption": {
+    "en": "The left columns are what CFR+ converged to; the right columns are pot/(pot+bet) and bet/(pot+2bet). Agreement is not a coincidence but the cross-validation of adr/0002: if either the math core or the solver is wrong, this table cannot be generated.",
+    "zh": "左列是 CFR+ 自己收敛出来的，右列是 pot/(pot+bet) 与 bet/(pot+2bet)。两列相同不是巧合，而是 adr/0002 的交叉验证：数学核心或求解器任一处写错，这张表就生不成。"
+  },
+  "checks": [
+    {
+      "detail": "solver's defence frequency vs pot/(pot+bet), every size",
+      "kind": "mdf_equality",
+      "pass": true,
+      "threshold": 0.005
+    },
+    {
+      "detail": "solver's bluff share vs bet/(pot+2bet), every size",
+      "kind": "bluff_indifference",
+      "pass": true,
+      "threshold": 0.005
+    },
+    {
+      "detail": "solver's game value vs pot*bet/(2(pot+bet))",
+      "kind": "game_value_closed_form",
+      "pass": true,
+      "threshold": 0.005
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Size",
+        "zh": "尺度"
+      },
+      "key": "size_label",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Solved defence",
+        "zh": "求解器防守"
+      },
+      "key": "solved_defense",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Algebraic MDF",
+        "zh": "代数 MDF"
+      },
+      "key": "algebra_mdf",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Solved bluff share",
+        "zh": "求解器诈唬占比"
+      },
+      "key": "solved_bluff_share",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Algebraic bluff share",
+        "zh": "代数诈唬占比"
+      },
+      "key": "algebra_bluff_share",
+      "unit": "probability"
+    },
+    {
+      "digits": 6,
+      "header": {
+        "en": "Exploitability (chips/hand)",
+        "zh": "可剥削度(筹码/手)"
+      },
+      "key": "exploitability",
+      "unit": "chips_per_hand"
+    }
+  ],
+  "id": "table.08-04.solver-vs-algebra",
+  "lesson": "08-04",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "src/pokergto/solver/proofs.py#PUBLISHED_PROOFS",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "algebra_bluff_share": 0.2,
+      "algebra_mdf": 0.75,
+      "algebra_value": 0.125,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_0p333333333333.json",
+      "bluff_gap": 3.008e-05,
+      "defense_gap": 0.000122,
+      "exploitability": 1.409e-05,
+      "size_label": "0.3333x pot",
+      "solved_bluff_share": 0.20003,
+      "solved_defense": 0.750122,
+      "solved_value": 0.125
+    },
+    {
+      "algebra_bluff_share": 0.25,
+      "algebra_mdf": 0.666667,
+      "algebra_value": 0.166667,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_0p5.json",
+      "bluff_gap": 3.19e-06,
+      "defense_gap": 1.33e-06,
+      "exploitability": 9.3e-07,
+      "size_label": "0.5000x pot",
+      "solved_bluff_share": 0.250003,
+      "solved_defense": 0.666668,
+      "solved_value": 0.166667
+    },
+    {
+      "algebra_bluff_share": 0.333333,
+      "algebra_mdf": 0.5,
+      "algebra_value": 0.25,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_1.json",
+      "bluff_gap": 3.244e-05,
+      "defense_gap": 0.0001,
+      "exploitability": 4.332e-05,
+      "size_label": "1.0000x pot",
+      "solved_bluff_share": 0.333366,
+      "solved_defense": 0.5001,
+      "solved_value": 0.25
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "solve",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.solver.cfr",
+    "seed": null
+  },
+  "title": {
+    "en": "Frequencies the solver found, against chapter 02's algebra",
+    "zh": "求解器解出的频率 与 第 02 章代数"
+  },
+  "unverified_claims": []
+}

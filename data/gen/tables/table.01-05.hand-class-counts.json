@@ -1,0 +1,128 @@
+{
+  "caption": {
+    "en": "Produced by enumerating all C(52,5)=2,598,960 hands through this repository's own evaluate5. The 40 straight flushes include the 4 royals.",
+    "zh": "对本仓库的 evaluate5 全量枚举 C(52,5)=2,598,960 手所得。同花顺 40 手（含皇家 4 手）。"
+  },
+  "checks": [
+    {
+      "detail": "C(52,5)",
+      "kind": "combo_count",
+      "pass": true,
+      "value": 2598960
+    },
+    {
+      "detail": "every category count matches C(52,5) enumeration; a mismatch means the evaluator is wrong",
+      "kind": "combo_count",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Category",
+        "zh": "牌型"
+      },
+      "key": "category",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Hands",
+        "zh": "手数"
+      },
+      "key": "count",
+      "unit": "hands"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Probability",
+        "zh": "概率"
+      },
+      "key": "probability",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.01-05.hand-class-counts",
+  "lesson": "01-05",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.evaluator#evaluate5",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "category": "同花顺",
+      "category_en": "straight flush",
+      "count": 40,
+      "probability": 1.539e-05
+    },
+    {
+      "category": "四条",
+      "category_en": "four of a kind",
+      "count": 624,
+      "probability": 0.0002401
+    },
+    {
+      "category": "葫芦",
+      "category_en": "full house",
+      "count": 3744,
+      "probability": 0.00144058
+    },
+    {
+      "category": "同花",
+      "category_en": "flush",
+      "count": 5108,
+      "probability": 0.0019654
+    },
+    {
+      "category": "顺子",
+      "category_en": "straight",
+      "count": 10200,
+      "probability": 0.00392465
+    },
+    {
+      "category": "三条",
+      "category_en": "three of a kind",
+      "count": 54912,
+      "probability": 0.02112845
+    },
+    {
+      "category": "两对",
+      "category_en": "two pair",
+      "count": 123552,
+      "probability": 0.04753902
+    },
+    {
+      "category": "一对",
+      "category_en": "one pair",
+      "count": 1098240,
+      "probability": 0.42256903
+    },
+    {
+      "category": "高牌",
+      "category_en": "high card",
+      "count": 1302540,
+      "probability": 0.50117739
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "evaluate5",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.evaluator",
+    "seed": null
+  },
+  "title": {
+    "en": "Five-card category counts (full enumeration)",
+    "zh": "五人手的类别计数（全枚举）"
+  },
+  "unverified_claims": []
+}

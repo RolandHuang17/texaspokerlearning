@@ -1,0 +1,63 @@
+name: Set up the pokergto environment
+description: >-
+  One place that decides how every workflow gets a working environment: setup-python plus a real
+  editable install of the dev and docs extras, and setup-node when the job needs the trainer.
+
+# Why this exists as a composite action instead of copied steps in seven workflows: the environment is
+# the part of CI that drifts silently. If one workflow installs `-e .` and another installs
+# `requirements-dev.txt`, the two can disagree and a failure stops being about the change. Keeping it
+# here means `pip install -e ".[dev,docs]"` is exactly the command in docs/development/local-dev.md,
+# in every job, on every runner.
+#
+# Deliberately not using uv or pip-tools: neither is part of this project's declared dependencies, and
+# a bootstrap path that works with `python -m pip` works on the maintainer's Windows machine too,
+# which is the environment this repository treats as first-class.
+
+inputs:
+  python-version:
+    description: Interpreter for this job. Kept as an input because the test matrix is the one place
+      several versions must coexist.
+    required: false
+    default: '3.12'
+  with-node:
+    description: 'true / false. Only the trainer and pages jobs need Node.'
+    required: false
+    default: 'false'
+  node-version:
+    description: Node major version for the trainer build.
+    required: false
+    default: '20'
+
+outputs:
+  python-version:
+    description: The concrete patch version setup-python resolved, for job summaries.
+    value: ${{ steps.python.outputs.python-version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Python ${{ inputs.python-version }}
+      id: python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: pyproject.toml
+
+    # `cache: pip` is a wheel cache keyed on the dependency declarations, not a saved environment, so
+    # a changed pin resolves a different set instead of serving a stale one. There is no lockfile in
+    # this repository yet (pyproject gives lower bounds, requirements-dev.txt mirrors them); when one
+    # is committed, add it to cache-dependency-path so the hash covers what CI actually installs.
+    - name: Install pokergto with dev and docs extras
+      shell: bash
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e ".[dev,docs]"
+        python -m pip list --format=freeze | grep -Ei '^(numpy|ruff|mypy|pytest|mkdocs)' \
+          | sed 's/^/    /' || true
+
+    - name: Node ${{ inputs.node-version }}
+      if: inputs.with-node == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}

@@ -1,0 +1,109 @@
+- Home: zh/index.md
+- 00 导论:
+  - 怎么读这套教材：底牌、牌面、四条街与位置名称: zh/00-orientation/how-to-use-this-repo.md
+  - 先推导再记忆：一个数字必须能被引擎重算出来: zh/00-orientation/derivation-over-memory.md
+  - 装好工具链：命令行、随机种子与确定性输出: zh/00-orientation/setup-and-toolchain.md
+- 01 组合数学与胜率:
+  - 从起手组合到手牌类别：每一类到底有几个组合: zh/01-combinatorics-equity/combos-from-1326-to-169.md
+  - 阻断牌与移除效应：一张牌如何改掉对手的组合计数: zh/01-combinatorics-equity/blockers-and-card-removal.md
+  - 穷举胜率：把补牌数换成每一街的精确概率: zh/01-combinatorics-equity/exact-equity-by-enumeration.md
+  - 模拟误差从哪来：方差、标准误与固定种子: zh/01-combinatorics-equity/monte-carlo-variance-and-seeds.md
+  - 七张牌评估器：牌型归类与踢脚判定的边界情形: zh/01-combinatorics-equity/the-seven-card-evaluator.md
+  - 胜率不等于拿到手的钱：胜率实现为何低于名义胜率: zh/01-combinatorics-equity/equity-realization-vs-raw-equity.md
+  - 读 13×13 网格：一格代表几个组合、行列轴是什么: zh/01-combinatorics-equity/reading-a-13x13-grid.md
+- 02 单次决策的数学:
+  - 保本百分比：一次跟注承担的风险对应多少回报: zh/02-the-math-of-one-decision/break-even-percentage.md
+  - 底池赔率翻译成跟注：所需胜率与隐含赔率的适用边界: zh/02-the-math-of-one-decision/pot-odds-to-call-frequency.md
+  - 最低防守频率：为什么是 pot/(pot+bet): zh/02-the-math-of-one-decision/deriving-minimum-defense-frequency.md
+  - 诈唬与价值的配比：无差别条件如何定出比例: zh/02-the-math-of-one-decision/bluff-to-value-ratio.md
+  - 弃牌赢率：一次下注里唯一由对手决定的收益: zh/02-the-math-of-one-decision/fold-equity.md
+  - 一套符号管住所有动作：跟注、下注、加注与全下: zh/02-the-math-of-one-decision/ev-unified-formula.md
+  - 薄价值下注：只赢一点点也值得打的判定条件: zh/02-the-math-of-one-decision/the-thin-value-bet.md
+  - 尺度的不对称：被加注的风险与弃牌带来的收益: zh/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md
+- 03 范围优势:
+  - 同一翻面上谁已经成顺子：用坚果优势而非胜率区分: zh/03-range-advantage/equity-advantage-vs-nut-advantage.md
+  - 封顶范围：为什么这条线里不存在坚果: zh/03-range-advantage/capped-ranges.md
+  - 优势会换手：翻牌、转牌、河牌上的范围优势各不相同: zh/03-range-advantage/advantage-street-by-street.md
+  - 牌面质地分类：单色、双色、成对与连张各自偏向谁: zh/03-range-advantage/board-texture-and-advantage.md
+  - 把阻断牌读成范围效应：谁的手里不可能有那手牌: zh/03-range-advantage/blockers-as-range-effects.md
+  - 自己范围里的移除效应：我的底牌删掉了我的坚果: zh/03-range-advantage/removal-in-your-own-range.md
+  - SPR：把筹码深度与底池尺寸压成同一个数: zh/03-range-advantage/spr-and-commitment.md
+  - 套池还是收着打：SPR 决定的两种承诺程度: zh/03-range-advantage/commit-or-float.md
+  - 单挑与三人池的范围优势不是同一件事: zh/03-range-advantage/range-advantage-heads-up-vs-3way.md
+- 04 下注尺度:
+  - 谁决定尺度：频率法与范围法的分工: zh/04-bet-sizing/sizing-governance.md
+  - 小尺度为什么存在：底池比例与防守负担的换算: zh/04-bet-sizing/why-one-third-pot-exists.md
+  - 超池下注为什么存在：坚果容量撑起尺度: zh/04-bet-sizing/why-overbets-exist.md
+  - 一条街用两个尺度：混合尺度如何切分范围: zh/04-bet-sizing/multiple-sizes-one-street.md
+  - 极化、合并与线性：三种范围形状对应三种尺度逻辑: zh/04-bet-sizing/polarized-vs-merged-vs-linear.md
+  - 保护还是价值：一张牌如何改变下注的理由: zh/04-bet-sizing/protection-versus-value.md
+  - 过牌的范围同样要被治理：过牌线里必须留什么: zh/04-bet-sizing/check-size-governance.md
+- 05 翻前（现金局）:
+  - 各位置率先加注：范围为什么向按钮位逐级放宽: zh/05-preflop-cash/rfi-by-position.md
+  - 大盲防守：赔率便宜到无法放弃的底池: zh/05-preflop-cash/big-blind-defense.md
+  - 3-bet 范围：价值、保护与轻量三段的配比: zh/05-preflop-cash/three-bet-ranges.md
+  - 挤压加注：当两家范围同时被封顶: zh/05-preflop-cash/the-squeeze.md
+  - 4-bet 与 5-bet：范围收窄到最后一段: zh/05-preflop-cash/four-bet-and-five-bet-ranges.md
+  - 一百个大盲意味着什么：深度对翻前范围的反向约束: zh/05-preflop-cash/one-hundred-big-blinds-spr-consequences.md
+- 06 翻后（现金局）:
+  - 翻牌持续下注按质地分档：谁握有先手、谁该过牌: zh/06-postflop-cash/flop-continuation-bets-by-texture.md
+  - 过牌加注范围：先让出底池是为了夺回什么: zh/06-postflop-cash/check-raise-ranges.md
+  - 试探性跟注与探查下注：用位置买下下一条街: zh/06-postflop-cash/floats-and-probe-bets.md
+  - 延迟持续下注与底池控制：过牌不是投降: zh/06-postflop-cash/delayed-continuation-bets.md
+  - 二次开火：转牌行动线与两条街之间的范围变化: zh/06-postflop-cash/double-barreling.md
+  - 转牌尺度：给对手的赔率与自己的风险同时变动: zh/06-postflop-cash/turn-sizing.md
+  - 河牌价值下注：没有人会再变牌时该打多重: zh/06-postflop-cash/river-value-betting.md
+  - 河牌诈唬与 Alpha：最后一条街的比例由谁设定: zh/06-postflop-cash/river-bluffing-and-alpha.md
+  - 抓诈唬要抓到量级：偏离最低防守频率的代价: zh/06-postflop-cash/bluff-catching-at-scale.md
+- 07 多人底池:
+  - N 个对手时的最低防守频率：独立假设写在这里: zh/07-multiway/mdf-with-n-opponents.md
+  - 持续下注频率为什么在多人底池坍塌: zh/07-multiway/continuation-frequency-collapse.md
+  - 人数改变配比：诈唬收紧、价值更纯: zh/07-multiway/bluff-value-tightening-multiway.md
+  - 同花构成、抽水与合理性校验：多人底池的三处修正: zh/07-multiway/suitedness-rake-and-sanity-checks.md
+- 08 简化求解器:
+  - 博弈树、信息集与策略组合：一名玩家实际能看见什么: zh/08-toy-solvers/game-trees-infosets-strategies.md
+  - 遗憾匹配：只按当初该做什么来迭代: zh/08-toy-solvers/regret-matching.md
+  - 在 Kuhn 博弈上手工跑一遍 CFR 迭代: zh/08-toy-solvers/cfr-on-kuhn-hand-trace.md
+  - 收敛的是平均策略，不是当前策略: zh/08-toy-solvers/convergence-average-strategy-exploitability.md
+  - CFR+ 快在哪里：把负遗憾截回零: zh/08-toy-solvers/cfr-plus-and-why-faster.md
+  - Leduc 与牌力抽象：模型丢掉了什么、还剩下什么: zh/08-toy-solvers/leduc-and-card-abstraction.md
+  - 读求解器输出而不背它：哪些是策略、哪些是残差: zh/08-toy-solvers/reading-solver-output-without-memorising-it.md
+- 09 现金实战与复盘:
+  - 节点锁定：把对手的错误写进模型再算剥削: zh/09-cash-practice/node-locking-what-if.md
+  - 要计划不要背表：一条行动线连着下一条: zh/09-cash-practice/plans-not-charts.md
+  - 复盘工作流：先定决策点，再谈结论: zh/09-cash-practice/hand-review-workflow.md
+  - 漏洞审计：用频率对照找出漏在哪条街: zh/09-cash-practice/leak-audit.md
+  - 排一个训练周期：定点重复与迁移练习的比例: zh/09-cash-practice/building-a-training-block.md
+- 10 单挑与按钮位对抗:
+  - 两人博弈的代数：为什么单挑的范围必然更宽: zh/10-heads-up-bvb/the-two-player-algebra.md
+  - 宽范围下的位置：先手权到底值多少: zh/10-heads-up-bvb/wide-ranges-and-position.md
+  - 按钮位率先加注对大盲 3-bet：谁在给谁封顶: zh/10-heads-up-bvb/button-open-versus-bb-three-bet.md
+  - 单挑翻后的频率：防守下限与进攻上限: zh/10-heads-up-bvb/heads-up-postflop-frequencies.md
+  - 把单挑技能搬回满员桌：哪些结论不能带走: zh/10-heads-up-bvb/transferring-hu-skills-to-a-full-ring.md
+- 11 锦标赛基础:
+  - 锦标赛数学改了哪一条：单手期望值不再是目标函数: zh/11-mtt-core/what-tournament-math-changes.md
+  - 弃牌赢率与 ICM 预告：同一个抢盲在这里换了价钱: zh/11-mtt-core/fold-equity-and-the-icm-preview.md
+  - 筹码区间与 M：把深度翻译成决策模式: zh/11-mtt-core/stack-zones.md
+  - 前注与大盲前注：底池里不属于任何人的钱: zh/11-mtt-core/antes-and-big-blind-antes.md
+  - 泡沫期动力学：钱在逼近，筹码在贬值: zh/11-mtt-core/bubble-dynamics.md
+  - 奖金跳档与等强度假设：模型什么时候够用: zh/11-mtt-core/pay-jumps-and-the-equal-skill-assumption.md
+- 12 ICM 与短码推倒:
+  - 两动作模型：短码为什么只剩全下与弃牌: zh/12-icm-pushfold/the-two-action-model.md
+  - 纳什全下范围：两动作模型里的均衡解: zh/12-icm-pushfold/nash-shoving-ranges.md
+  - ICM 与筹码期望值：同一手牌的两个结论: zh/12-icm-pushfold/icm-versus-chip-ev.md
+  - 泡沫因子：筹码换算成钱的那个乘数: zh/12-icm-pushfold/bubble-factors.md
+  - 决赛桌的 ICM：人数与筹码分布同时改变: zh/12-icm-pushfold/final-table-icm.md
+  - 搭一套推倒训练：从计算范围到反馈闭环: zh/12-icm-pushfold/a-pushfold-drill-workflow.md
+- 13 群体读牌与剥削:
+  - 一条公式分清纳什解与群体剥削解: zh/13-population-exploits/nash-versus-population-in-one-formula.md
+  - 测量一个群体：样本量、频率区间与统计口径: zh/13-population-exploits/measuring-a-population.md
+  - 剥削“过牌过多”这个群体漏洞: zh/13-population-exploits/exploiting-the-check-back-leak.md
+  - 对手诈唬过多或过少：两种偏离要两种应对: zh/13-population-exploits/exploiting-over-and-under-bluffing.md
+  - 尺度马脚：把下注金额当信息源: zh/13-population-exploits/exploiting-sizing-tells.md
+  - 偏离而不自我毁灭：平衡式剥削: zh/13-population-exploits/deviating-without-self-destructing.md
+- 14 综合实战:
+  - 完整闭环分析一手牌：从范围到可核验的结论: zh/14-capstone-practice/a-full-loop-hand-analysis.md
+  - 给自己排训练计划：把漏洞变成可检验的周期: zh/14-capstone-practice/your-own-training-plan.md
+  - 混合场次考核：换了场景，结论就得跟着换: zh/14-capstone-practice/mixed-spot-examination.md
+  - 均衡模型不会告诉你的那些事: zh/14-capstone-practice/what-gto-does-not-tell-you.md
+- Development: zh/development/index.md

@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/curriculum.schema.json",
+  "title": "The curriculum spine (data/src/curriculum.yaml)",
+  "description": "The authoritative ordered list of chapters and lessons. Lesson ids are part of the public contract surface: they are never renumbered (see CONTRIBUTING.md, SemVer policy). docs/en/<chapter>/<lesson>.md and docs/zh/<chapter>/<lesson>.md must exist for every lesson registered here, and tools/check_bilingual.py proves the bijection in both directions: no missing mirrors, no orphan files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "engine_version", "lesson_template", "chapters"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "engine_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "lesson_template": {
+      "description": "The fixed ordered section list every lesson must follow, in both languages. CI asserts order and count, which is what makes 184 mirrored files mechanically checkable.",
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "type": "string" }
+    },
+    "chapters": {
+      "type": "array",
+      "minItems": 15,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "order", "title", "slug", "tags", "lessons"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^\\d{2}$" },
+          "order": { "type": "integer", "minimum": 0, "maximum": 14 },
+          "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "summary": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "slug": { "type": "string", "pattern": "^\\d{2}-[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "tags": { "$ref": "common.schema.json#/$defs/tags" },
+          "lessons": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "order", "slug", "title", "tags", "status_zh", "status_en"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" },
+                "order": { "type": "integer", "minimum": 1 },
+                "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+                "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "objective": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "tags": { "$ref": "common.schema.json#/$defs/tags" },
+                "prereq": {
+                  "type": "array",
+                  "items": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" }
+                },
+                "spot_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+                "hand_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+                "quiz_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+                "table_ids": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/id" } },
+                "glossary_new_terms": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/glossary_ref" } },
+                "status_zh": { "$ref": "common.schema.json#/$defs/status" },
+                "status_en": { "$ref": "common.schema.json#/$defs/status" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

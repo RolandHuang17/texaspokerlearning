@@ -1,0 +1,1702 @@
+# The curriculum spine. Generated downstream by tools/gen_curriculum_index.py; never hand-copy a
+# number from here into prose — lesson ids are the contract, values come from data/gen/.
+schema_version: "1.0.0"
+engine_version: "0.1.0"
+
+lesson_template:
+  - "本节目标 / Objectives"
+  - "前置知识 / Prerequisites"
+  - "核心原理 / The principle"
+  - "推导 / Derivation"
+  - "直觉 / Intuition"
+  - "算例 / Worked examples"
+  - "生成表 / Generated tables"
+  - "实战牌局 / Live hands"
+  - "范围图 / Range chart"
+  - "为何成立、何时失效 / Why it works, when it breaks"
+  - "陷阱 / Common mistakes"
+  - "练习 / Drills"
+  - "自测清单 / Self-check"
+  - "来源与置信度 / Provenance and confidence"
+  - "术语 / Terms"
+
+chapters:
+  - id: "00"
+    order: 0
+    slug: 00-orientation
+    title:
+      zh: "导论"
+      en: "Orientation"
+    summary:
+      zh: "先讲清这套教材怎么用：术语、结构、来源标注，以及为什么数字必须由引擎生成。"
+      en: "How the repository is read: vocabulary, the fixed lesson template, provenance, and why numbers are generated rather than typed."
+    tags:
+      scenario: [shared]
+      streets: [n-a]
+    lessons:
+      - id: "00-01"
+        order: 1
+        slug: how-to-use-this-repo
+        title:
+          zh: "怎么读这套教材：底牌、牌面、四条街与位置名称"
+          en: "How to use this curriculum: hole cards, board, the four streets and position names"
+        objective:
+          zh: "能说出一个课节的固定分节结构、AUTO 表块的数字从哪来，以及每个基础动作术语在本仓库里的唯一写法。"
+          en: "State the fixed section order of a lesson, where an AUTO table's numbers come from, and the one sanctioned spelling of each basic action term."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [hole-cards, board, street, preflop, flop, turn, river, pot, bet, raise, call, fold, check, hero, villain, six-max, position, button, small-blind, big-blind]
+        prereq: []
+        status_zh: draft
+        status_en: draft
+      - id: "00-02"
+        order: 2
+        slug: derivation-over-memory
+        title:
+          zh: "先推导再记忆：一个数字必须能被引擎重算出来"
+          en: "Derivation before memory: every number must be recomputable by the engine"
+        objective:
+          zh: "能区分 derived、reference、external 三类来源，并解释一条标注为未核验的结论为什么仍然可以保留在课节里。"
+          en: "Distinguish derived, reference and external provenance, and explain why an UNVERIFIED claim may still stay in a lesson."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [gto, nash-equilibrium, exploitability, best-response, provenance, unverified-claim, derivation-ref]
+        prereq: ["00-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "00-03"
+        order: 3
+        slug: setup-and-toolchain
+        title:
+          zh: "装好工具链：命令行、随机种子与确定性输出"
+          en: "Set up the toolchain: the CLI, random seeds and deterministic output"
+        objective:
+          zh: "能在本地跑通一条引擎命令并复述：为什么同一命令在两台机器上必须产出逐字节相同的结果。"
+          en: "Run one engine command locally and explain why it must emit byte-identical output on every machine."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [solver, determinism, generated-artifact, single-source-of-truth, rng-seed]
+        prereq: ["00-01", "00-02"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "01"
+    order: 1
+    slug: 01-combinatorics-equity
+    title:
+      zh: "组合数学与胜率"
+      en: "Combinatorics and Equity"
+    summary:
+      zh: "把牌局还原成可数的对象：组合、移除效应、精确胜率、模拟误差与牌力评估。"
+      en: "Reduce a hand to countable objects: combos, removal effects, exact equity, simulation error and hand evaluation."
+    tags:
+      scenario: [shared]
+      streets: [preflop, flop, turn, river]
+    lessons:
+      - id: "01-01"
+        order: 1
+        slug: combos-from-1326-to-169
+        title:
+          zh: "从起手组合到手牌类别：每一类到底有几个组合"
+          en: "From hole combos to hand classes: how many combos each class really has"
+        objective:
+          zh: "能写出按类别推算组合数的方法，并用引擎的逐类枚举核对整张计数表。"
+          en: "Compute combos class by class from first principles and check the whole count table against the engine's enumeration."
+        tags:
+          scenario: [shared]
+          streets: [preflop]
+          concepts: [combos, hand-class, suited, offsuit, pocket-pair, hole-cards]
+        prereq: ["00-01", "00-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-02"
+        order: 2
+        slug: blockers-and-card-removal
+        title:
+          zh: "阻断牌与移除效应：一张牌如何改掉对手的组合计数"
+          en: "Blockers and removal effects: how one card rewrites the opponent's combo count"
+        objective:
+          zh: "能用移除效应算出持有某张牌后，对手某一类别减少的组合数，并说明这类信息何时值得利用。"
+          en: "Quantify how holding a given card deletes combos from an opponent class, and say when that information is worth acting on."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [blocker, removal-effect, combos, hand-class, range]
+        prereq: ["01-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-03"
+        order: 3
+        slug: exact-equity-by-enumeration
+        title:
+          zh: "穷举胜率：把补牌数换成每一街的精确概率"
+          en: "Exact equity by enumeration: turning outs into per-street probabilities"
+        objective:
+          zh: "能用穷举得到含平分的胜率，并指出它与补牌 shortcuts 在哪些牌面上差距最大。"
+          en: "Enumerate equity including chopped pots, and identify the boards where the outs shortcut diverges most."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [equity, win-probability, outs, rule-of-two-and-four, tie-chop, showdown]
+        prereq: ["01-01", "01-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-04"
+        order: 4
+        slug: monte-carlo-variance-and-seeds
+        title:
+          zh: "模拟误差从哪来：方差、标准误与固定种子"
+          en: "Monte Carlo error: variance, standard error and pinned seeds"
+        objective:
+          zh: "能说明模拟次数与标准误的关系，并解释为什么每张生成表都要记录种子。"
+          en: "Relate simulation count to standard error, and explain why every generated table records its seed."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [monte-carlo-simulation, variance, standard-error, rng-seed, sample-size, determinism]
+        prereq: ["01-03", "00-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-05"
+        order: 5
+        slug: the-seven-card-evaluator
+        title:
+          zh: "七张牌评估器：牌型归类与踢脚判定的边界情形"
+          en: "The seven-card evaluator: hand classification and kicker tie-breaks"
+        objective:
+          zh: "能说明评估器为何要在七张牌的所有五张子手里取最优，并解释它对平分底池返回什么。"
+          en: "Explain why the evaluator takes the best five-card subset of seven, and what it returns for a chopped pot."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [hand-ranking, hand-strength, kicker, showdown, flush, straight, trips, full-house]
+        prereq: ["01-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-06"
+        order: 6
+        slug: equity-realization-vs-raw-equity
+        title:
+          zh: "胜率不等于拿到手的钱：胜率实现为何低于名义胜率"
+          en: "Equity is not money: why realization falls short of raw equity"
+        objective:
+          zh: "能列出压低胜率实现的结构性原因，并指出哪一类手牌最容易实现不足。"
+          en: "List the structural reasons realization undershoots raw equity and name the hand class that under-realises most."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [equity-realization, implied-odds, reverse-implied-odds, equity, showdown]
+        prereq: ["01-03", "01-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "01-07"
+        order: 7
+        slug: reading-a-13x13-grid
+        title:
+          zh: "读 13×13 网格：一格代表几个组合、行列轴是什么"
+          en: "Reading a 13x13 grid: what a cell counts and what the axes mean"
+        objective:
+          zh: "能把一张网格换算成组合数清单，并说明同花格与不同花格为何权重不同。"
+          en: "Convert a grid into a combo list and explain why suited and offsuit cells carry different weights."
+        tags:
+          scenario: [shared]
+          streets: [preflop]
+          concepts: [grid-13x13, range, range-chart, hand-class, combos]
+        prereq: ["01-01", "01-02"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "02"
+    order: 2
+    slug: 02-the-math-of-one-decision
+    title:
+      zh: "单次决策的数学"
+      en: "The Math of One Decision"
+    summary:
+      zh: "一次跟注、一次下注的全部算术：保本点、防守下限、诈唬配比与尺度带来的不对称。"
+      en: "All the arithmetic of a single decision: break-even, defence floors, bluff ratios and the asymmetry sizing buys."
+    tags:
+      scenario: [shared]
+      streets: [flop, turn, river, multi-street]
+    lessons:
+      - id: "02-01"
+        order: 1
+        slug: break-even-percentage
+        title:
+          zh: "保本百分比：一次跟注承担的风险对应多少回报"
+          en: "Break-even percentage: the risk a call takes against the reward it buys"
+        objective:
+          zh: "能用底池与下注额写出保本百分比，并说清它衡量的是哪一笔具体风险。"
+          en: "Write the break-even expression from pot and bet, and state precisely which risk it measures."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [expected-value, break-even-percentage, pot, bet, call, raise, fold, check]
+        prereq: ["00-02", "01-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-02"
+        order: 2
+        slug: pot-odds-to-call-frequency
+        title:
+          zh: "底池赔率翻译成跟注：所需胜率与隐含赔率的适用边界"
+          en: "Pot odds into a call: required equity and where implied odds break the shortcut"
+        objective:
+          zh: "能由底池赔率推出所需胜率，并说明引入隐含赔率时必须额外声明的前提。"
+          en: "Derive required equity from pot odds and name the assumptions implied odds smuggle in."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn]
+          concepts: [pot-odds, required-equity, implied-odds, break-even-percentage, outs]
+        prereq: ["02-01", "01-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-03"
+        order: 3
+        slug: deriving-minimum-defense-frequency
+        title:
+          zh: "最低防守频率：为什么是 pot/(pot+bet)"
+          en: "Minimum defense frequency: why pot/(pot+bet)"
+        objective:
+          zh: "能从“纯诈唬不该自动获利”这个要求推出 MDF 表达式，并区分 MDF 与自己实际使用的防守频率。"
+          en: "Derive MDF from the requirement that a pure bluff must not be automatically profitable, and separate MDF from the defence frequency actually used."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [minimum-defense-frequency, defend, fold-frequency, bet-size, pot-odds]
+        prereq: ["02-01", "02-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-04"
+        order: 4
+        slug: bluff-to-value-ratio
+        title:
+          zh: "诈唬与价值的配比：无差别条件如何定出比例"
+          en: "The bluff-to-value ratio: how indifference sets the mix"
+        objective:
+          zh: "能用“让对手跟注与弃牌等值”的条件推出下注范围里的诈唬占比，并说明它随尺度的移动方向。"
+          en: "Derive the bluff share of a betting range from making the caller indifferent, and say how it moves as the size changes."
+        tags:
+          scenario: [shared]
+          streets: [river]
+          concepts: [bluff, bluff-to-value-ratio, value-bet, bluff-range, value-range, indifference, mixed-strategy, pure-strategy, bluff-frequency]
+        prereq: ["02-01", "02-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-05"
+        order: 5
+        slug: fold-equity
+        title:
+          zh: "弃牌赢率：一次下注里唯一由对手决定的收益"
+          en: "Fold equity: the only part of a bet the opponent can hand you"
+        objective:
+          zh: "能把一次下注的期望值拆成对手弃牌与继续两支，并指出哪一支随牌面变化更快。"
+          en: "Split a bet's expectation into the fold and continue branches and say which one moves faster across runouts."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [fold-equity, ev-decomposition, expected-value, bluff, fold-frequency]
+        prereq: ["02-01", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-06"
+        order: 6
+        slug: ev-unified-formula
+        title:
+          zh: "一套符号管住所有动作：跟注、下注、加注与全下"
+          en: "One notation for every action: call, bet, raise and shove"
+        objective:
+          zh: "能用同一套符号写出四种行动的期望值，并解释为什么比较动作只需比较它们的差。"
+          en: "Express call, bet, raise and shove in one notation and explain why only the differences matter."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [ev-decomposition, expected-value, call, raise, shove, fold-equity]
+        prereq: ["02-01", "02-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-07"
+        order: 7
+        slug: the-thin-value-bet
+        title:
+          zh: "薄价值下注：只赢一点点也值得打的判定条件"
+          en: "Thin value bets: when winning only a little is still worth betting"
+        objective:
+          zh: "能用胜率与对手范围结构划出薄价值与标准价值的界线，而不是以“我有好牌”当理由。"
+          en: "Separate thin value from standard value using equity and the opponent's range structure instead of the claim that a good hand is reason enough."
+        tags:
+          scenario: [shared]
+          streets: [river]
+          concepts: [thin-value, value-bet, value-range, indifference, required-equity]
+        prereq: ["02-04", "02-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "02-08"
+        order: 8
+        slug: sizing-risk-and-fold-asymmetry
+        title:
+          zh: "尺度的不对称：被加注的风险与弃牌带来的收益"
+          en: "Sizing asymmetry: raise risk against what a fold is worth"
+        objective:
+          zh: "能说明加大尺度同时改变哪两件事，并写出被加注之后剩余行动的期望。"
+          en: "Say which two quantities a larger size changes at once, and write the residual expectation after being raised."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [sizing-risk, fold-asymmetry, bet-size, minimum-defense-frequency, fold-equity]
+        prereq: ["02-03", "02-06"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "03"
+    order: 3
+    slug: 03-range-advantage
+    title:
+      zh: "范围优势"
+      en: "Range Advantage"
+    summary:
+      zh: "比较两个范围而不是比较两副牌：胜率优势、坚果优势、牌面质地与筹码深度的共同作用。"
+      en: "Compare ranges rather than hands: equity advantage, nut advantage, board texture and how depth changes both."
+    tags:
+      scenario: [shared]
+      streets: [preflop, flop, turn, river, multi-street]
+    lessons:
+      - id: "03-01"
+        order: 1
+        slug: equity-advantage-vs-nut-advantage
+        title:
+          zh: "同一翻面上谁已经成顺子：用坚果优势而非胜率区分"
+          en: "Who already has the straight on this flop: nut advantage, not equity"
+        objective:
+          zh: "能用两个范围的成牌容量解释坚果优势，并说出它能回答、而胜率优势回答不了的那类决策。"
+          en: "Explain nut advantage through each range's capacity for made hands, and name the decision it settles that equity advantage cannot."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [range-advantage, nut-advantage, equity-advantage, the-nuts, capacity, range]
+        prereq: ["01-07", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-02"
+        order: 2
+        slug: capped-ranges
+        title:
+          zh: "封顶范围：为什么这条线里不存在坚果"
+          en: "Capped ranges: why one line contains no nuts"
+        objective:
+          zh: "能从一条行动线反推它给范围设下的上限，并说明这个上限如何限制该方合法的尺度选择。"
+          en: "Read the upper bound a line imposes on a range and show how that bound restricts the sizes that range can use."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [capped-range, range-advantage, the-nuts, capacity, line]
+        prereq: ["03-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-03"
+        order: 3
+        slug: advantage-street-by-street
+        title:
+          zh: "优势会换手：翻牌、转牌、河牌上的范围优势各不相同"
+          en: "Advantage changes hands: flop, turn and river ranges are not the same argument"
+        objective:
+          zh: "能用发展牌序解释为什么一条街的坚果优势可能在下一张牌上消失。"
+          en: "Use runout structure to explain why a street's nut advantage can vanish on the next card."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [runout, range-advantage, nut-advantage, equity-advantage, equity-realization]
+        prereq: ["03-01", "01-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-04"
+        order: 4
+        slug: board-texture-and-advantage
+        title:
+          zh: "牌面质地分类：单色、双色、成对与连张各自偏向谁"
+          en: "Board texture classes: whom monochrome, two-tone, paired and connected boards help"
+        objective:
+          zh: "能用引擎的分类规则判定一个牌面属于哪一类，并把该类型对应到受益的范围。"
+          en: "Classify a board with the engine's predicates and connect that class to the range it favours."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn]
+          concepts: [board-texture, monochrome-board, two-tone-board, rainbow-board, paired-board, connected-board, static-board, dynamic-board, wet-board, dry-board, broadway-board, backdoor-draw, flush-draw]
+        prereq: ["03-01", "01-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-05"
+        order: 5
+        slug: blockers-as-range-effects
+        title:
+          zh: "把阻断牌读成范围效应：谁的手里不可能有那手牌"
+          en: "Blockers as range effects: which hands a card keeps out of a range"
+        objective:
+          zh: "能用移除效应判断某类诈唬候选在对手防守收窄后的价值变化方向。"
+          en: "Use removal effects to sign how one bluff candidate's value moves once the defence narrows."
+        tags:
+          scenario: [shared]
+          streets: [river]
+          concepts: [blocker, removal-effect, range, bluff-range, combos, minimum-defense-frequency]
+        prereq: ["01-02", "03-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-06"
+        order: 6
+        slug: removal-in-your-own-range
+        title:
+          zh: "自己范围里的移除效应：我的底牌删掉了我的坚果"
+          en: "Removal inside your own range: my hole cards delete my own nuts"
+        objective:
+          zh: "能说明用真实底牌条件化范围为什么会同时改变胜率与坚果计数，并指出改变的方向。"
+          en: "Explain why conditioning a range on the actual hole cards changes both equity and nut counts, and in which direction."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [removal-effect, blocker, range, capacity, combos, nut-advantage]
+        prereq: ["03-05", "01-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-07"
+        order: 7
+        slug: spr-and-commitment
+        title:
+          zh: "SPR：把筹码深度与底池尺寸压成同一个数"
+          en: "SPR: stack depth and pot size collapsed into one number"
+        objective:
+          zh: "能算出任一条线开局时的 SPR，并说明 SPR 高低各自改变了哪些全下与跟注阈值。"
+          en: "Compute SPR at the start of a line and say which all-in thresholds move with it."
+        tags:
+          scenario: [shared]
+          streets: [preflop, flop]
+          concepts: [spr, effective-stack, shove, required-equity, pot]
+        prereq: ["02-06", "01-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-08"
+        order: 8
+        slug: commit-or-float
+        title:
+          zh: "套池还是收着打：SPR 决定的两种承诺程度"
+          en: "Commit or hold back: the two levels of commitment SPR creates"
+        objective:
+          zh: "能用底池承诺描述一条线走到哪一步就不该再弃牌，并指出这条界线由什么算出。"
+          en: "Describe the point in a line where folding stops making sense, and identify what computes that threshold."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn]
+          concepts: [pot-commitment, spr, effective-stack, shove, implied-odds]
+        prereq: ["03-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "03-09"
+        order: 9
+        slug: range-advantage-heads-up-vs-3way
+        title:
+          zh: "单挑与三人池的范围优势不是同一件事"
+          en: "Range advantage means something different heads-up and three-way"
+        objective:
+          zh: "能用“谁能赢下这个底池”的人数逻辑解释多人底池里坚果优势被稀释的原因。"
+          en: "Use the who-can-win-this-pot logic to explain why nut advantage dilutes as players are added."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [multiway, range-advantage, nut-advantage, capacity, the-nuts]
+        prereq: ["03-01", "03-04"]
+        status_zh: draft
+        status_en: draft
+  - id: "04"
+    order: 4
+    slug: 04-bet-sizing
+    title:
+      zh: "下注尺度"
+      en: "Bet Sizing"
+    summary:
+      zh: "尺度不是口味问题：由频率与范围形状共同决定，从最小注到超池注各有其存在理由。"
+      en: "Sizing is not taste: frequency and range shape decide it, and every size from minimum bet to overbet has a reason to exist."
+    tags:
+      scenario: [shared, cash]
+      streets: [flop, turn, river]
+    lessons:
+      - id: "04-01"
+        order: 1
+        slug: sizing-governance
+        title:
+          zh: "谁决定尺度：频率法与范围法的分工"
+          en: "Who governs the size: frequency logic against range logic"
+        objective:
+          zh: "能用同一条街上的两个动作说明何时由频率决定尺度、何时由范围构成决定尺度。"
+          en: "Use one street's two actions to show when frequency governs size and when range composition does."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [frequency-approach, range-approach, betting-frequency, checking-frequency, bet-size]
+        prereq: ["02-03", "03-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-02"
+        order: 2
+        slug: why-one-third-pot-exists
+        title:
+          zh: "小尺度为什么存在：底池比例与防守负担的换算"
+          en: "Why small sizes exist: converting pot fraction into defence burden"
+        objective:
+          zh: "能推出一个小尺度给对手施加的防守频率与诈唬成本，并指出哪些牌面把它排除在外。"
+          en: "Derive the defence frequency and bluff cost a small size imposes, and name the boards that rule it out."
+        tags:
+          scenario: [shared, cash]
+          streets: [flop]
+          concepts: [pot-fraction, min-bet, minimum-defense-frequency, betting-frequency, board-texture]
+        prereq: ["04-01", "02-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-03"
+        order: 3
+        slug: why-overbets-exist
+        title:
+          zh: "超池下注为什么存在：坚果容量撑起尺度"
+          en: "Why overbets exist: nut capacity that carries a huge size"
+        objective:
+          zh: "能用范围的坚果容量与防守不足的代价说明超池尺度出现的条件。"
+          en: "Explain when an overbet size appears, using nut capacity and the cost of under-defending."
+        tags:
+          scenario: [shared, cash]
+          streets: [turn, river]
+          concepts: [overbet, capped-range, capacity, nut-advantage, pot-fraction]
+        prereq: ["04-02", "03-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-04"
+        order: 4
+        slug: multiple-sizes-one-street
+        title:
+          zh: "一条街用两个尺度：混合尺度如何切分范围"
+          en: "Two sizes on one street: how a mixed-size policy splits the range"
+        objective:
+          zh: "能说明同一条街的两个尺度各自承载哪一段牌力，以及它们如何共用过牌的那一半。"
+          en: "Say which slice of the range each size on one street carries and how the two share the checking half."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn]
+          concepts: [size-set, mixed-strategy, betting-frequency, checking-frequency, bet-size]
+        prereq: ["04-01", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-05"
+        order: 5
+        slug: polarized-vs-merged-vs-linear
+        title:
+          zh: "极化、合并与线性：三种范围形状对应三种尺度逻辑"
+          en: "Polarized, merged and linear: three range shapes, three sizing logics"
+        objective:
+          zh: "能按价值到诈唬的排序判断一个范围属于哪种形状，并说出该形状支持的尺度类型。"
+          en: "Classify a range's shape from its value-to-bluff ordering and state which sizes that shape supports."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [polarized, merged, linear, value-range, bluff-range, range-approach]
+        prereq: ["04-04", "03-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-06"
+        order: 6
+        slug: protection-versus-value
+        title:
+          zh: "保护还是价值：一张牌如何改变下注的理由"
+          en: "Protection or value: what changes the reason for betting"
+        objective:
+          zh: "能用半诈唬与听牌在下一条街的行为，把保护性下注从价值下注里区分出来。"
+          en: "Separate protection bets from value bets using how draws and semi-bluffs behave on the next card."
+        tags:
+          scenario: [shared, cash]
+          streets: [flop, turn]
+          concepts: [protection-bet, semi-bluff, value-bet, equity-realization, flush-draw]
+        prereq: ["04-05", "01-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "04-07"
+        order: 7
+        slug: check-size-governance
+        title:
+          zh: "过牌的范围同样要被治理：过牌线里必须留什么"
+          en: "Governing the checking range: what a check line must still carry"
+        objective:
+          zh: "能说出过牌范围必须自带的两类牌，以及缺位时对手能立刻拿走的东西。"
+          en: "Name the two hand classes a checking range must carry and what the opponent gains when they are missing."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn]
+          concepts: [checking-range, checking-frequency, minimum-defense-frequency, capped-range, frequency-approach]
+        prereq: ["04-01", "02-03"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "05"
+    order: 5
+    slug: 05-preflop-cash
+    title:
+      zh: "翻前（现金局）"
+      en: "Preflop (6-max Cash)"
+    summary:
+      zh: "现金局六个位置的翻前框架：率先加注、大盲防守与逐级收窄的再加注范围。"
+      en: "The six-max preflop frame: opening, big-blind defence, and re-raise ranges that narrow bet by bet."
+    tags:
+      scenario: [cash]
+      streets: [preflop]
+    lessons:
+      - id: "05-01"
+        order: 1
+        slug: rfi-by-position
+        title:
+          zh: "各位置率先加注：范围为什么向按钮位逐级放宽"
+          en: "Open-raise ranges by position: why they widen toward the button"
+        objective:
+          zh: "能用位置带来的后手信息与摊牌风险，解释率先加注范围宽窄的排序依据。"
+          en: "Explain the ordering of opening ranges using later information and the showdown risk paid for it."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [rfi, limp, tight, loose, under-the-gun, hijack, cutoff, early-position, late-position, button, steal]
+        prereq: ["01-07", "03-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "05-02"
+        order: 2
+        slug: big-blind-defense
+        title:
+          zh: "大盲防守：赔率便宜到无法放弃的底池"
+          en: "Big blind defence: odds too cheap to abandon"
+        objective:
+          zh: "能用所需胜率与位置劣势推出大盲防守范围的边界，并指出哪些类别必须走加注线。"
+          en: "Derive the big blind's defence boundary from required equity and positional disadvantage, and name the classes that must take the raising line."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [big-blind-defense, calling-range, defend, minimum-defense-frequency, required-equity, capped-range]
+        prereq: ["02-02", "02-03", "05-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "05-03"
+        order: 3
+        slug: three-bet-ranges
+        title:
+          zh: "3-bet 范围：价值、保护与轻量三段的配比"
+          en: "Three-bet ranges: how value, protection and light re-raises are mixed"
+        objective:
+          zh: "能说明一个 3-bet 范围需要哪三段牌力支撑，以及遭遇再加注时每段各自的出路。"
+          en: "Name the three tiers a three-bet range needs and what happens to each tier when a further re-raise arrives."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [three-bet, three-bet-shove, bluff-to-value-ratio, value-range, fold-equity, shove]
+        prereq: ["05-02", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "05-04"
+        order: 4
+        slug: the-squeeze
+        title:
+          zh: "挤压加注：当两家范围同时被封顶"
+          en: "The squeeze: when two ranges are capped at once"
+        objective:
+          zh: "能用两家范围的上限解释挤压加注为何能用少量坚果换来更大的底池争夺。"
+          en: "Use both opponents' range caps to explain why a squeeze contests a large pot holding few nuts."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [squeeze, cold-call, capped-range, fold-equity, range-advantage]
+        prereq: ["03-02", "05-03", "02-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "05-05"
+        order: 5
+        slug: four-bet-and-five-bet-ranges
+        title:
+          zh: "4-bet 与 5-bet：范围收窄到最后一段"
+          en: "Four- and five-bet ranges: narrowing down to the last tier"
+        objective:
+          zh: "能比较 4-bet 与 3-bet 范围的容量差异，并说明诈唬在这一层为何更难回收。"
+          en: "Contrast four-bet and three-bet range capacity and explain why bluffs recover less at this level."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [four-bet, five-bet, three-bet, capacity, shove, bluff-to-value-ratio]
+        prereq: ["05-03", "03-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "05-06"
+        order: 6
+        slug: one-hundred-big-blinds-spr-consequences
+        title:
+          zh: "一百个大盲意味着什么：深度对翻前范围的反向约束"
+          en: "What a hundred big blinds does: depth constraining preflop ranges back"
+        objective:
+          zh: "能用 SPR 与有效筹码说明同一手牌在不同深度下翻前动作的变化方向。"
+          en: "Use SPR and effective stack to state the direction a preflop action changes as depth changes."
+        tags:
+          scenario: [cash]
+          streets: [preflop]
+          concepts: [big-blind-unit, spr, effective-stack, rfi, pot-commitment, big-blind-defense]
+        prereq: ["03-07", "05-01"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "06"
+    order: 6
+    slug: 06-postflop-cash
+    title:
+      zh: "翻后（现金局）"
+      en: "Postflop (6-max Cash)"
+    summary:
+      zh: "现金局翻后的完整行动语法：持续下注、加注、第二条枪与河牌上的两个极端。"
+      en: "The full postflop grammar of cash play: continuation bets, raises, second barrels and the two river extremes."
+    tags:
+      scenario: [cash]
+      streets: [flop, turn, river, multi-street]
+    lessons:
+      - id: "06-01"
+        order: 1
+        slug: flop-continuation-bets-by-texture
+        title:
+          zh: "翻牌持续下注按质地分档：谁握有先手、谁该过牌"
+          en: "Flop continuation bets by texture: who holds the initiative and who checks"
+        objective:
+          zh: "能用范围优势与先手权解释持续下注频率在不同牌面类型上的高低。"
+          en: "Explain why continuation-bet frequency rises and falls across texture classes using range advantage and initiative."
+        tags:
+          scenario: [cash]
+          streets: [flop]
+          concepts: [continuation-bet, initiative, betting-frequency, board-texture, range-advantage]
+        prereq: ["03-04", "04-01", "05-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-02"
+        order: 2
+        slug: check-raise-ranges
+        title:
+          zh: "过牌加注范围：先让出底池是为了夺回什么"
+          en: "Check-raise ranges: giving up the pot to take something back"
+        objective:
+          zh: "能说出过牌加注范围必须包含的两类牌，以及只含一类时对手的最优应对。"
+          en: "Name the two classes a check-raise range needs and the best response when it carries only one of them."
+        tags:
+          scenario: [cash]
+          streets: [flop, turn]
+          concepts: [check-raise, check-back, slow-play, semi-bluff, polarized, checking-range]
+        prereq: ["04-05", "06-01", "02-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-03"
+        order: 3
+        slug: floats-and-probe-bets
+        title:
+          zh: "试探性跟注与探查下注：用位置买下下一条街"
+          en: "Floats and probe bets: buying the next street with position"
+        objective:
+          zh: "能用弃牌赢率与后续进攻频率说明先跟后打的合理性及其失效条件。"
+          en: "Justify continuing then attacking using fold equity and follow-up frequency, and state when it stops working."
+        tags:
+          scenario: [cash]
+          streets: [flop, turn]
+          concepts: [float, probe, initiative, fold-equity, position]
+        prereq: ["06-01", "02-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-04"
+        order: 4
+        slug: delayed-continuation-bets
+        title:
+          zh: "延迟持续下注与底池控制：过牌不是投降"
+          en: "Delayed continuation bets and pot control: a check is not a surrender"
+        objective:
+          zh: "能区分延迟进攻与二次持续下注各自的触发条件，并说明底池控制放弃了哪部分价值。"
+          en: "Separate the triggers of a delayed attack from a second-barrel spot and state what pot control gives up."
+        tags:
+          scenario: [cash]
+          streets: [turn, river]
+          concepts: [delayed-continuation-bet, pot-control, checking-range, free-card, probe, runout]
+        prereq: ["06-01", "04-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-05"
+        order: 5
+        slug: double-barreling
+        title:
+          zh: "二次开火：转牌行动线与两条街之间的范围变化"
+          en: "Double-barreling: the turn line and the range shift behind it"
+        objective:
+          zh: "能用两条街之间的范围迁移与发展牌序决定第二发子弹该不该打。"
+          en: "Decide the second barrel from the range migration and the runout between the two streets."
+        tags:
+          scenario: [cash]
+          streets: [turn]
+          concepts: [double-barrel, line, runout, range-advantage, fold-equity, nut-advantage]
+        prereq: ["06-01", "03-03", "02-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-06"
+        order: 6
+        slug: turn-sizing
+        title:
+          zh: "转牌尺度：给对手的赔率与自己的风险同时变动"
+          en: "Turn sizing: the odds offered and the risk taken move together"
+        objective:
+          zh: "能用给对手的赔率评估一个转牌尺度在对手跟注后剩下的胜率要求。"
+          en: "Evaluate a turn size by the equity requirement it leaves the caller with after complying."
+        tags:
+          scenario: [cash]
+          streets: [turn]
+          concepts: [offered-odds, bet-size, overbet, minimum-defense-frequency, sizing-risk, double-barrel]
+        prereq: ["02-08", "06-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-07"
+        order: 7
+        slug: river-value-betting
+        title:
+          zh: "河牌价值下注：没有人会再变牌时该打多重"
+          en: "River value betting: how much to bet when nobody improves again"
+        objective:
+          zh: "能用对手范围在河牌的收缩解释价值尺度与拦截下注各自的适用条件。"
+          en: "Explain river value sizing and blocking-bet choices from the opponent's contracted range."
+        tags:
+          scenario: [cash]
+          streets: [river]
+          concepts: [blocking-bet, thin-value, value-bet, betting-frequency, capped-range, pot-control]
+        prereq: ["02-07", "06-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-08"
+        order: 8
+        slug: river-bluffing-and-alpha
+        title:
+          zh: "河牌诈唬与 Alpha：最后一条街的比例由谁设定"
+          en: "River bluffing and alpha: who sets the ratio on the last street"
+        objective:
+          zh: "能用 Alpha 的定义与对手防守频率推出河牌诈唬数量的上界。"
+          en: "Bound the number of river bluffs from the definition of alpha and the opponent's defence frequency."
+        tags:
+          scenario: [cash]
+          streets: [river]
+          concepts: [alpha, triple-barrel, bluff-frequency, bluff-range, minimum-defense-frequency, indifference]
+        prereq: ["02-04", "06-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "06-09"
+        order: 9
+        slug: bluff-catching-at-scale
+        title:
+          zh: "抓诈唬要抓到量级：偏离最低防守频率的代价"
+          en: "Bluff-catching at scale: what departing from MDF actually costs"
+        objective:
+          zh: "能算出无差别跟注胜率与对手实际诈唬率之间的区间，并判断哪一段抓诈唬牌该继续。"
+          en: "Compute the band between the indifference threshold and the opponent's actual bluff rate, and choose which bluff-catchers continue."
+        tags:
+          scenario: [cash]
+          streets: [river]
+          concepts: [bluff-catching, bluff-catcher, alpha, required-equity, indifference, minimum-defense-frequency]
+        prereq: ["02-03", "06-08"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "07"
+    order: 7
+    slug: 07-multiway
+    title:
+      zh: "多人底池"
+      en: "Multiway Pots"
+    summary:
+      zh: "人数改变一切算术：防守公式、持续下注频率的坍塌，以及同花与抽水带来的修正。"
+      en: "Player count rewrites the arithmetic: the defence formula, the collapse of continuation-bet frequency, and the corrections suitedness and rake force."
+    tags:
+      scenario: [shared, cash]
+      streets: [preflop, flop, turn, river]
+    lessons:
+      - id: "07-01"
+        order: 1
+        slug: mdf-with-n-opponents
+        title:
+          zh: "N 个对手时的最低防守频率：独立假设写在这里"
+          en: "MDF with N opponents: the independence assumption stated out loud"
+        objective:
+          zh: "能写出多人底池的防守频率表达式，并指出它与真实防守产生差距的具体成因。"
+          en: "Write the multiway defence expression and name the reason it differs from real defence."
+        tags:
+          scenario: [shared]
+          streets: [flop, turn, river]
+          concepts: [independent-defender-assumption, minimum-defense-frequency, multiway, pot-odds, required-equity, removal-effect]
+        prereq: ["02-03", "03-09"]
+        status_zh: draft
+        status_en: draft
+      - id: "07-02"
+        order: 2
+        slug: continuation-frequency-collapse
+        title:
+          zh: "持续下注频率为什么在多人底池坍塌"
+          en: "Why continuation-bet frequency collapses multiway"
+        objective:
+          zh: "能用至少一家命中牌面的概率解释持续下注频率随人数的下降方向。"
+          en: "Use the probability that somebody connects to explain the direction continuation-bet frequency moves with player count."
+        tags:
+          scenario: [shared]
+          streets: [flop]
+          concepts: [betting-frequency, continuation-bet, multiway, range-advantage, capacity]
+        prereq: ["07-01", "03-09", "06-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "07-03"
+        order: 3
+        slug: bluff-value-tightening-multiway
+        title:
+          zh: "人数改变配比：诈唬收紧、价值更纯"
+          en: "Player count tightens the mix: fewer bluffs, purer value"
+        objective:
+          zh: "能用坚果容量与半诈唬重叠解释多人底池中诈唬占比的下降方向。"
+          en: "Explain the direction bluff frequency moves multiway using nut capacity and semi-bluff overlap."
+        tags:
+          scenario: [shared]
+          streets: [multi-street]
+          concepts: [bluff-to-value-ratio, semi-bluff, multiway, capacity, bluff-frequency]
+        prereq: ["02-04", "07-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "07-04"
+        order: 4
+        slug: suitedness-rake-and-sanity-checks
+        title:
+          zh: "同花构成、抽水与合理性校验：多人底池的三处修正"
+          en: "Suitedness, rake and sanity checks: three corrections to multiway maths"
+        objective:
+          zh: "能说明同花构成如何改变多人跟注的价值，并指出抽水在哪条线上把跟注变成负期望。"
+          en: "Show how suited components change multiway call value and where rake turns a call negative."
+        tags:
+          scenario: [shared, cash]
+          streets: [preflop, multi-street]
+          concepts: [suited, offsuit, rake, equity-realization, expected-value, outs]
+        prereq: ["07-01", "01-06"]
+        status_zh: draft
+        status_en: draft
+  - id: "08"
+    order: 8
+    slug: 08-toy-solvers
+    title:
+      zh: "简化求解器"
+      en: "Toy Solvers and CFR"
+    summary:
+      zh: "把均衡算出来而不是猜出来：博弈树、遗憾匹配、平均策略与可剥削度的收敛过程。"
+      en: "Compute equilibrium instead of guessing it: game trees, regret matching, the average strategy and how exploitability converges."
+    tags:
+      scenario: [shared]
+      streets: [n-a, preflop, flop]
+    lessons:
+      - id: "08-01"
+        order: 1
+        slug: game-trees-infosets-strategies
+        title:
+          zh: "博弈树、信息集与策略组合：一名玩家实际能看见什么"
+          en: "Game trees, information sets and strategy profiles: what a player can actually see"
+        objective:
+          zh: "能区分节点、信息集与策略组合，并解释为什么同一信息集内必须使用同一套频率。"
+          en: "Separate node, information set and strategy profile, and explain why one information set carries one frequency distribution."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [game-tree, information-set, strategy-profile, mixed-strategy, solver]
+        prereq: ["00-02", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-02"
+        order: 2
+        slug: regret-matching
+        title:
+          zh: "遗憾匹配：只按当初该做什么来迭代"
+          en: "Regret matching: iterating only on what you should have done"
+        objective:
+          zh: "能用正遗憾值写出下一轮的行动频率，并说明迭代真正推向收敛的是哪个量。"
+          en: "Turn positive regrets into the next round's frequencies and identify which quantity actually converges."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [regret, regret-matching, cfr, information-set, ev-decomposition]
+        prereq: ["08-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-03"
+        order: 3
+        slug: cfr-on-kuhn-hand-trace
+        title:
+          zh: "在 Kuhn 博弈上手工跑一遍 CFR 迭代"
+          en: "Tracing CFR iterations by hand on the Kuhn game"
+        objective:
+          zh: "能逐步算出 Kuhn 博弈里一个信息集的遗憾更新与随之变化的策略频率。"
+          en: "Step through one information set's regret update and the resulting strategy change on the Kuhn game."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [kuhn, regret-matching, cfr, strategy-profile, game-tree]
+        prereq: ["08-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-04"
+        order: 4
+        slug: convergence-average-strategy-exploitability
+        title:
+          zh: "收敛的是平均策略，不是当前策略"
+          en: "Convergence belongs to the average strategy, not the current one"
+        objective:
+          zh: "能用可剥削度衡量平均策略离均衡还有多远，并解释当前策略为何来回摆动。"
+          en: "Measure how far the average strategy sits from equilibrium using exploitability, and explain current-strategy oscillation."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [average-strategy, convergence, exploitability, game-value, best-response, nash-equilibrium]
+        prereq: ["08-03", "00-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-05"
+        order: 5
+        slug: cfr-plus-and-why-faster
+        title:
+          zh: "CFR+ 快在哪里：把负遗憾截回零"
+          en: "Why CFR+ is faster: flooring negative regrets at zero"
+        objective:
+          zh: "能说明这两处改动各自如何加快平均策略收敛，并给出验证速度所需的对照实验。"
+          en: "Explain how each of the two changes accelerates average-strategy convergence and design the control run that proves it."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [cfr-plus, regret, average-strategy, convergence, determinism]
+        prereq: ["08-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-06"
+        order: 6
+        slug: leduc-and-card-abstraction
+        title:
+          zh: "Leduc 与牌力抽象：模型丢掉了什么、还剩下什么"
+          en: "Leduc and card abstraction: what the model throws away and what survives"
+        objective:
+          zh: "能指出一处牌力抽象合并了哪些信息集，并说明它把结论推向哪个方向。"
+          en: "Identify which information sets a card abstraction merges and how that biases the conclusion."
+        tags:
+          scenario: [shared]
+          streets: [preflop, flop]
+          concepts: [leduc, card-abstraction, information-set, game-tree, solver]
+        prereq: ["08-01", "08-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "08-07"
+        order: 7
+        slug: reading-solver-output-without-memorising-it
+        title:
+          zh: "读求解器输出而不背它：哪些是策略、哪些是残差"
+          en: "Reading solver output without memorising it: policy against residual noise"
+        objective:
+          zh: "能用可剥削度与迭代次数把一份输出里可信的部分和残余噪声分开。"
+          en: "Use exploitability and iteration count to separate the trustworthy part of an output from residual noise."
+        tags:
+          scenario: [shared]
+          streets: [n-a]
+          concepts: [solver-output, exploitability, average-strategy, solver, convergence, sample-size]
+        prereq: ["08-04", "01-04"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "09"
+    order: 9
+    slug: 09-cash-practice
+    title:
+      zh: "现金实战与复盘"
+      en: "Cash Practice and Review"
+    summary:
+      zh: "把理论变成工作流：节点锁定做假设、按计划而非背表、审计漏洞并排出训练周期。"
+      en: "Turn theory into workflow: what-if node locking, plans over charts, leak audits and a scheduled training block."
+    tags:
+      scenario: [cash, population]
+      streets: [multi-street]
+    lessons:
+      - id: "09-01"
+        order: 1
+        slug: node-locking-what-if
+        title:
+          zh: "节点锁定：把对手的错误写进模型再算剥削"
+          en: "Node locking: write the opponent's mistake into the model, then compute the exploit"
+        objective:
+          zh: "能用节点锁定覆盖一个决策频率，并读出双方期望值各自的变化方向。"
+          en: "Override one decision frequency with node locking and read the direction of both players' expected value."
+        tags:
+          scenario: [cash, population]
+          streets: [multi-street]
+          concepts: [node-locking, solver-output, exploitability, best-response, information-set]
+        prereq: ["08-07", "02-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "09-02"
+        order: 2
+        slug: plans-not-charts
+        title:
+          zh: "要计划不要背表：一条行动线连着下一条"
+          en: "Plans, not charts: chaining one line into the next"
+        objective:
+          zh: "能用行动线如何改变范围，解释单独一格的频率为什么不足以支撑决策。"
+          en: "Explain why one grid cell cannot decide anything, once you see how the line reshapes the range."
+        tags:
+          scenario: [cash]
+          streets: [multi-street]
+          concepts: [decision-plan, line, range, range-chart, capped-range]
+        prereq: ["09-01", "06-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "09-03"
+        order: 3
+        slug: hand-review-workflow
+        title:
+          zh: "复盘工作流：先定决策点，再谈结论"
+          en: "The hand-review workflow: decision points before conclusions"
+        objective:
+          zh: "能把一手牌拆成决策点，并按范围、赔率、动作三步给出可复核的结论。"
+          en: "Split a hand into decision points and reach a checkable conclusion through range, odds, then action."
+        tags:
+          scenario: [cash]
+          streets: [multi-street]
+          concepts: [hand-review, decision-point, ev-decomposition, calling-range, provenance]
+        prereq: ["09-02", "02-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "09-04"
+        order: 4
+        slug: leak-audit
+        title:
+          zh: "漏洞审计：用频率对照找出漏在哪条街"
+          en: "Leak audits: locating the leak by comparing frequencies"
+        objective:
+          zh: "能判断自己的数据与生成频率之差属于频率型漏洞还是范围型漏洞，并说出各自的检验办法。"
+          en: "Judge whether the gap between your data and generated frequencies is a frequency leak or a range leak, and how each is tested."
+        tags:
+          scenario: [cash, population]
+          streets: [multi-street]
+          concepts: [leak, leak-audit, betting-frequency, fold-frequency, minimum-defense-frequency]
+        prereq: ["09-03", "06-09"]
+        status_zh: draft
+        status_en: draft
+      - id: "09-05"
+        order: 5
+        slug: building-a-training-block
+        title:
+          zh: "排一个训练周期：定点重复与迁移练习的比例"
+          en: "Building a training block: repetition against transfer"
+        objective:
+          zh: "能按 spot 的出现频次与已确认的漏洞，排出一个带复核标准的训练周期。"
+          en: "Sequence a training block with review criteria, driven by spot frequency and confirmed leaks."
+        tags:
+          scenario: [cash]
+          streets: [multi-street]
+          concepts: [training-block, spot-repetition, leak-audit, range-chart, decision-plan]
+        prereq: ["09-04"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "10"
+    order: 10
+    slug: 10-heads-up-bvb
+    title:
+      zh: "单挑与按钮位对抗"
+      en: "Heads-Up and Button vs Big Blind"
+    summary:
+      zh: "两人博弈的代数让范围变宽、尺度变极端，并检验哪些结论能带回满员牌桌。"
+      en: "Two-player algebra widens ranges and extremes sizing, and tests which conclusions survive a full ring."
+    tags:
+      scenario: [hu]
+      streets: [preflop, flop, turn, river, multi-street]
+    lessons:
+      - id: "10-01"
+        order: 1
+        slug: the-two-player-algebra
+        title:
+          zh: "两人博弈的代数：为什么单挑的范围必然更宽"
+          en: "Two-player algebra: why heads-up ranges must be wider"
+        objective:
+          zh: "能用另一家必然封顶这一事实，解释单挑中范围上限与防守频率的差异来源。"
+          en: "Use the certainty that the other player is capped to explain how heads-up range bounds and defence frequencies differ."
+        tags:
+          scenario: [hu]
+          streets: [multi-street]
+          concepts: [heads-up, capped-range, minimum-defense-frequency, betting-frequency, multiway]
+        prereq: ["03-09", "02-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "10-02"
+        order: 2
+        slug: wide-ranges-and-position
+        title:
+          zh: "宽范围下的位置：先手权到底值多少"
+          en: "Wide ranges and position: what the initiative is worth"
+        objective:
+          zh: "能用后手信息与坚果容量说明范围变宽时位置价值的变化方向。"
+          en: "Explain how positional value moves as ranges widen, using later information and nut capacity."
+        tags:
+          scenario: [hu]
+          streets: [multi-street]
+          concepts: [wide-range, narrow-range, position, initiative, capacity]
+        prereq: ["10-01", "06-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "10-03"
+        order: 3
+        slug: button-open-versus-bb-three-bet
+        title:
+          zh: "按钮位率先加注对大盲 3-bet：谁在给谁封顶"
+          en: "Button open versus big-blind three-bet: who caps whom"
+        objective:
+          zh: "能说明这两家范围各自的上限如何决定翻后的尺度与频率选择。"
+          en: "Show how each side's range cap drives the postflop sizing and frequency choices."
+        tags:
+          scenario: [hu]
+          streets: [preflop, flop]
+          concepts: [button-vs-big-blind, three-bet, rfi, capped-range, calling-range]
+        prereq: ["05-03", "10-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "10-04"
+        order: 4
+        slug: heads-up-postflop-frequencies
+        title:
+          zh: "单挑翻后的频率：防守下限与进攻上限"
+          en: "Heads-up postflop frequencies: defence floors and attack ceilings"
+        objective:
+          zh: "能用单挑里的防守下限与尺度集合解释同一条街为什么需要多个尺度。"
+          en: "Use heads-up defence floors and the available size set to explain why one street needs several sizes."
+        tags:
+          scenario: [hu]
+          streets: [flop, turn, river]
+          concepts: [minimum-defense-frequency, betting-frequency, checking-range, overbet, heads-up, size-set]
+        prereq: ["10-03", "04-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "10-05"
+        order: 5
+        slug: transferring-hu-skills-to-a-full-ring
+        title:
+          zh: "把单挑技能搬回满员桌：哪些结论不能带走"
+          en: "Bringing heads-up skills back to a full ring: which conclusions do not transfer"
+        objective:
+          zh: "能列出单挑结论失效的条件，并说明人数如何恢复坚果优势的意义。"
+          en: "List where heads-up conclusions fail, and show how extra players restore the meaning of nut advantage."
+        tags:
+          scenario: [hu, cash]
+          streets: [multi-street]
+          concepts: [multiway, nut-advantage, capacity, range-advantage, heads-up]
+        prereq: ["10-04", "07-02"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "11"
+    order: 11
+    slug: 11-mtt-core
+    title:
+      zh: "锦标赛基础"
+      en: "Tournament Core"
+    summary:
+      zh: "筹码不再等于钱：存活价值、前注结构与奖金阶梯如何改写同一个决策的评价。"
+      en: "Chips stop being money: how survival value, ante structure and pay jumps rewrite the score of the same decision."
+    tags:
+      scenario: [mtt]
+      streets: [preflop, multi-street]
+    lessons:
+      - id: "11-01"
+        order: 1
+        slug: what-tournament-math-changes
+        title:
+          zh: "锦标赛数学改了哪一条：单手期望值不再是目标函数"
+          en: "What tournament math changes: single-hand EV is no longer the objective"
+        objective:
+          zh: "能用存活概率与奖金结构说明期望值最大的动作为什么未必是最优动作。"
+          en: "Explain with survival and payout structure why the biggest single-hand expectation need not be the best action."
+        tags:
+          scenario: [mtt]
+          streets: [multi-street]
+          concepts: [tournament, chip-leadership, bankroll, risk-of-ruin, downswing, expected-value]
+        prereq: ["02-06", "03-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "11-02"
+        order: 2
+        slug: fold-equity-and-the-icm-preview
+        title:
+          zh: "弃牌赢率与 ICM 预告：同一个抢盲在这里换了价钱"
+          en: "Fold equity and the ICM preview: the same steal is priced differently"
+        objective:
+          zh: "能用弃牌赢率与筹码边际价值的递减方向，解释同一偷盲动作在锦标赛里价值下降的原因。"
+          en: "Use fold equity and the diminishing marginal value of chips to explain why the identical steal is worth less."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [icm, fold-equity, steal, chip-leadership, big-blind]
+        prereq: ["11-01", "02-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "11-03"
+        order: 3
+        slug: stack-zones
+        title:
+          zh: "筹码区间与 M：把深度翻译成决策模式"
+          en: "Stack zones and M: reading depth as a decision mode"
+        objective:
+          zh: "能用 M 与区间边界说明同一手牌在两个区间里动作的差异及其来源。"
+          en: "Use M and the zone boundaries to show how one hand's action differs across zones, and why."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [m-factor, stack-zone, short-stack, big-stack, effective-stack, spr]
+        prereq: ["11-01", "03-07"]
+        status_zh: draft
+        status_en: draft
+      - id: "11-04"
+        order: 4
+        slug: antes-and-big-blind-antes
+        title:
+          zh: "前注与大盲前注：底池里不属于任何人的钱"
+          en: "Antes and big-blind antes: money in the pot that is nobody's decision"
+        objective:
+          zh: "能重算含前注结构后的底池赔率，并说明防守频率为什么会因此放松。"
+          en: "Recompute pot odds under an ante structure and explain why defence loosens as a result."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [ante, bb-ante, dead-money, pot-odds, required-equity, big-blind]
+        prereq: ["11-03", "02-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "11-05"
+        order: 5
+        slug: bubble-dynamics
+        title:
+          zh: "泡沫期动力学：钱在逼近，筹码在贬值"
+          en: "Bubble dynamics: the money approaches while chips depreciate"
+        objective:
+          zh: "能用进圈前后的存活价值解释泡沫期弃牌范围变宽的成因，并指出哪一方受影响更大。"
+          en: "Use the survival value around the pay cut to explain why folding widens on the bubble, and who is hit harder."
+        tags:
+          scenario: [mtt]
+          streets: [multi-street]
+          concepts: [bubble, in-the-money, chip-leadership, risk-of-ruin, tournament]
+        prereq: ["11-02", "11-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "11-06"
+        order: 6
+        slug: pay-jumps-and-the-equal-skill-assumption
+        title:
+          zh: "奖金跳档与等强度假设：模型什么时候够用"
+          en: "Pay jumps and the equal-skill assumption: when the model is enough"
+        objective:
+          zh: "能指出一条奖金跳档改变了哪一项边际价值，以及等强度假设失效时结论偏向哪边。"
+          en: "Identify the marginal value one pay jump changes, and the direction results drift when equal skill fails."
+        tags:
+          scenario: [mtt]
+          streets: [multi-street]
+          concepts: [pay-jump, payout-structure, equal-skill-assumption, icm, chip-leadership]
+        prereq: ["11-02", "11-05"]
+        status_zh: draft
+        status_en: draft
+  - id: "12"
+    order: 12
+    slug: 12-icm-pushfold
+    title:
+      zh: "ICM 与短码推倒"
+      en: "ICM and Push/Fold"
+    summary:
+      zh: "两动作模型下的均衡解：纳什全下范围、ICM 与筹码期望的分歧，以及泡沫因子的换算。"
+      en: "Equilibrium in the two-action model: Nash shoving ranges, where ICM and chip EV disagree, and what the bubble factor converts."
+    tags:
+      scenario: [mtt]
+      streets: [preflop]
+    lessons:
+      - id: "12-01"
+        order: 1
+        slug: the-two-action-model
+        title:
+          zh: "两动作模型：短码为什么只剩全下与弃牌"
+          en: "The two-action model: why short stacks reduce to shove or fold"
+        objective:
+          zh: "能说明可选尺度如何随深度收缩，并指出两动作模型为了可解性删掉了什么。"
+          en: "Explain how available sizing collapses with depth and state what the two-action model deletes for tractability."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [push-fold, two-action-model, shove, bet-size, spr]
+        prereq: ["03-07", "11-03"]
+        status_zh: draft
+        status_en: draft
+      - id: "12-02"
+        order: 2
+        slug: nash-shoving-ranges
+        title:
+          zh: "纳什全下范围：两动作模型里的均衡解"
+          en: "Nash shoving ranges: the equilibrium of the two-action model"
+        objective:
+          zh: "能在两动作模型里写出全下方与跟注方各自的无差别条件，并说明两者如何互为约束。"
+          en: "Write the indifference conditions for both the shoving and the calling side, and show how each constrains the other."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [nash-shove-ranges, shoving-range, call-shove-range, indifference, nash-equilibrium, required-equity]
+        prereq: ["12-01", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "12-03"
+        order: 3
+        slug: icm-versus-chip-ev
+        title:
+          zh: "ICM 与筹码期望值：同一手牌的两个结论"
+          en: "ICM against chip EV: two answers for one hand"
+        objective:
+          zh: "能用两种度量给同一次全下打分，并说明它们在什么条件下给出相反的排序。"
+          en: "Score the same shove with both measures and say when they rank it in opposite orders."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [chip-ev, eicm, icm, expected-value, payout-structure]
+        prereq: ["12-02", "11-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "12-04"
+        order: 4
+        slug: bubble-factors
+        title:
+          zh: "泡沫因子：筹码换算成钱的那个乘数"
+          en: "Bubble factors: the multiplier between chips and money"
+        objective:
+          zh: "能用泡沫因子的方向解释筹码上为正期望的全下为什么在泡沫期仍然不能推。"
+          en: "Use the direction of the bubble factor to explain a chip-positive shove that must still be folded."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [bubble-factor, survival-premium, icm, chip-ev, bubble]
+        prereq: ["12-03", "11-05"]
+        status_zh: draft
+        status_en: draft
+      - id: "12-05"
+        order: 5
+        slug: final-table-icm
+        title:
+          zh: "决赛桌的 ICM：人数与筹码分布同时改变"
+          en: "Final-table ICM: player count and stack distribution move together"
+        objective:
+          zh: "能用筹码分布与奖金结构解释同一次全下范围在决赛桌收窄的原因。"
+          en: "Explain why the same shoving range narrows at the final table using stack distribution and payout structure."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [final-table, bubble-factor, icm, shoving-range, payout-structure, big-stack, table-avoidance]
+        prereq: ["12-04", "11-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "12-06"
+        order: 6
+        slug: a-pushfold-drill-workflow
+        title:
+          zh: "搭一套推倒训练：从计算范围到反馈闭环"
+          en: "A push/fold drill workflow: from computed ranges to a feedback loop"
+        objective:
+          zh: "能搭出可重复的推倒训练流程，并说明每一次作答该比对哪个计算结果。"
+          en: "Set up a repeatable push/fold drill and state which computed result each rep is scored against."
+        tags:
+          scenario: [mtt]
+          streets: [preflop]
+          concepts: [push-fold, nash-shove-ranges, shoving-range, training-block, spot-repetition]
+        prereq: ["12-02", "09-05"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "13"
+    order: 13
+    slug: 13-population-exploits
+    title:
+      zh: "群体读牌与剥削"
+      en: "Population Reads and Exploitation"
+    summary:
+      zh: "把对手当成真实人群而不是均衡解：测量群体频率、定位可利用的偏离，并安全地偏离回去。"
+      en: "Treat opponents as a real population rather than an equilibrium: measure its frequencies, find the exploitable departures, and deviate safely."
+    tags:
+      scenario: [population]
+      streets: [multi-street, flop, turn, river]
+    lessons:
+      - id: "13-01"
+        order: 1
+        slug: nash-versus-population-in-one-formula
+        title:
+          zh: "一条公式分清纳什解与群体剥削解"
+          en: "One formula separating the Nash answer from the population exploit"
+        objective:
+          zh: "能用同一公式里的频率项改写目标函数，把对手当作群体而非均衡来应对。"
+          en: "Rewrite the objective through the frequency term so the opponent is a population rather than an equilibrium."
+        tags:
+          scenario: [population]
+          streets: [multi-street]
+          concepts: [population, exploit, equilibrium-baseline, exploitability, best-response]
+        prereq: ["02-06", "08-04", "00-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "13-02"
+        order: 2
+        slug: measuring-a-population
+        title:
+          zh: "测量一个群体：样本量、频率区间与统计口径"
+          en: "Measuring a population: sample size, frequency bands and definitions"
+        objective:
+          zh: "能判断一个统计量需要多少样本，才足以区分群体倾向与随机波动。"
+          en: "State how much data a statistic needs before it separates a population tendency from noise."
+        tags:
+          scenario: [population]
+          streets: [multi-street]
+          concepts: [hud, vpip, pfr, aggression-frequency, wtsd, w-sd, sample-size, standard-error]
+        prereq: ["13-01", "01-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "13-03"
+        order: 3
+        slug: exploiting-the-check-back-leak
+        title:
+          zh: "剥削“过牌过多”这个群体漏洞"
+          en: "Exploiting the population's over-checking leak"
+        objective:
+          zh: "能用观察到的过牌频率替换均衡防守频率，并重算下注价值与应有的频率。"
+          en: "Replace the equilibrium defence frequency with the observed checking rate and recompute bet value and frequency."
+        tags:
+          scenario: [population]
+          streets: [flop, turn]
+          concepts: [overfold, check-back, checking-frequency, fold-frequency, fold-equity, leak]
+        prereq: ["13-02", "04-07", "06-02"]
+        status_zh: draft
+        status_en: draft
+      - id: "13-04"
+        order: 4
+        slug: exploiting-over-and-under-bluffing
+        title:
+          zh: "对手诈唬过多或过少：两种偏离要两种应对"
+          en: "Over- and under-bluffing: two departures, two answers"
+        objective:
+          zh: "能用对手实际诈唬率与 Alpha 的差判断该跟注还是该再加注，并说明差值多大才值得动手。"
+          en: "Judge whether to call or re-raise from the gap between observed bluff rate and alpha, and say when the gap is worth acting on."
+        tags:
+          scenario: [population]
+          streets: [river]
+          concepts: [over-bluffing, under-bluffing, alpha, bluff-catching, indifference, bluff-frequency]
+        prereq: ["13-02", "06-09", "02-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "13-05"
+        order: 5
+        slug: exploiting-sizing-tells
+        title:
+          zh: "尺度马脚：把下注金额当信息源"
+          en: "Sizing tells: treating the amount bet as information"
+        objective:
+          zh: "能用一个尺度对应的范围变化判断它何时值得跟大注、何时只是噪声。"
+          en: "Use the range shift a size implies to decide when a sizing tendency is callable and when it is noise."
+        tags:
+          scenario: [population]
+          streets: [turn, river]
+          concepts: [tell, sizing-tell, bet-size, capped-range, range, polarized]
+        prereq: ["13-02", "06-06"]
+        status_zh: draft
+        status_en: draft
+      - id: "13-06"
+        order: 6
+        slug: deviating-without-self-destructing
+        title:
+          zh: "偏离而不自我毁灭：平衡式剥削"
+          en: "Deviating without self-destruction: balanced exploitation"
+        objective:
+          zh: "能说明一次偏离需要藏进哪条行动线，并给出被反制时的退路。"
+          en: "Identify which line must mask a deviation and state the fallback when it gets counter-exploited."
+        tags:
+          scenario: [population]
+          streets: [multi-street]
+          concepts: [deviation, balanced-exploitation, exploitability, node-locking, mixed-strategy, line]
+        prereq: ["13-04", "09-01"]
+        status_zh: draft
+        status_en: draft
+
+  - id: "14"
+    order: 14
+    slug: 14-capstone-practice
+    title:
+      zh: "综合实战"
+      en: "Capstone Practice"
+    summary:
+      zh: "把前三章的工具串成一次完整分析、一份自己的训练计划，并检验模型边界之外的东西。"
+      en: "Chain the earlier tools into one complete analysis, your own training plan, and a check of what sits outside the model."
+    tags:
+      scenario: [shared, cash, mtt, hu, population]
+      streets: [multi-street]
+    lessons:
+      - id: "14-01"
+        order: 1
+        slug: a-full-loop-hand-analysis
+        title:
+          zh: "完整闭环分析一手牌：从范围到可核验的结论"
+          en: "A full-loop hand analysis: from ranges to a checkable conclusion"
+        objective:
+          zh: "能独立完成一次涵盖范围、赔率、频率与来源标注的分析，并写出结论的核验办法。"
+          en: "Complete one analysis covering range, odds, frequencies and provenance, and state how its conclusion is checked."
+        tags:
+          scenario: [shared, cash]
+          streets: [multi-street]
+          concepts: [decision-loop, hand-review, ev-decomposition, provenance, unverified-claim]
+        prereq: ["09-03", "13-01", "06-09"]
+        status_zh: draft
+        status_en: draft
+      - id: "14-02"
+        order: 2
+        slug: your-own-training-plan
+        title:
+          zh: "给自己排训练计划：把漏洞变成可检验的周期"
+          en: "Your own training plan: turning leaks into testable blocks"
+        objective:
+          zh: "能按漏洞的严重度与出现频次排出训练计划，并为每个周期写下检验标准。"
+          en: "Order a training plan by leak severity and frequency, with a written test for every block."
+        tags:
+          scenario: [shared, cash, mtt]
+          streets: [multi-street]
+          concepts: [training-plan, training-block, leak-audit, spot-repetition, decision-loop]
+        prereq: ["09-05", "09-04", "14-01"]
+        status_zh: draft
+        status_en: draft
+      - id: "14-03"
+        order: 3
+        slug: mixed-spot-examination
+        title:
+          zh: "混合场次考核：换了场景，结论就得跟着换"
+          en: "The mixed-spot examination: conclusions must move with the scenario"
+        objective:
+          zh: "能把同一手牌放到现金、单挑与锦标赛场景里，并解释改变答案的具体输入。"
+          en: "Move one hand across cash, heads-up and tournament scenarios and identify the exact input that changed the answer."
+        tags:
+          scenario: [shared, cash, hu, mtt]
+          streets: [multi-street]
+          concepts: [spot-mix, tournament, heads-up, multiway, spr, icm]
+        prereq: ["14-01", "10-05", "12-04"]
+        status_zh: draft
+        status_en: draft
+      - id: "14-04"
+        order: 4
+        slug: what-gto-does-not-tell-you
+        title:
+          zh: "均衡模型不会告诉你的那些事"
+          en: "What the equilibrium model does not tell you"
+        objective:
+          zh: "能列出模型输入之外的三类真实信息，并说明它们各自改变哪个频率或哪一项估值。"
+          en: "List three kinds of real information outside the model inputs and say which frequency or valuation each one changes."
+        tags:
+          scenario: [shared, population]
+          streets: [multi-street]
+          concepts: [metagame, information-set, population, solver-output, exploitability]
+        prereq: ["14-01", "13-06"]
+        status_zh: draft
+        status_en: draft
+

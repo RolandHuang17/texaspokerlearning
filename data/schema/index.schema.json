@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/index.schema.json",
+  "title": "Aggregated curriculum index consumed by the trainer and the docs nav",
+  "description": "Generated per locale from data/src/curriculum.yaml by tools/gen_curriculum_index.py. The nav and the landing-page curriculum map are built from this, never hand-written, so a lesson registered but not written shows up as a build error instead of a silent 404.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "engine_version", "locale", "totals", "chapters"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "engine_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "locale": { "enum": ["en", "zh"] },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["chapters", "lessons", "lessons_ready", "spots", "hands", "quizzes", "tables"],
+      "properties": {
+        "chapters": { "type": "integer", "minimum": 0 },
+        "lessons": { "type": "integer", "minimum": 0 },
+        "lessons_ready": { "type": "integer", "minimum": 0 },
+        "lessons_draft": { "type": "integer", "minimum": 0 },
+        "spots": { "type": "integer", "minimum": 0 },
+        "hands": { "type": "integer", "minimum": 0 },
+        "quizzes": { "type": "integer", "minimum": 0 },
+        "tables": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "chapters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "slug", "title", "lessons"],
+        "properties": {
+          "id": { "type": "string" },
+          "slug": { "type": "string" },
+          "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "summary": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "scenario": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/scenario_tag" } },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "slug", "title", "status", "path"],
+              "properties": {
+                "id": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" },
+                "slug": { "type": "string" },
+                "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "objective": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "status": { "$ref": "common.schema.json#/$defs/status" },
+                "path": { "type": "string", "pattern": "^docs/(en|zh)/" },
+                "prereq": { "type": "array", "items": { "type": "string" } },
+                "scenario": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/scenario_tag" } },
+                "hand_ids": { "type": "array", "items": { "type": "string" } },
+                "quiz_ids": { "type": "array", "items": { "type": "string" } },
+                "table_ids": { "type": "array", "items": { "type": "string" } },
+                "spot_ids": { "type": "array", "items": { "type": "string" } },
+                "unverified_count": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

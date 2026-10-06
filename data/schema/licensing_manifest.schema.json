@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/licensing_manifest.schema.json",
+  "title": "License records for anything not authored here (data/src/licensing_manifest.yaml)",
+  "description": "Every external source used as a validation anchor or cited fact must appear here. tools/check_provenance.py rejects an artifact whose provenance.upstream has no record, and rejects any record whose license is not in common.schema.json#/$defs/accepted_license.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "records"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "policy": {
+      "type": "string",
+      "description": "Short restatement of NOTICE, rendered on the docs provenance page."
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "upstream", "license", "what_is_taken", "why_permitted"],
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "upstream": { "type": "string", "minLength": 1 },
+          "license": { "$ref": "common.schema.json#/$defs/accepted_license" },
+          "retrieved": { "type": ["string", "null"], "format": "date" },
+          "what_is_taken": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "why_permitted": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "artifacts_using_it": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "explicitly_prohibited": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/lang_string" },
+      "description": "Machine-readable restatement of the NOTICE ban, rendered in the docs so the rule is visible where a contributor would add a chart."
+    }
+  }
+}

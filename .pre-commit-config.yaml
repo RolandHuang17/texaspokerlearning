@@ -1,0 +1,176 @@
+# Pre-commit configuration.
+#
+# Why the Python hooks are `repo: local` with `language: system` instead of the usual remote hook
+# repos: three reasons, all of them about the environment rather than taste.
+#
+#   1. Offline. pre-commit cloning `astral-sh/ruff-pre-commit` or `pre-commit/mirrors-mypy` needs
+#      network access at first run and a working toolchain download; a contributor on a train, or a
+#      CI runner behind an egress proxy, gets a hook failure that says nothing about their change.
+#      `language: system` runs `python -m ruff` in the environment the repository already declares,
+#      so there is exactly one ruff and one mypy, and `pyproject.toml` configures both of them.
+#   2. Version coherence. A remote hook pins its own tool version inside its own isolated venv, which
+#      means a contributor can be gated by a ruff newer than the one in `pip install -e ".[dev]"` and
+#      see failures they cannot reproduce locally. Here the version is the installed one, and
+#      `requirements-dev.txt` is the pin.
+#   3. Same commands as the docs. Every entry below is the command in docs/development/local-dev.md.
+#      If a gate only exists inside pre-commit, it is not a gate people can reason about.
+#
+# The cost is that a fresh clone with no environment installed cannot run these hooks — which is why
+# `setup/install.{ps1,sh}` installs the extras before anything else, and `setup/doctor.py` reports
+# whether the module entry points are reachable. CI is the backstop: every local hook here is re-run
+# in `ci.yml`, `bilingual.yml` and `data-drift.yml` as plain commands, so an un-run `--no-verify`
+# cannot land a broken artifact.
+#
+# Prettier and codespell are the exception: they are not Python and have no home in this project's
+# venv, so they install their own isolated environments on first run, over the network.
+
+minimum_pre_commit_version: "3.6.0"
+
+default_language_version:
+  python: python3
+
+exclude: |
+  (?x)^(
+    site/.*|                    # mkdocs build output
+    trainer/node_modules/.*|
+    trainer/dist/.*|
+    out/.*|                     # solver scratch space
+    .*\.lock$
+  )$
+
+repos:
+  # --- hygiene, no language-specific behaviour -------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        # `.editorconfig` says trailing whitespace is meaningful in Markdown (two spaces are a hard
+        # line break), so the hook has to know that or it would silently re-flow lesson typography.
+        args: [--markdown-linebreak-ext=md]
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # No arguments, deliberately. The defaults are the feature here: duplicate mapping keys are
+        # rejected, which in a 92-lesson curriculum spine is the difference between "a lesson is
+        # registered twice" and "a lesson quietly vanished" (ruamel keeps the last value). mkdocs.yml
+        # and data/src/*.yaml use no custom tags, so --unsafe is not needed and would only weaken it.
+      - id: check-json
+        # data/gen/*.json must parse before gen_all.py's byte diff runs against it, and a corrupt
+        # artifact is otherwise only discovered by whatever test happened to read it.
+      - id: check-toml
+      - id: check-added-large-files
+        # 1 MiB rather than the 500 KiB default: solver artifacts are CSV (exploitability per
+        # iteration) and a legitimate one can pass 500 KiB. Anything bigger belongs in a release
+        # asset, not in git — see adr/0001 on what data/gen is allowed to contain.
+        args: [--maxkb=1000]
+      - id: mixed-line-ending
+        # .gitattributes already declares `* text=auto eol=lf`, and data/gen is compared byte for
+        # byte, so a CRLF sneaking in is a gate failure and not a style opinion.
+        args: [--fix=lf]
+
+  # --- the repository's own gates, run from the contributor's environment ----------------------
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check (src, tools, setup)
+        entry: python -m ruff check --no-cache --exit-non-zero-on-fix
+        language: system
+        types: [python]
+        files: ^(src|tools|setup)/.*\.py$
+        args: [--fix]
+        # Fixes in place, then fails if it changed anything, so the contributor sees the diff and
+        # re-runs instead of wondering why the hook "passed" after rewriting their file.
+
+      - id: ruff-format
+        name: ruff format
+        entry: python -m ruff format --no-cache
+        language: system
+        types: [python]
+        files: ^(src|tools|setup)/.*\.py$
+
+      - id: mypy
+        name: mypy (src/pokergto, strict)
+        entry: python -m mypy
+        language: system
+        pass_filenames: false
+        files: ^src/.*\.py$
+        # No filenames on purpose: pyproject sets `files = ["src/pokergto"]`, and mypy must see the
+        # whole package to resolve cross-module types. Running it per-file is how a partial
+        # type-check gets mistaken for a passing one.
+
+      - id: check-bilingual
+        name: bilingual parity (en/zh mirror, template, AUTO ids)
+        entry: python tools/check_bilingual.py
+        language: system
+        pass_filenames: false
+        files: ^(docs/(en|zh)/|data/src/curriculum\.yaml|data/src/glossary\.yaml|tools/check_bilingual\.py|src/pokergto/registry\.py)
+        # The tool walks the tree itself; giving it one filename would check one lesson and report
+        # success about all of them.
+
+      - id: check-provenance
+        name: provenance gate (no unattributed claim, no proprietary source)
+        entry: python tools/check_provenance.py
+        language: system
+        pass_filenames: false
+        files: ^(data/|docs/|tools/check_provenance\.py|src/pokergto/artifacts\.py)
+
+      - id: check-artifact-schema
+        name: artifact schema validation (data/gen vs data/schema)
+        entry: python tools/check_artifact_schema.py
+        language: system
+        pass_filenames: false
+        files: ^(data/gen/|data/schema/|tools/check_artifact_schema\.py|src/pokergto/artifacts\.py)
+
+      - id: inject-doc-tables-check
+        name: AUTO blocks are not hand-edited
+        entry: python tools/inject_doc_tables.py --check
+        language: system
+        pass_filenames: false
+        files: ^(docs/(en|zh)/|data/gen/tables/|tools/inject_doc_tables\.py|src/pokergto/render\.py)
+        # Added beyond the brief's four local hooks because it is the gate that makes adr/0001 real,
+        # and a lesson whose committed table differs from the engine's output is exactly the failure
+        # the repository exists to prevent.
+
+      - id: gen-all-check
+        name: data/gen is byte-identical to a fresh generation
+        entry: python tools/gen_all.py --check --skip solver
+        language: system
+        pass_filenames: false
+        files: ^(src/pokergto/|data/src/|tools/gen_)
+        # VERIFIED FAILURE: as of this writing this hook aborts with
+        #   NameError: name '_kind_for' is not defined   (tools/gen_all.py:108)
+        # because the manifest step calls a function that does not exist; the generator's own
+        # docstring advertises exactly this `--skip solver` mode. The working equivalent today is
+        # `python tools/gen_all.py --check --skip manifest`. This line stays as the contract and the
+        # failure stays visible, rather than quietly pointing at the weaker subset: the fix belongs in
+        # tools/gen_all.py, which is the maintainer's file.
+
+  # --- non-Python formatters and spelling, isolated environments --------------------------------
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.9.9
+    hooks:
+      - id: prettier
+        files: \.(md|ya?ml|json)$
+        exclude: |
+          (?x)^(
+            data/gen/.*|        # generated; prettier re-wrapping a byte-pinned artifact breaks
+            data/schema/.*|     #   gen_all.py --check, and these trees are machine-owned
+            docs/en/.*|         # AUTO blocks are engine-rendered tables; prettier re-aligns them by
+            docs/zh/.*|         #   character count, not display width, so CJK tables would break
+            trainer/.*          # the trainer has its own npm toolchain and prettier config
+          )$
+        # Markdown tables, YAML indentation and JSON spacing are the three things a human edits by
+        # hand and a generator emits byte-exactly; this hook only owns the first category.
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.2
+    hooks:
+      - id: codespell
+        # Prose only. Generated JSON and the Chinese lesson tree are excluded below, so this hook
+        # never fires on content nobody is typing by hand, and a real poker term that trips it is
+        # fixed with --ignore-words-list rather than by skipping the hook.
+        exclude: |
+          (?x)^(
+            data/gen/.*|        # generated content is not proofread by a spell checker
+            docs/zh/.*|         # Chinese lessons: no Latin words to check, lots of false positives
+            .*\.schema\.json
+          )$

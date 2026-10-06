@@ -1,0 +1,162 @@
+{
+  "caption": {
+    "en": "For pot P and bet B = s*P: MDF = P/(P+B) = 1/(1+s). Computed by pokergto.odds, not transcribed.",
+    "zh": "对底池 P、下注 B=s·P：MDF = P/(P+B) = 1/(1+s)。这一列由 pokergto.odds 现算，不是抄来的表。"
+  },
+  "checks": [
+    {
+      "detail": "mdf column == pot/(pot+bet) recomputed independently",
+      "kind": "mdf_equality",
+      "pass": false
+    },
+    {
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Size",
+        "zh": "尺度"
+      },
+      "key": "size_label",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "MDF",
+        "zh": "MDF 防守频率"
+      },
+      "key": "mdf",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Fold freq a bluff needs",
+        "zh": "诈唬所需弃牌率"
+      },
+      "key": "fold_frequency_needed",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Equity to call",
+        "zh": "跟注所需胜率"
+      },
+      "key": "equity_needed",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.02-03.mdf-vs-sizing",
+  "lesson": "02-03",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#minimum_defense_frequency",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "bluff_fraction": 0.166667,
+      "equity_needed": 0.166667,
+      "fold_frequency_needed": 0.2,
+      "mdf": 0.8,
+      "pot_odds": 4.0,
+      "size": 0.25,
+      "size_label": "1/4 pot",
+      "value_to_bluff": 5.0
+    },
+    {
+      "bluff_fraction": 0.2,
+      "equity_needed": 0.2,
+      "fold_frequency_needed": 0.25,
+      "mdf": 0.75,
+      "pot_odds": 3.0,
+      "size": 0.333333,
+      "size_label": "1/3 pot",
+      "value_to_bluff": 4.0
+    },
+    {
+      "bluff_fraction": 0.25,
+      "equity_needed": 0.25,
+      "fold_frequency_needed": 0.333333,
+      "mdf": 0.666667,
+      "pot_odds": 2.0,
+      "size": 0.5,
+      "size_label": "1/2 pot",
+      "value_to_bluff": 3.0
+    },
+    {
+      "bluff_fraction": 0.285714,
+      "equity_needed": 0.285714,
+      "fold_frequency_needed": 0.4,
+      "mdf": 0.6,
+      "pot_odds": 1.5,
+      "size": 0.666667,
+      "size_label": "2/3 pot",
+      "value_to_bluff": 2.5
+    },
+    {
+      "bluff_fraction": 0.3,
+      "equity_needed": 0.3,
+      "fold_frequency_needed": 0.428571,
+      "mdf": 0.571429,
+      "pot_odds": 1.333333,
+      "size": 0.75,
+      "size_label": "3/4 pot",
+      "value_to_bluff": 2.333333
+    },
+    {
+      "bluff_fraction": 0.333333,
+      "equity_needed": 0.333333,
+      "fold_frequency_needed": 0.5,
+      "mdf": 0.5,
+      "pot_odds": 1.0,
+      "size": 1.0,
+      "size_label": "1x pot",
+      "value_to_bluff": 2.0
+    },
+    {
+      "bluff_fraction": 0.375,
+      "equity_needed": 0.375,
+      "fold_frequency_needed": 0.6,
+      "mdf": 0.4,
+      "pot_odds": 0.666667,
+      "size": 1.5,
+      "size_label": "3/2 pot",
+      "value_to_bluff": 1.666667
+    },
+    {
+      "bluff_fraction": 0.4,
+      "equity_needed": 0.4,
+      "fold_frequency_needed": 0.666667,
+      "mdf": 0.333333,
+      "pot_odds": 0.5,
+      "size": 2.0,
+      "size_label": "2x pot",
+      "value_to_bluff": 1.5
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "sizing_table",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.odds",
+    "seed": null
+  },
+  "title": {
+    "en": "Bet size and minimum defense frequency",
+    "zh": "下注尺度与最低防守频率"
+  },
+  "unverified_claims": []
+}

@@ -1,0 +1,24 @@
+# Development + docs requirements, pip path.
+#
+# pyproject.toml is the single source of truth for metadata and tool configuration; this file
+# exists so that a contributor on Windows/Anaconda can do:
+#
+#     python -m pip install -r requirements-dev.txt
+#
+# without an editable install, and so CI pins one resolved set. On Linux/macOS CI the editable
+# install path (`pip install -e ".[dev,docs]"`) is used instead; both must stay in sync, and
+# .github/workflows/ci.yml has a job step that fails if they diverge.
+
+numpy>=1.24
+PyYAML>=6
+jsonschema>=4
+
+pytest>=7.4
+pytest-cov>=4
+ruff>=0.4
+mypy>=1.8
+pre-commit>=3.6
+
+mkdocs>=1.6
+mkdocs-material>=9.5
+pymdown-extensions>=10

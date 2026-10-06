@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/hand_example.schema.json",
+  "title": "A live-hand teaching example (实战牌局)",
+  "description": "Hand-authored transcript plus the decision points a lesson grades. Deliberately NOT a machine-parsed hand history from a poker site: this format exists so a hand can be written down with its teaching intent attached. Every lesson must render at least two of these; tools/check_bilingual.py enforces it, so 'lots of practical examples' is a gate rather than an aspiration.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "title", "meta", "seats", "streets", "decision_points", "provenance"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "summary": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "tags", "lessons"],
+      "properties": {
+        "status": { "$ref": "common.schema.json#/$defs/status" },
+        "tags": { "$ref": "common.schema.json#/$defs/tags" },
+        "lessons": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" }
+        },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "format": {
+      "enum": ["cash-6max", "cash-hu", "bvb", "mtt", "toy"],
+      "default": "cash-6max"
+    },
+    "seats": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["pos", "stack_bb"],
+        "properties": {
+          "pos": { "enum": ["UTG", "MP", "CO", "BTN", "SB", "BB", "HJ", "BJ"] },
+          "hero": { "type": "boolean", "default": false },
+          "stack_bb": { "type": "number", "exclusiveMinimum": 0 },
+          "vpip": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "note": { "$ref": "common.schema.json#/$defs/lang_string" }
+        }
+      }
+    },
+    "hero_hand": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "type": "string", "pattern": "^(A|K|Q|J|T|9|8|7|6|5|4|3|2)[shdc]$" }
+    },
+    "streets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["street"],
+        "properties": {
+          "street": { "$ref": "common.schema.json#/$defs/street_tag" },
+          "board": {
+            "type": "array",
+            "maxItems": 5,
+            "items": { "type": "string", "pattern": "^(A|K|Q|J|T|9|8|7|6|5|4|3|2)[shdc]$" }
+          },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["pos", "action"],
+              "properties": {
+                "pos": { "type": "string" },
+                "action": { "enum": ["fold", "check", "call", "bet", "raise", "shove", "complete"] },
+                "size_bb": { "type": ["number", "null"] },
+                "pot_fraction": { "type": ["number", "null"] }
+              }
+            }
+          },
+          "pot_bb": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "decision_points": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["street", "question", "correct_action", "why"],
+        "properties": {
+          "street": { "$ref": "common.schema.json#/$defs/street_tag" },
+          "question": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["label"],
+              "properties": {
+                "label": { "$ref": "common.schema.json#/$defs/lang_string" },
+                "ev_bb": { "type": ["number", "null"] }
+              }
+            }
+          },
+          "correct_action": { "type": "string" },
+          "correct_size_bb": { "type": ["number", "null"] },
+          "why": { "$ref": "common.schema.json#/$defs/lang_string" },
+          "spot_ref": { "$ref": "common.schema.json#/$defs/id" },
+          "cost_of_mistake_bb_per_100": { "type": ["number", "null"] },
+          "principle": { "$ref": "common.schema.json#/$defs/glossary_ref" }
+        }
+      }
+    },
+    "outcome": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "winner": { "type": ["string", "null"] },
+        "hero_bb": { "type": ["number", "null"] },
+        "note": { "$ref": "common.schema.json#/$defs/lang_string" }
+      }
+    },
+    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "unverified_claims": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unverified_claim" }
+    },
+    "checks": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/check" } }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/quiz.schema.json",
+  "title": "A drill item, authored or generated",
+  "description": "Answers are computed, never typed. tools/check_quiz_answers.py recomputes each answer from the engine and fails on mismatch, so a generated numeric item cannot carry a stale key. Prompts and rationales are bilingual by type.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "type", "prompt", "answer", "rationale", "provenance"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "lesson": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" },
+    "type": {
+      "enum": [
+        "numeric",
+        "multiple_choice",
+        "range_identify",
+        "range_paint",
+        "spot_decision",
+        "hand_replay",
+        "comparison"
+      ]
+    },
+    "prompt": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "parameters": {
+      "type": "object",
+      "description": "Inputs to the engine call that generates this item and its answer.",
+      "additionalProperties": true
+    },
+    "answer": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "number": { "type": ["number", "null"] },
+        "choice": { "type": ["string", "null"] },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["key", "label"],
+            "properties": {
+              "key": { "type": "string" },
+              "label": { "$ref": "common.schema.json#/$defs/lang_string" }
+            }
+          }
+        },
+        "chart": { "type": ["string", "null"] },
+        "action": { "type": ["string", "null"] },
+        "size_pot_fraction": { "type": ["number", "null"] }
+      }
+    },
+    "tolerance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "absolute": { "type": ["number", "null"], "minimum": 0 },
+        "relative": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "rationale": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "derivation_ref": { "type": ["string", "null"] },
+    "generator": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "module": { "type": "string" },
+        "function": { "type": "string" },
+        "seed": { "type": ["integer", "null"] }
+      }
+    },
+    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "checks": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/check" } }
+  }
+}

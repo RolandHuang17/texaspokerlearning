@@ -1,0 +1,173 @@
+# Site build for the bilingual curriculum. Everything here is a decision, not a preference; the
+# reasons are in the comments because the next reader needs the constraint, not the syntax.
+#
+# Verified against what this repository actually contains (mkdocs 1.6.1 + mkdocs-material 9.7.7):
+# `python -m mkdocs build --strict` is green. Note that bare `mkdocs` is NOT on PATH on Windows
+# with this toolchain (see docs/development/local-dev.md).
+
+site_name: "GTO 学堂 / GTO Academy"
+site_description: >-
+  A bilingual (Chinese/English) GTO Texas Hold'em curriculum where every number is derived in code
+  and cited to its provenance, never asserted from memory.
+site_author: Roland Huang
+
+# Placeholder until the Pages site is confirmed. It is load-bearing, not decorative: the language
+# selector below emits root-relative links, and mkdocs uses this value for canonical tags and for
+# the sitemap. Changing the deploy target means changing it here and nowhere else.
+site_url: https://RolandHuang17.github.io/texaspokerlearning/
+
+# The curriculum lives as a mirrored tree, docs/en/<chapter>/<lesson>.md and the identical byte-path
+# under docs/zh/. docs_dir is therefore `docs`, not `docs/en`: the locale is the FIRST path segment,
+# which is what tools/check_bilingual.py compares and what tools/inject_doc_tables.py reads off the
+# file path to choose which locale of a generated table to render.
+docs_dir: docs
+
+# `repo_name` is the plain repository name because the site is a project page, and the owner prefix
+# would just repeat the URL that is already configured below.
+repo_name: texaspokerlearning
+repo_url: https://github.com/RolandHuang17/texaspokerlearning
+# Keeps "Improve this page" honest: it links into the real tree, so a reader can open the lesson's
+# twin in the other language from the same commit.
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+
+  # Typography is the one thing that cannot be an afterthought in a bilingual repository: the default
+  # Roboto has no CJK coverage, so Chinese lessons fall back to whatever the OS substitutes, which on
+  # Windows means a serif face next to sans-serif Latin and tables that look broken.
+  #
+  # Material's CSS builds the final stack as `var(--md-text-font), -apple-system, BlinkMacSystemFont,
+  # Helvetica, Arial, sans-serif` (verified in the installed 9.7.7 stylesheet), so naming one family
+  # here still leaves a Latin-first system fallback for readers who block Google Fonts. A two-family
+  # stack (a Latin display face first, Noto Sans SC second) would need an extra CSS asset under
+  # docs/, and docs/ deliberately holds authored content only.
+  font:
+    text: Noto Sans SC
+    code: JetBrains Mono
+
+  features:
+    - navigation.sections # chapters stay visible as groups; a flat list of 92 lessons is unusable
+    - navigation.top # long derivations: jump back to the locale switch without scrolling
+    - navigation.tracking # the URL is the lesson id, so citations between chapters stay meaningful
+    - toc.follow
+    - search.share # a search URL is reproducible, which makes "see what the site says" citable
+    - content.code.copy
+    - content.tabs.link
+
+  # Poker derivations are read at night on phones as often as in a browser; a hard-coded light theme
+  # would make the LaTeX unreadable rather than merely unpretty.
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+# Language selector.
+#
+# This is hand-wired, and the reason is a fact about the installed toolchain rather than a taste:
+# mkdocs-material announced the deprecation of its bundled `i18n` plugin in 9.5 and the installed
+# 9.7.7 does not ship it at all — its `mkdocs.plugins` entry points list blog, group, info, meta,
+# offline, optimize, privacy, projects, search, social, tags and typeset, and no i18n. Meanwhile
+# `mkdocs-static-i18n` (the replacement) is not a dependency of this project: pyproject.toml's `docs`
+# extra pins only mkdocs, mkdocs-material and pymdown-extensions. Adding a plugin is a dependency
+# decision for the maintainer, so the selector below is the zero-new-dependency version: Material
+# renders `extra.alternate` as the header dropdown and as `<link rel="alternate" hreflang>` whether
+# or not a plugin generated the pages.
+#
+# Links are root-relative because site_url is a project page. Relative links (`../zh/`) would resolve
+# against the current page's depth and therefore break for the top-level pages under /development/.
+#
+# Consequence to accept knowingly: with no i18n plugin there is no build_files copy, so the site root
+# has no index page — the landing pages are /en/ and /zh/, and the Pages URL 404s until either a
+# plugin is added or a docs/index.md redirect is authored. Flagged to the maintainer.
+extra:
+  alternate:
+    - name: English
+      link: /texaspokerlearning/en/
+      lang: en
+    - name: 简体中文
+      link: /texaspokerlearning/zh/
+      lang: zh
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/RolandHuang17/texaspokerlearning
+      name: Source, issues and pull requests
+
+markdown_extensions:
+  # Chapter 02 and chapter 08 are LaTeX derivations (indifference equations, exploitability bounds).
+  # `generic: true` emits MathJax-compatible \[ \] and \( \) markup instead of MathML, which is why
+  # extra_javascript below must load MathJax v3; the two settings are one decision, not two.
+  - pymdownx.arithmatex:
+      generic: true
+  # Admonitions carry the UNVERIFIED badge that src/pokergto/render.py::provenance_block generates.
+  # The class name `unverified` is asserted by tools/check_provenance.py, so it must survive the
+  # renderer: do not swap these for callouts that rewrite the title line.
+  - admonition
+  - pymdownx.details # collapsible provenance notes, so honesty is visible without being a wall
+  - pymdownx.superfences # nested fences: Python that emits a table inside a lesson step
+  - attr_list
+  - def_list
+  - footnotes # citations to public-domain results, kept out of the derivation's own sentences
+  - tables # generated AUTO blocks are markdown tables
+  - toc:
+      permalink: true # a lesson sentence must be citable by section, from either language
+
+extra_javascript:
+  # Version-pinned rather than floating: an unpinned `mathjax@3` changes rendering without a commit
+  # in this repository, and a derivation that reflows silently is a review problem in a teaching
+  # document. Rendered formulas are the content here, not decoration.
+  - https://unpkg.com/mathjax@3.2.2/es5/tex-mml-chtml.js
+
+plugins:
+  - search:
+      # Both locales are indexed into one corpus: lunr ships lunr.zh.js (verified present in the
+      # installed mkdocs), which segments Chinese by character so a Chinese query finds a Chinese
+      # lesson. Dropping `zh` would silently make the Chinese half of the project unsearchable.
+      # Material also accepts `jieba_dict` for word-level segmentation; that is a data asset we do
+      # not have, and character segmentation is enough for lesson titles and term names.
+      lang:
+        - en
+        - zh
+
+# ---------------------------------------------------------------------------
+# nav
+# ---------------------------------------------------------------------------
+#
+# Lesson navigation is NOT authored here, and cannot be included automatically today.
+#
+# tools/gen_curriculum_index.py reads data/src/curriculum.yaml and emits data/gen/nav.en.yml and
+# data/gen/nav.zh.yml — the same fragments the site's table of contents should be built from, so the
+# spine and the nav can never disagree (adr/0001). But mkdocs 1.6.1 has no `!include` constructor:
+# `nav: !include data/gen/nav.en.yml` fails with "could not determine a constructor for the tag
+# '!include'" before docs_dir resolution is ever considered, so there is no way to pull a YAML
+# fragment from outside docs/ into this file. A fragment inside docs/ would have to be generated
+# there, which contradicts `data/gen` being the single generated tree.
+#
+# Therefore: the entries below are the stable, hand-authored part of the nav, and once
+# data/src/curriculum.yaml exists, the generated lesson tree from data/gen/nav.<locale>.yml is merged
+# into this block by hand and reviewed as a diff. That is a manual step, not automation we have
+# built, and it is stated plainly instead of implied by a comment that promises a script.
+# Until lessons are authored there is nothing to merge: docs/en and docs/zh each hold a landing page
+# and the chapters arrive with milestone M1.
+nav:
+  - English: en/index.md
+  - 中文: zh/index.md
+  # Contributor-facing engineering docs are single-language by design (see adr/0005 and the note at
+  # the top of each file), which is why they appear once, outside either locale tree, and why
+  # tools/check_bilingual.py exempts `development/` from the mirroring rule.
+  - Development:
+      - development/local-dev.md
+      - development/bilingual-style.md
+      - development/data-provenance.md
+      - development/solver-proof-policy.md
+      - development/adr.md

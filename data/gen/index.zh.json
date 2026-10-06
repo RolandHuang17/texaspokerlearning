@@ -1,0 +1,2401 @@
+{
+  "chapters": [
+    {
+      "id": "00",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "00-01",
+          "path": "docs/zh/00-orientation/how-to-use-this-repo.md",
+          "prereq": [],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "how-to-use-this-repo",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "How to use this curriculum: hole cards, board, the four streets and position names",
+            "zh": "怎么读这套教材：底牌、牌面、四条街与位置名称"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "00-02",
+          "path": "docs/zh/00-orientation/derivation-over-memory.md",
+          "prereq": [
+            "00-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "derivation-over-memory",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Derivation before memory: every number must be recomputable by the engine",
+            "zh": "先推导再记忆：一个数字必须能被引擎重算出来"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "00-03",
+          "path": "docs/zh/00-orientation/setup-and-toolchain.md",
+          "prereq": [
+            "00-01",
+            "00-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "setup-and-toolchain",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Set up the toolchain: the CLI, random seeds and deterministic output",
+            "zh": "装好工具链：命令行、随机种子与确定性输出"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared"
+      ],
+      "slug": "00-orientation",
+      "summary": {
+        "en": "How the repository is read: vocabulary, the fixed lesson template, provenance, and why numbers are generated rather than typed.",
+        "zh": "先讲清这套教材怎么用：术语、结构、来源标注，以及为什么数字必须由引擎生成。"
+      },
+      "title": {
+        "en": "Orientation",
+        "zh": "导论"
+      }
+    },
+    {
+      "id": "01",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "01-01",
+          "path": "docs/zh/01-combinatorics-equity/combos-from-1326-to-169.md",
+          "prereq": [
+            "00-01",
+            "00-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "combos-from-1326-to-169",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "From hole combos to hand classes: how many combos each class really has",
+            "zh": "从起手组合到手牌类别：每一类到底有几个组合"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-02",
+          "path": "docs/zh/01-combinatorics-equity/blockers-and-card-removal.md",
+          "prereq": [
+            "01-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "blockers-and-card-removal",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Blockers and removal effects: how one card rewrites the opponent's combo count",
+            "zh": "阻断牌与移除效应：一张牌如何改掉对手的组合计数"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-03",
+          "path": "docs/zh/01-combinatorics-equity/exact-equity-by-enumeration.md",
+          "prereq": [
+            "01-01",
+            "01-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "exact-equity-by-enumeration",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Exact equity by enumeration: turning outs into per-street probabilities",
+            "zh": "穷举胜率：把补牌数换成每一街的精确概率"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-04",
+          "path": "docs/zh/01-combinatorics-equity/monte-carlo-variance-and-seeds.md",
+          "prereq": [
+            "01-03",
+            "00-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "monte-carlo-variance-and-seeds",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Monte Carlo error: variance, standard error and pinned seeds",
+            "zh": "模拟误差从哪来：方差、标准误与固定种子"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-05",
+          "path": "docs/zh/01-combinatorics-equity/the-seven-card-evaluator.md",
+          "prereq": [
+            "01-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "the-seven-card-evaluator",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The seven-card evaluator: hand classification and kicker tie-breaks",
+            "zh": "七张牌评估器：牌型归类与踢脚判定的边界情形"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-06",
+          "path": "docs/zh/01-combinatorics-equity/equity-realization-vs-raw-equity.md",
+          "prereq": [
+            "01-03",
+            "01-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "equity-realization-vs-raw-equity",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Equity is not money: why realization falls short of raw equity",
+            "zh": "胜率不等于拿到手的钱：胜率实现为何低于名义胜率"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "01-07",
+          "path": "docs/zh/01-combinatorics-equity/reading-a-13x13-grid.md",
+          "prereq": [
+            "01-01",
+            "01-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "reading-a-13x13-grid",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Reading a 13x13 grid: what a cell counts and what the axes mean",
+            "zh": "读 13×13 网格：一格代表几个组合、行列轴是什么"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared"
+      ],
+      "slug": "01-combinatorics-equity",
+      "summary": {
+        "en": "Reduce a hand to countable objects: combos, removal effects, exact equity, simulation error and hand evaluation.",
+        "zh": "把牌局还原成可数的对象：组合、移除效应、精确胜率、模拟误差与牌力评估。"
+      },
+      "title": {
+        "en": "Combinatorics and Equity",
+        "zh": "组合数学与胜率"
+      }
+    },
+    {
+      "id": "02",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "02-01",
+          "path": "docs/zh/02-the-math-of-one-decision/break-even-percentage.md",
+          "prereq": [
+            "00-02",
+            "01-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "break-even-percentage",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Break-even percentage: the risk a call takes against the reward it buys",
+            "zh": "保本百分比：一次跟注承担的风险对应多少回报"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-02",
+          "path": "docs/zh/02-the-math-of-one-decision/pot-odds-to-call-frequency.md",
+          "prereq": [
+            "02-01",
+            "01-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "pot-odds-to-call-frequency",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Pot odds into a call: required equity and where implied odds break the shortcut",
+            "zh": "底池赔率翻译成跟注：所需胜率与隐含赔率的适用边界"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-03",
+          "path": "docs/zh/02-the-math-of-one-decision/deriving-minimum-defense-frequency.md",
+          "prereq": [
+            "02-01",
+            "02-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "deriving-minimum-defense-frequency",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Minimum defense frequency: why pot/(pot+bet)",
+            "zh": "最低防守频率：为什么是 pot/(pot+bet)"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-04",
+          "path": "docs/zh/02-the-math-of-one-decision/bluff-to-value-ratio.md",
+          "prereq": [
+            "02-01",
+            "02-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "bluff-to-value-ratio",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The bluff-to-value ratio: how indifference sets the mix",
+            "zh": "诈唬与价值的配比：无差别条件如何定出比例"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-05",
+          "path": "docs/zh/02-the-math-of-one-decision/fold-equity.md",
+          "prereq": [
+            "02-01",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "fold-equity",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Fold equity: the only part of a bet the opponent can hand you",
+            "zh": "弃牌赢率：一次下注里唯一由对手决定的收益"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-06",
+          "path": "docs/zh/02-the-math-of-one-decision/ev-unified-formula.md",
+          "prereq": [
+            "02-01",
+            "02-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "ev-unified-formula",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "One notation for every action: call, bet, raise and shove",
+            "zh": "一套符号管住所有动作：跟注、下注、加注与全下"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-07",
+          "path": "docs/zh/02-the-math-of-one-decision/the-thin-value-bet.md",
+          "prereq": [
+            "02-04",
+            "02-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "the-thin-value-bet",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Thin value bets: when winning only a little is still worth betting",
+            "zh": "薄价值下注：只赢一点点也值得打的判定条件"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "02-08",
+          "path": "docs/zh/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md",
+          "prereq": [
+            "02-03",
+            "02-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "sizing-risk-and-fold-asymmetry",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Sizing asymmetry: raise risk against what a fold is worth",
+            "zh": "尺度的不对称：被加注的风险与弃牌带来的收益"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared"
+      ],
+      "slug": "02-the-math-of-one-decision",
+      "summary": {
+        "en": "All the arithmetic of a single decision: break-even, defence floors, bluff ratios and the asymmetry sizing buys.",
+        "zh": "一次跟注、一次下注的全部算术：保本点、防守下限、诈唬配比与尺度带来的不对称。"
+      },
+      "title": {
+        "en": "The Math of One Decision",
+        "zh": "单次决策的数学"
+      }
+    },
+    {
+      "id": "03",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "03-01",
+          "path": "docs/zh/03-range-advantage/equity-advantage-vs-nut-advantage.md",
+          "prereq": [
+            "01-07",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "equity-advantage-vs-nut-advantage",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Who already has the straight on this flop: nut advantage, not equity",
+            "zh": "同一翻面上谁已经成顺子：用坚果优势而非胜率区分"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-02",
+          "path": "docs/zh/03-range-advantage/capped-ranges.md",
+          "prereq": [
+            "03-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "capped-ranges",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Capped ranges: why one line contains no nuts",
+            "zh": "封顶范围：为什么这条线里不存在坚果"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-03",
+          "path": "docs/zh/03-range-advantage/advantage-street-by-street.md",
+          "prereq": [
+            "03-01",
+            "01-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "advantage-street-by-street",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Advantage changes hands: flop, turn and river ranges are not the same argument",
+            "zh": "优势会换手：翻牌、转牌、河牌上的范围优势各不相同"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-04",
+          "path": "docs/zh/03-range-advantage/board-texture-and-advantage.md",
+          "prereq": [
+            "03-01",
+            "01-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "board-texture-and-advantage",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Board texture classes: whom monochrome, two-tone, paired and connected boards help",
+            "zh": "牌面质地分类：单色、双色、成对与连张各自偏向谁"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-05",
+          "path": "docs/zh/03-range-advantage/blockers-as-range-effects.md",
+          "prereq": [
+            "01-02",
+            "03-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "blockers-as-range-effects",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Blockers as range effects: which hands a card keeps out of a range",
+            "zh": "把阻断牌读成范围效应：谁的手里不可能有那手牌"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-06",
+          "path": "docs/zh/03-range-advantage/removal-in-your-own-range.md",
+          "prereq": [
+            "03-05",
+            "01-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "removal-in-your-own-range",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Removal inside your own range: my hole cards delete my own nuts",
+            "zh": "自己范围里的移除效应：我的底牌删掉了我的坚果"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-07",
+          "path": "docs/zh/03-range-advantage/spr-and-commitment.md",
+          "prereq": [
+            "02-06",
+            "01-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "spr-and-commitment",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "SPR: stack depth and pot size collapsed into one number",
+            "zh": "SPR：把筹码深度与底池尺寸压成同一个数"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-08",
+          "path": "docs/zh/03-range-advantage/commit-or-float.md",
+          "prereq": [
+            "03-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "commit-or-float",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Commit or hold back: the two levels of commitment SPR creates",
+            "zh": "套池还是收着打：SPR 决定的两种承诺程度"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "03-09",
+          "path": "docs/zh/03-range-advantage/range-advantage-heads-up-vs-3way.md",
+          "prereq": [
+            "03-01",
+            "03-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "range-advantage-heads-up-vs-3way",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Range advantage means something different heads-up and three-way",
+            "zh": "单挑与三人池的范围优势不是同一件事"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared"
+      ],
+      "slug": "03-range-advantage",
+      "summary": {
+        "en": "Compare ranges rather than hands: equity advantage, nut advantage, board texture and how depth changes both.",
+        "zh": "比较两个范围而不是比较两副牌：胜率优势、坚果优势、牌面质地与筹码深度的共同作用。"
+      },
+      "title": {
+        "en": "Range Advantage",
+        "zh": "范围优势"
+      }
+    },
+    {
+      "id": "04",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "04-01",
+          "path": "docs/zh/04-bet-sizing/sizing-governance.md",
+          "prereq": [
+            "02-03",
+            "03-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "sizing-governance",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Who governs the size: frequency logic against range logic",
+            "zh": "谁决定尺度：频率法与范围法的分工"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-02",
+          "path": "docs/zh/04-bet-sizing/why-one-third-pot-exists.md",
+          "prereq": [
+            "04-01",
+            "02-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash"
+          ],
+          "slug": "why-one-third-pot-exists",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Why small sizes exist: converting pot fraction into defence burden",
+            "zh": "小尺度为什么存在：底池比例与防守负担的换算"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-03",
+          "path": "docs/zh/04-bet-sizing/why-overbets-exist.md",
+          "prereq": [
+            "04-02",
+            "03-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash"
+          ],
+          "slug": "why-overbets-exist",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Why overbets exist: nut capacity that carries a huge size",
+            "zh": "超池下注为什么存在：坚果容量撑起尺度"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-04",
+          "path": "docs/zh/04-bet-sizing/multiple-sizes-one-street.md",
+          "prereq": [
+            "04-01",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "multiple-sizes-one-street",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Two sizes on one street: how a mixed-size policy splits the range",
+            "zh": "一条街用两个尺度：混合尺度如何切分范围"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-05",
+          "path": "docs/zh/04-bet-sizing/polarized-vs-merged-vs-linear.md",
+          "prereq": [
+            "04-04",
+            "03-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "polarized-vs-merged-vs-linear",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Polarized, merged and linear: three range shapes, three sizing logics",
+            "zh": "极化、合并与线性：三种范围形状对应三种尺度逻辑"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-06",
+          "path": "docs/zh/04-bet-sizing/protection-versus-value.md",
+          "prereq": [
+            "04-05",
+            "01-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash"
+          ],
+          "slug": "protection-versus-value",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Protection or value: what changes the reason for betting",
+            "zh": "保护还是价值：一张牌如何改变下注的理由"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "04-07",
+          "path": "docs/zh/04-bet-sizing/check-size-governance.md",
+          "prereq": [
+            "04-01",
+            "02-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "check-size-governance",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Governing the checking range: what a check line must still carry",
+            "zh": "过牌的范围同样要被治理：过牌线里必须留什么"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "cash",
+        "shared",
+        "cash",
+        "shared",
+        "shared",
+        "shared",
+        "cash",
+        "shared"
+      ],
+      "slug": "04-bet-sizing",
+      "summary": {
+        "en": "Sizing is not taste: frequency and range shape decide it, and every size from minimum bet to overbet has a reason to exist.",
+        "zh": "尺度不是口味问题：由频率与范围形状共同决定，从最小注到超池注各有其存在理由。"
+      },
+      "title": {
+        "en": "Bet Sizing",
+        "zh": "下注尺度"
+      }
+    },
+    {
+      "id": "05",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "05-01",
+          "path": "docs/zh/05-preflop-cash/rfi-by-position.md",
+          "prereq": [
+            "01-07",
+            "03-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "rfi-by-position",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Open-raise ranges by position: why they widen toward the button",
+            "zh": "各位置率先加注：范围为什么向按钮位逐级放宽"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "05-02",
+          "path": "docs/zh/05-preflop-cash/big-blind-defense.md",
+          "prereq": [
+            "02-02",
+            "02-03",
+            "05-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "big-blind-defense",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Big blind defence: odds too cheap to abandon",
+            "zh": "大盲防守：赔率便宜到无法放弃的底池"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "05-03",
+          "path": "docs/zh/05-preflop-cash/three-bet-ranges.md",
+          "prereq": [
+            "05-02",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "three-bet-ranges",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Three-bet ranges: how value, protection and light re-raises are mixed",
+            "zh": "3-bet 范围：价值、保护与轻量三段的配比"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "05-04",
+          "path": "docs/zh/05-preflop-cash/the-squeeze.md",
+          "prereq": [
+            "03-02",
+            "05-03",
+            "02-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "the-squeeze",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The squeeze: when two ranges are capped at once",
+            "zh": "挤压加注：当两家范围同时被封顶"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "05-05",
+          "path": "docs/zh/05-preflop-cash/four-bet-and-five-bet-ranges.md",
+          "prereq": [
+            "05-03",
+            "03-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "four-bet-and-five-bet-ranges",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Four- and five-bet ranges: narrowing down to the last tier",
+            "zh": "4-bet 与 5-bet：范围收窄到最后一段"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "05-06",
+          "path": "docs/zh/05-preflop-cash/one-hundred-big-blinds-spr-consequences.md",
+          "prereq": [
+            "03-07",
+            "05-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "one-hundred-big-blinds-spr-consequences",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "What a hundred big blinds does: depth constraining preflop ranges back",
+            "zh": "一百个大盲意味着什么：深度对翻前范围的反向约束"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash"
+      ],
+      "slug": "05-preflop-cash",
+      "summary": {
+        "en": "The six-max preflop frame: opening, big-blind defence, and re-raise ranges that narrow bet by bet.",
+        "zh": "现金局六个位置的翻前框架：率先加注、大盲防守与逐级收窄的再加注范围。"
+      },
+      "title": {
+        "en": "Preflop (6-max Cash)",
+        "zh": "翻前（现金局）"
+      }
+    },
+    {
+      "id": "06",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "06-01",
+          "path": "docs/zh/06-postflop-cash/flop-continuation-bets-by-texture.md",
+          "prereq": [
+            "03-04",
+            "04-01",
+            "05-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "flop-continuation-bets-by-texture",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Flop continuation bets by texture: who holds the initiative and who checks",
+            "zh": "翻牌持续下注按质地分档：谁握有先手、谁该过牌"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-02",
+          "path": "docs/zh/06-postflop-cash/check-raise-ranges.md",
+          "prereq": [
+            "04-05",
+            "06-01",
+            "02-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "check-raise-ranges",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Check-raise ranges: giving up the pot to take something back",
+            "zh": "过牌加注范围：先让出底池是为了夺回什么"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-03",
+          "path": "docs/zh/06-postflop-cash/floats-and-probe-bets.md",
+          "prereq": [
+            "06-01",
+            "02-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "floats-and-probe-bets",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Floats and probe bets: buying the next street with position",
+            "zh": "试探性跟注与探查下注：用位置买下下一条街"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-04",
+          "path": "docs/zh/06-postflop-cash/delayed-continuation-bets.md",
+          "prereq": [
+            "06-01",
+            "04-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "delayed-continuation-bets",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Delayed continuation bets and pot control: a check is not a surrender",
+            "zh": "延迟持续下注与底池控制：过牌不是投降"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-05",
+          "path": "docs/zh/06-postflop-cash/double-barreling.md",
+          "prereq": [
+            "06-01",
+            "03-03",
+            "02-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "double-barreling",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Double-barreling: the turn line and the range shift behind it",
+            "zh": "二次开火：转牌行动线与两条街之间的范围变化"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-06",
+          "path": "docs/zh/06-postflop-cash/turn-sizing.md",
+          "prereq": [
+            "02-08",
+            "06-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "turn-sizing",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Turn sizing: the odds offered and the risk taken move together",
+            "zh": "转牌尺度：给对手的赔率与自己的风险同时变动"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-07",
+          "path": "docs/zh/06-postflop-cash/river-value-betting.md",
+          "prereq": [
+            "02-07",
+            "06-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "river-value-betting",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "River value betting: how much to bet when nobody improves again",
+            "zh": "河牌价值下注：没有人会再变牌时该打多重"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-08",
+          "path": "docs/zh/06-postflop-cash/river-bluffing-and-alpha.md",
+          "prereq": [
+            "02-04",
+            "06-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "river-bluffing-and-alpha",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "River bluffing and alpha: who sets the ratio on the last street",
+            "zh": "河牌诈唬与 Alpha：最后一条街的比例由谁设定"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "06-09",
+          "path": "docs/zh/06-postflop-cash/bluff-catching-at-scale.md",
+          "prereq": [
+            "02-03",
+            "06-08"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "bluff-catching-at-scale",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Bluff-catching at scale: what departing from MDF actually costs",
+            "zh": "抓诈唬要抓到量级：偏离最低防守频率的代价"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash",
+        "cash"
+      ],
+      "slug": "06-postflop-cash",
+      "summary": {
+        "en": "The full postflop grammar of cash play: continuation bets, raises, second barrels and the two river extremes.",
+        "zh": "现金局翻后的完整行动语法：持续下注、加注、第二条枪与河牌上的两个极端。"
+      },
+      "title": {
+        "en": "Postflop (6-max Cash)",
+        "zh": "翻后（现金局）"
+      }
+    },
+    {
+      "id": "07",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "07-01",
+          "path": "docs/zh/07-multiway/mdf-with-n-opponents.md",
+          "prereq": [
+            "02-03",
+            "03-09"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "mdf-with-n-opponents",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "MDF with N opponents: the independence assumption stated out loud",
+            "zh": "N 个对手时的最低防守频率：独立假设写在这里"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "07-02",
+          "path": "docs/zh/07-multiway/continuation-frequency-collapse.md",
+          "prereq": [
+            "07-01",
+            "03-09",
+            "06-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "continuation-frequency-collapse",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Why continuation-bet frequency collapses multiway",
+            "zh": "持续下注频率为什么在多人底池坍塌"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "07-03",
+          "path": "docs/zh/07-multiway/bluff-value-tightening-multiway.md",
+          "prereq": [
+            "02-04",
+            "07-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "bluff-value-tightening-multiway",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Player count tightens the mix: fewer bluffs, purer value",
+            "zh": "人数改变配比：诈唬收紧、价值更纯"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "07-04",
+          "path": "docs/zh/07-multiway/suitedness-rake-and-sanity-checks.md",
+          "prereq": [
+            "07-01",
+            "01-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash"
+          ],
+          "slug": "suitedness-rake-and-sanity-checks",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Suitedness, rake and sanity checks: three corrections to multiway maths",
+            "zh": "同花构成、抽水与合理性校验：多人底池的三处修正"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "cash"
+      ],
+      "slug": "07-multiway",
+      "summary": {
+        "en": "Player count rewrites the arithmetic: the defence formula, the collapse of continuation-bet frequency, and the corrections suitedness and rake force.",
+        "zh": "人数改变一切算术：防守公式、持续下注频率的坍塌，以及同花与抽水带来的修正。"
+      },
+      "title": {
+        "en": "Multiway Pots",
+        "zh": "多人底池"
+      }
+    },
+    {
+      "id": "08",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "08-01",
+          "path": "docs/zh/08-toy-solvers/game-trees-infosets-strategies.md",
+          "prereq": [
+            "00-02",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "game-trees-infosets-strategies",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Game trees, information sets and strategy profiles: what a player can actually see",
+            "zh": "博弈树、信息集与策略组合：一名玩家实际能看见什么"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-02",
+          "path": "docs/zh/08-toy-solvers/regret-matching.md",
+          "prereq": [
+            "08-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "regret-matching",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Regret matching: iterating only on what you should have done",
+            "zh": "遗憾匹配：只按当初该做什么来迭代"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-03",
+          "path": "docs/zh/08-toy-solvers/cfr-on-kuhn-hand-trace.md",
+          "prereq": [
+            "08-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "cfr-on-kuhn-hand-trace",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Tracing CFR iterations by hand on the Kuhn game",
+            "zh": "在 Kuhn 博弈上手工跑一遍 CFR 迭代"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-04",
+          "path": "docs/zh/08-toy-solvers/convergence-average-strategy-exploitability.md",
+          "prereq": [
+            "08-03",
+            "00-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "convergence-average-strategy-exploitability",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Convergence belongs to the average strategy, not the current one",
+            "zh": "收敛的是平均策略，不是当前策略"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-05",
+          "path": "docs/zh/08-toy-solvers/cfr-plus-and-why-faster.md",
+          "prereq": [
+            "08-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "cfr-plus-and-why-faster",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Why CFR+ is faster: flooring negative regrets at zero",
+            "zh": "CFR+ 快在哪里：把负遗憾截回零"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-06",
+          "path": "docs/zh/08-toy-solvers/leduc-and-card-abstraction.md",
+          "prereq": [
+            "08-01",
+            "08-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "leduc-and-card-abstraction",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Leduc and card abstraction: what the model throws away and what survives",
+            "zh": "Leduc 与牌力抽象：模型丢掉了什么、还剩下什么"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "08-07",
+          "path": "docs/zh/08-toy-solvers/reading-solver-output-without-memorising-it.md",
+          "prereq": [
+            "08-04",
+            "01-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared"
+          ],
+          "slug": "reading-solver-output-without-memorising-it",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Reading solver output without memorising it: policy against residual noise",
+            "zh": "读求解器输出而不背它：哪些是策略、哪些是残差"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared",
+        "shared"
+      ],
+      "slug": "08-toy-solvers",
+      "summary": {
+        "en": "Compute equilibrium instead of guessing it: game trees, regret matching, the average strategy and how exploitability converges.",
+        "zh": "把均衡算出来而不是猜出来：博弈树、遗憾匹配、平均策略与可剥削度的收敛过程。"
+      },
+      "title": {
+        "en": "Toy Solvers and CFR",
+        "zh": "简化求解器"
+      }
+    },
+    {
+      "id": "09",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "09-01",
+          "path": "docs/zh/09-cash-practice/node-locking-what-if.md",
+          "prereq": [
+            "08-07",
+            "02-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash",
+            "population"
+          ],
+          "slug": "node-locking-what-if",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Node locking: write the opponent's mistake into the model, then compute the exploit",
+            "zh": "节点锁定：把对手的错误写进模型再算剥削"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "09-02",
+          "path": "docs/zh/09-cash-practice/plans-not-charts.md",
+          "prereq": [
+            "09-01",
+            "06-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "plans-not-charts",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Plans, not charts: chaining one line into the next",
+            "zh": "要计划不要背表：一条行动线连着下一条"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "09-03",
+          "path": "docs/zh/09-cash-practice/hand-review-workflow.md",
+          "prereq": [
+            "09-02",
+            "02-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "hand-review-workflow",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The hand-review workflow: decision points before conclusions",
+            "zh": "复盘工作流：先定决策点，再谈结论"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "09-04",
+          "path": "docs/zh/09-cash-practice/leak-audit.md",
+          "prereq": [
+            "09-03",
+            "06-09"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash",
+            "population"
+          ],
+          "slug": "leak-audit",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Leak audits: locating the leak by comparing frequencies",
+            "zh": "漏洞审计：用频率对照找出漏在哪条街"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "09-05",
+          "path": "docs/zh/09-cash-practice/building-a-training-block.md",
+          "prereq": [
+            "09-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "cash"
+          ],
+          "slug": "building-a-training-block",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Building a training block: repetition against transfer",
+            "zh": "排一个训练周期：定点重复与迁移练习的比例"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "cash",
+        "population",
+        "cash",
+        "cash",
+        "cash",
+        "population",
+        "cash"
+      ],
+      "slug": "09-cash-practice",
+      "summary": {
+        "en": "Turn theory into workflow: what-if node locking, plans over charts, leak audits and a scheduled training block.",
+        "zh": "把理论变成工作流：节点锁定做假设、按计划而非背表、审计漏洞并排出训练周期。"
+      },
+      "title": {
+        "en": "Cash Practice and Review",
+        "zh": "现金实战与复盘"
+      }
+    },
+    {
+      "id": "10",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "10-01",
+          "path": "docs/zh/10-heads-up-bvb/the-two-player-algebra.md",
+          "prereq": [
+            "03-09",
+            "02-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "hu"
+          ],
+          "slug": "the-two-player-algebra",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Two-player algebra: why heads-up ranges must be wider",
+            "zh": "两人博弈的代数：为什么单挑的范围必然更宽"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "10-02",
+          "path": "docs/zh/10-heads-up-bvb/wide-ranges-and-position.md",
+          "prereq": [
+            "10-01",
+            "06-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "hu"
+          ],
+          "slug": "wide-ranges-and-position",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Wide ranges and position: what the initiative is worth",
+            "zh": "宽范围下的位置：先手权到底值多少"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "10-03",
+          "path": "docs/zh/10-heads-up-bvb/button-open-versus-bb-three-bet.md",
+          "prereq": [
+            "05-03",
+            "10-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "hu"
+          ],
+          "slug": "button-open-versus-bb-three-bet",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Button open versus big-blind three-bet: who caps whom",
+            "zh": "按钮位率先加注对大盲 3-bet：谁在给谁封顶"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "10-04",
+          "path": "docs/zh/10-heads-up-bvb/heads-up-postflop-frequencies.md",
+          "prereq": [
+            "10-03",
+            "04-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "hu"
+          ],
+          "slug": "heads-up-postflop-frequencies",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Heads-up postflop frequencies: defence floors and attack ceilings",
+            "zh": "单挑翻后的频率：防守下限与进攻上限"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "10-05",
+          "path": "docs/zh/10-heads-up-bvb/transferring-hu-skills-to-a-full-ring.md",
+          "prereq": [
+            "10-04",
+            "07-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "hu",
+            "cash"
+          ],
+          "slug": "transferring-hu-skills-to-a-full-ring",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Bringing heads-up skills back to a full ring: which conclusions do not transfer",
+            "zh": "把单挑技能搬回满员桌：哪些结论不能带走"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "hu",
+        "hu",
+        "hu",
+        "hu",
+        "hu",
+        "cash"
+      ],
+      "slug": "10-heads-up-bvb",
+      "summary": {
+        "en": "Two-player algebra widens ranges and extremes sizing, and tests which conclusions survive a full ring.",
+        "zh": "两人博弈的代数让范围变宽、尺度变极端，并检验哪些结论能带回满员牌桌。"
+      },
+      "title": {
+        "en": "Heads-Up and Button vs Big Blind",
+        "zh": "单挑与按钮位对抗"
+      }
+    },
+    {
+      "id": "11",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "11-01",
+          "path": "docs/zh/11-mtt-core/what-tournament-math-changes.md",
+          "prereq": [
+            "02-06",
+            "03-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "what-tournament-math-changes",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "What tournament math changes: single-hand EV is no longer the objective",
+            "zh": "锦标赛数学改了哪一条：单手期望值不再是目标函数"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "11-02",
+          "path": "docs/zh/11-mtt-core/fold-equity-and-the-icm-preview.md",
+          "prereq": [
+            "11-01",
+            "02-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "fold-equity-and-the-icm-preview",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Fold equity and the ICM preview: the same steal is priced differently",
+            "zh": "弃牌赢率与 ICM 预告：同一个抢盲在这里换了价钱"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "11-03",
+          "path": "docs/zh/11-mtt-core/stack-zones.md",
+          "prereq": [
+            "11-01",
+            "03-07"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "stack-zones",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Stack zones and M: reading depth as a decision mode",
+            "zh": "筹码区间与 M：把深度翻译成决策模式"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "11-04",
+          "path": "docs/zh/11-mtt-core/antes-and-big-blind-antes.md",
+          "prereq": [
+            "11-03",
+            "02-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "antes-and-big-blind-antes",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Antes and big-blind antes: money in the pot that is nobody's decision",
+            "zh": "前注与大盲前注：底池里不属于任何人的钱"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "11-05",
+          "path": "docs/zh/11-mtt-core/bubble-dynamics.md",
+          "prereq": [
+            "11-02",
+            "11-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "bubble-dynamics",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Bubble dynamics: the money approaches while chips depreciate",
+            "zh": "泡沫期动力学：钱在逼近，筹码在贬值"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "11-06",
+          "path": "docs/zh/11-mtt-core/pay-jumps-and-the-equal-skill-assumption.md",
+          "prereq": [
+            "11-02",
+            "11-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "pay-jumps-and-the-equal-skill-assumption",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Pay jumps and the equal-skill assumption: when the model is enough",
+            "zh": "奖金跳档与等强度假设：模型什么时候够用"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt"
+      ],
+      "slug": "11-mtt-core",
+      "summary": {
+        "en": "Chips stop being money: how survival value, ante structure and pay jumps rewrite the score of the same decision.",
+        "zh": "筹码不再等于钱：存活价值、前注结构与奖金阶梯如何改写同一个决策的评价。"
+      },
+      "title": {
+        "en": "Tournament Core",
+        "zh": "锦标赛基础"
+      }
+    },
+    {
+      "id": "12",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "12-01",
+          "path": "docs/zh/12-icm-pushfold/the-two-action-model.md",
+          "prereq": [
+            "03-07",
+            "11-03"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "the-two-action-model",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The two-action model: why short stacks reduce to shove or fold",
+            "zh": "两动作模型：短码为什么只剩全下与弃牌"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "12-02",
+          "path": "docs/zh/12-icm-pushfold/nash-shoving-ranges.md",
+          "prereq": [
+            "12-01",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "nash-shoving-ranges",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Nash shoving ranges: the equilibrium of the two-action model",
+            "zh": "纳什全下范围：两动作模型里的均衡解"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "12-03",
+          "path": "docs/zh/12-icm-pushfold/icm-versus-chip-ev.md",
+          "prereq": [
+            "12-02",
+            "11-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "icm-versus-chip-ev",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "ICM against chip EV: two answers for one hand",
+            "zh": "ICM 与筹码期望值：同一手牌的两个结论"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "12-04",
+          "path": "docs/zh/12-icm-pushfold/bubble-factors.md",
+          "prereq": [
+            "12-03",
+            "11-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "bubble-factors",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Bubble factors: the multiplier between chips and money",
+            "zh": "泡沫因子：筹码换算成钱的那个乘数"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "12-05",
+          "path": "docs/zh/12-icm-pushfold/final-table-icm.md",
+          "prereq": [
+            "12-04",
+            "11-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "final-table-icm",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Final-table ICM: player count and stack distribution move together",
+            "zh": "决赛桌的 ICM：人数与筹码分布同时改变"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "12-06",
+          "path": "docs/zh/12-icm-pushfold/a-pushfold-drill-workflow.md",
+          "prereq": [
+            "12-02",
+            "09-05"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "mtt"
+          ],
+          "slug": "a-pushfold-drill-workflow",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "A push/fold drill workflow: from computed ranges to a feedback loop",
+            "zh": "搭一套推倒训练：从计算范围到反馈闭环"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt",
+        "mtt"
+      ],
+      "slug": "12-icm-pushfold",
+      "summary": {
+        "en": "Equilibrium in the two-action model: Nash shoving ranges, where ICM and chip EV disagree, and what the bubble factor converts.",
+        "zh": "两动作模型下的均衡解：纳什全下范围、ICM 与筹码期望的分歧，以及泡沫因子的换算。"
+      },
+      "title": {
+        "en": "ICM and Push/Fold",
+        "zh": "ICM 与短码推倒"
+      }
+    },
+    {
+      "id": "13",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "13-01",
+          "path": "docs/zh/13-population-exploits/nash-versus-population-in-one-formula.md",
+          "prereq": [
+            "02-06",
+            "08-04",
+            "00-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "nash-versus-population-in-one-formula",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "One formula separating the Nash answer from the population exploit",
+            "zh": "一条公式分清纳什解与群体剥削解"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "13-02",
+          "path": "docs/zh/13-population-exploits/measuring-a-population.md",
+          "prereq": [
+            "13-01",
+            "01-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "measuring-a-population",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Measuring a population: sample size, frequency bands and definitions",
+            "zh": "测量一个群体：样本量、频率区间与统计口径"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "13-03",
+          "path": "docs/zh/13-population-exploits/exploiting-the-check-back-leak.md",
+          "prereq": [
+            "13-02",
+            "04-07",
+            "06-02"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "exploiting-the-check-back-leak",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Exploiting the population's over-checking leak",
+            "zh": "剥削“过牌过多”这个群体漏洞"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "13-04",
+          "path": "docs/zh/13-population-exploits/exploiting-over-and-under-bluffing.md",
+          "prereq": [
+            "13-02",
+            "06-09",
+            "02-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "exploiting-over-and-under-bluffing",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Over- and under-bluffing: two departures, two answers",
+            "zh": "对手诈唬过多或过少：两种偏离要两种应对"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "13-05",
+          "path": "docs/zh/13-population-exploits/exploiting-sizing-tells.md",
+          "prereq": [
+            "13-02",
+            "06-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "exploiting-sizing-tells",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Sizing tells: treating the amount bet as information",
+            "zh": "尺度马脚：把下注金额当信息源"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "13-06",
+          "path": "docs/zh/13-population-exploits/deviating-without-self-destructing.md",
+          "prereq": [
+            "13-04",
+            "09-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "population"
+          ],
+          "slug": "deviating-without-self-destructing",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Deviating without self-destruction: balanced exploitation",
+            "zh": "偏离而不自我毁灭：平衡式剥削"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "population",
+        "population",
+        "population",
+        "population",
+        "population",
+        "population"
+      ],
+      "slug": "13-population-exploits",
+      "summary": {
+        "en": "Treat opponents as a real population rather than an equilibrium: measure its frequencies, find the exploitable departures, and deviate safely.",
+        "zh": "把对手当成真实人群而不是均衡解：测量群体频率、定位可利用的偏离，并安全地偏离回去。"
+      },
+      "title": {
+        "en": "Population Reads and Exploitation",
+        "zh": "群体读牌与剥削"
+      }
+    },
+    {
+      "id": "14",
+      "lessons": [
+        {
+          "hand_ids": [],
+          "id": "14-01",
+          "path": "docs/zh/14-capstone-practice/a-full-loop-hand-analysis.md",
+          "prereq": [
+            "09-03",
+            "13-01",
+            "06-09"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash"
+          ],
+          "slug": "a-full-loop-hand-analysis",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "A full-loop hand analysis: from ranges to a checkable conclusion",
+            "zh": "完整闭环分析一手牌：从范围到可核验的结论"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "14-02",
+          "path": "docs/zh/14-capstone-practice/your-own-training-plan.md",
+          "prereq": [
+            "09-05",
+            "09-04",
+            "14-01"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash",
+            "mtt"
+          ],
+          "slug": "your-own-training-plan",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "Your own training plan: turning leaks into testable blocks",
+            "zh": "给自己排训练计划：把漏洞变成可检验的周期"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "14-03",
+          "path": "docs/zh/14-capstone-practice/mixed-spot-examination.md",
+          "prereq": [
+            "14-01",
+            "10-05",
+            "12-04"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "cash",
+            "hu",
+            "mtt"
+          ],
+          "slug": "mixed-spot-examination",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "The mixed-spot examination: conclusions must move with the scenario",
+            "zh": "混合场次考核：换了场景，结论就得跟着换"
+          },
+          "unverified_count": 0
+        },
+        {
+          "hand_ids": [],
+          "id": "14-04",
+          "path": "docs/zh/14-capstone-practice/what-gto-does-not-tell-you.md",
+          "prereq": [
+            "14-01",
+            "13-06"
+          ],
+          "quiz_ids": [],
+          "scenario": [
+            "shared",
+            "population"
+          ],
+          "slug": "what-gto-does-not-tell-you",
+          "spot_ids": [],
+          "status": "draft",
+          "table_ids": [],
+          "title": {
+            "en": "What the equilibrium model does not tell you",
+            "zh": "均衡模型不会告诉你的那些事"
+          },
+          "unverified_count": 0
+        }
+      ],
+      "scenario": [
+        "shared",
+        "cash",
+        "shared",
+        "cash",
+        "mtt",
+        "shared",
+        "cash",
+        "hu",
+        "mtt",
+        "shared",
+        "population"
+      ],
+      "slug": "14-capstone-practice",
+      "summary": {
+        "en": "Chain the earlier tools into one complete analysis, your own training plan, and a check of what sits outside the model.",
+        "zh": "把前三章的工具串成一次完整分析、一份自己的训练计划，并检验模型边界之外的东西。"
+      },
+      "title": {
+        "en": "Capstone Practice",
+        "zh": "综合实战"
+      }
+    }
+  ],
+  "engine_version": "0.1.0",
+  "locale": "zh",
+  "schema_version": "1.0.0",
+  "totals": {
+    "chapters": 15,
+    "hands": 0,
+    "lessons": 92,
+    "lessons_draft": 92,
+    "lessons_ready": 0,
+    "quizzes": 0,
+    "spots": 0,
+    "tables": 10
+  }
+}

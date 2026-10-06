@@ -1,0 +1,99 @@
+{
+  "caption": {
+    "en": "Calling B into P needs B/(P+2B) equity. This is the only thing pot odds are for; everything else is a consequence.",
+    "zh": "跟注 B 进 P：需要胜率 = B/(P+2B)。这是赔率唯一的用途，其余全是它的推论。"
+  },
+  "checks": [
+    {
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Bet (x pot)",
+        "zh": "对手下注(倍底池)"
+      },
+      "key": "size_label",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Equity needed",
+        "zh": "所需胜率"
+      },
+      "key": "equity_needed",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.02-02.equity-needed-to-call",
+  "lesson": "02-02",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#equity_needed_to_call",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "equity_needed": 0.166666666667,
+      "pot_plus_2bet": 1.5,
+      "size_label": "0.25x pot"
+    },
+    {
+      "equity_needed": 0.2,
+      "pot_plus_2bet": 1.666666666667,
+      "size_label": "0.333333x pot"
+    },
+    {
+      "equity_needed": 0.25,
+      "pot_plus_2bet": 2.0,
+      "size_label": "0.5x pot"
+    },
+    {
+      "equity_needed": 0.285714285714,
+      "pot_plus_2bet": 2.333333333333,
+      "size_label": "0.666667x pot"
+    },
+    {
+      "equity_needed": 0.3,
+      "pot_plus_2bet": 2.5,
+      "size_label": "0.75x pot"
+    },
+    {
+      "equity_needed": 0.333333333333,
+      "pot_plus_2bet": 3.0,
+      "size_label": "1x pot"
+    },
+    {
+      "equity_needed": 0.375,
+      "pot_plus_2bet": 4.0,
+      "size_label": "1.5x pot"
+    },
+    {
+      "equity_needed": 0.4,
+      "pot_plus_2bet": 5.0,
+      "size_label": "2x pot"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "equity_needed_to_call",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.odds",
+    "seed": null
+  },
+  "title": {
+    "en": "Equity required to call",
+    "zh": "跟注所需胜率"
+  },
+  "unverified_claims": []
+}

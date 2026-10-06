@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Docs site build output
+/site/
+/mkdocs/.cache/
+
+# Trainer: public/data is a *generated copy* of data/gen (see ADR-0001); never commit it.
+trainer/node_modules/
+trainer/dist/
+trainer/public/data/
+trainer/src/generated/manifest.ts
+*.local
+
+# Solver scratch / large logs
+/out/
+*.log
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

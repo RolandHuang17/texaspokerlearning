@@ -1,0 +1,98 @@
+{
+  "caption": {
+    "en": "169 classes: 13 pairs of 6, 78 suited of 4, 78 offsuit of 12. Any method that treats suited and offsuit classes as equally weighted fails here first.",
+    "zh": "169 个类分成 13 对子(6)、78 同花(4)、78 不同花(12)。任何把同花与不同花等权的算法都会在这里露馅。"
+  },
+  "checks": [
+    {
+      "detail": "13x6 + 78x4 + 78x12 == 1326",
+      "kind": "combo_count",
+      "pass": true
+    },
+    {
+      "detail": "the 13x13 grid's own combo table sums to the same 1326",
+      "kind": "combo_count",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Shape",
+        "zh": "形态"
+      },
+      "key": "shape",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Classes",
+        "zh": "类数"
+      },
+      "key": "classes",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Combos each",
+        "zh": "每类组合数"
+      },
+      "key": "combos_each",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Combos",
+        "zh": "总组合数"
+      },
+      "key": "combos",
+      "unit": "combos"
+    }
+  ],
+  "id": "table.01-01.combo-decomposition",
+  "lesson": "01-01",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.cards#combos_for_class",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "classes": 13,
+      "combos": 78,
+      "combos_each": 6,
+      "shape": "pairs"
+    },
+    {
+      "classes": 78,
+      "combos": 312,
+      "combos_each": 4,
+      "shape": "suited"
+    },
+    {
+      "classes": 78,
+      "combos": 936,
+      "combos_each": 12,
+      "shape": "offsuit"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "combos_for_class",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.cards",
+    "seed": null
+  },
+  "title": {
+    "en": "Decomposing the 1,326 hole-card combinations",
+    "zh": "1326 手起手组合的分解"
+  },
+  "unverified_claims": []
+}

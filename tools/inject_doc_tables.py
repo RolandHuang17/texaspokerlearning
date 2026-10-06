@@ -1,0 +1,135 @@
+#!/usr/bin/env python3
+"""Replace the contents of AUTO blocks in lessons with generated tables.
+
+A lesson writes, once::
+
+    <!-- BEGIN AUTO:table.02-03.mdf-vs-sizing -->
+    <!-- END AUTO:table.02-03.mdf-vs-sizing -->
+
+and this tool fills the interior from ``data/gen/tables/...json``, rendering the markdown table for
+that file's locale plus the provenance marker that ``tools/check_provenance.py`` counts. Both the
+English and the Chinese lesson embed the *same* artifact id, so the numbers cannot diverge even in
+principle.
+
+``--check`` re-renders and compares bytes without writing. CI runs it, which is what turns "please
+regenerate" into "your pull request is red".
+
+Usage::
+
+    python tools/inject_doc_tables.py            # write
+    python tools/inject_doc_tables.py --check    # verify, no writes
+    python tools/inject_doc_tables.py --file docs/zh/02-x/y.md
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import sys
+from pathlib import Path
+
+from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
+
+bootstrap_path()
+
+from pokergto.render import provenance_block, table_from_artifact  # noqa: E402
+
+DOCS = REPO_ROOT / "docs"
+GEN = REPO_ROOT / "data" / "gen"
+
+BLOCK = re.compile(
+    r"(?P<open>[ \t]*<!--\s*BEGIN AUTO:(?P<id>[A-Za-z0-9._-]+)\s*-->)(?P<body>.*?)"
+    r"(?P<close>[ \t]*<!--\s*END AUTO:(?P=id)\s*-->)",
+    re.DOTALL,
+)
+
+
+def _artifact_path(table_id: str) -> Path:
+    return GEN / "tables" / f"{table_id}.json"
+
+
+def render_block(table_id: str, *, locale: str) -> str:
+    path = _artifact_path(table_id)
+    if not path.exists():
+        raise FileNotFoundError(
+            f"{table_id}: no generated table at {path.relative_to(REPO_ROOT)}. "
+            "Run `python tools/gen_all.py --only tables` first."
+        )
+    artifact = json.loads(path.read_text(encoding="utf-8"))
+    table = table_from_artifact(artifact, locale=locale)
+    provenance = artifact.get("provenance", {})
+    verified = str(bool(provenance.get("verified"))).lower()
+    marker = f"<!-- provenance: kind={provenance.get('kind', 'reference')} verified={verified} -->"
+    badge = provenance_block(provenance, locale=locale)
+    return (
+        f"\n{table}\n\n{marker}\n{badge}\n\n"
+        f"<!-- source: {artifact['source']['module']}::{artifact['source'].get('function') or '-'} "
+        f"via {artifact['source']['generator']} -->\n"
+    )
+
+
+def process_file(path: Path, *, check: bool) -> tuple[int, list[str]]:
+    locale = path.relative_to(DOCS).parts[0]
+    text = path.read_text(encoding="utf-8")
+    problems: list[str] = []
+    replacements = 0
+
+    def substitute(match: re.Match[str]) -> str:
+        nonlocal replacements
+        table_id = match.group("id")
+        try:
+            interior = render_block(table_id, locale=locale)
+        except FileNotFoundError as error:
+            problems.append(str(error))
+            return match.group(0)
+        replacements += 1
+        rebuilt = match.group("open") + interior + match.group("close")
+        if check and rebuilt != match.group(0):
+            problems.append(
+                f"{path.relative_to(REPO_ROOT)}: AUTO block {table_id} is stale "
+                "(committed content differs from what the engine now produces)"
+            )
+        return rebuilt
+
+    updated = BLOCK.sub(substitute, text)
+    if not check and updated != text:
+        path.write_text(updated, encoding="utf-8", newline="\n")
+    return replacements, problems
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    parser.add_argument("--check", action="store_true")
+    parser.add_argument("--file", type=Path, action="append", dest="files")
+    args = parser.parse_args(argv)
+
+    files = args.files or (sorted(DOCS.rglob("*.md")) if DOCS.exists() else [])
+    if not files:
+        ok("no lesson files yet: AUTO-table check passes on an empty tree")
+        return 0
+
+    total = 0
+    problems: list[str] = []
+    for file in files:
+        count, file_problems = process_file(file, check=args.check)
+        total += count
+        problems.extend(file_problems)
+
+    if problems:
+        for problem in problems:
+            fail(problem)
+        if args.check:
+            print(
+                "\nFix: `python tools/inject_doc_tables.py` then commit the result. Numbers in prose "
+                "are generated, never edited -- see adr/0001.",
+                file=sys.stderr,
+            )
+        return 1
+    verb = "verified" if args.check else "rewrote"
+    ok(f"AUTO tables: {verb} {total} block(s) across {len(files)} files")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -1,0 +1,233 @@
+{
+  "caption": {
+    "en": "d = 1 - (B/(P+B))^(1/N). The exponent is 1/N, not N-1: a pot-sized bet facing 2 opponents needs 29.29% from each while the joint defense stays 50%. Assumes independent defenders; card removal makes that an approximation.",
+    "zh": "d = 1 - (B/(P+B))^(1/N)。指数是 1/N 而不是 N-1：底池下注、2 名对手时每人防守 29.29%，而合并防守仍是 50%。假设各防守者独立，牌力移除效应使真实值偏离（见 provenance.assumptions）。"
+  },
+  "checks": [
+    {
+      "detail": "N=1 must reproduce the heads-up MDF, which is the self-check on the 1/N exponent",
+      "kind": "mdf_equality",
+      "pass": true
+    },
+    {
+      "detail": "joint defense across N players equals the heads-up MDF for every N",
+      "kind": "ev_matches_direct_calculation",
+      "pass": true,
+      "tol": 1e-09
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Opponents",
+        "zh": "对手数"
+      },
+      "key": "opponents",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Per-player defense",
+        "zh": "每人防守频率"
+      },
+      "key": "per_player",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "At least one defends",
+        "zh": "至少一人防守"
+      },
+      "key": "joint",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Heads-up MDF",
+        "zh": "单挑 MDF"
+      },
+      "key": "heads_up_mdf",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.07-01.multiway-defense",
+  "lesson": "07-01",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "各防守者被视为独立行动；真实的牌力移除(card removal)会让合并防守率偏离此值。",
+        "zh": "各防守者被视为独立行动；真实的牌力移除(card removal)会让合并防守率偏离此值。"
+      },
+      {
+        "en": "Defenders are treated as choosing independently; card removal makes the joint rate deviate in a real deal.",
+        "zh": "Defenders are treated as choosing independently; card removal makes the joint rate deviate in a real deal."
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.odds#defense_frequency_multiway",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "heads_up_mdf": 0.75188,
+      "joint": 0.75188,
+      "opponents": 1,
+      "per_player": 0.75188,
+      "size": 0.33
+    },
+    {
+      "heads_up_mdf": 0.75188,
+      "joint": 0.75188,
+      "opponents": 2,
+      "per_player": 0.501883,
+      "size": 0.33
+    },
+    {
+      "heads_up_mdf": 0.75188,
+      "joint": 0.75188,
+      "opponents": 3,
+      "per_player": 0.371622,
+      "size": 0.33
+    },
+    {
+      "heads_up_mdf": 0.75188,
+      "joint": 0.75188,
+      "opponents": 4,
+      "per_player": 0.294226,
+      "size": 0.33
+    },
+    {
+      "heads_up_mdf": 0.75188,
+      "joint": 0.75188,
+      "opponents": 5,
+      "per_player": 0.243285,
+      "size": 0.33
+    },
+    {
+      "heads_up_mdf": 0.666667,
+      "joint": 0.666667,
+      "opponents": 1,
+      "per_player": 0.666667,
+      "size": 0.5
+    },
+    {
+      "heads_up_mdf": 0.666667,
+      "joint": 0.666667,
+      "opponents": 2,
+      "per_player": 0.42265,
+      "size": 0.5
+    },
+    {
+      "heads_up_mdf": 0.666667,
+      "joint": 0.666667,
+      "opponents": 3,
+      "per_player": 0.306639,
+      "size": 0.5
+    },
+    {
+      "heads_up_mdf": 0.666667,
+      "joint": 0.666667,
+      "opponents": 4,
+      "per_player": 0.240164,
+      "size": 0.5
+    },
+    {
+      "heads_up_mdf": 0.666667,
+      "joint": 0.666667,
+      "opponents": 5,
+      "per_player": 0.197258,
+      "size": 0.5
+    },
+    {
+      "heads_up_mdf": 0.571429,
+      "joint": 0.571429,
+      "opponents": 1,
+      "per_player": 0.571429,
+      "size": 0.75
+    },
+    {
+      "heads_up_mdf": 0.571429,
+      "joint": 0.571429,
+      "opponents": 2,
+      "per_player": 0.345346,
+      "size": 0.75
+    },
+    {
+      "heads_up_mdf": 0.571429,
+      "joint": 0.571429,
+      "opponents": 3,
+      "per_player": 0.246053,
+      "size": 0.75
+    },
+    {
+      "heads_up_mdf": 0.571429,
+      "joint": 0.571429,
+      "opponents": 4,
+      "per_player": 0.190893,
+      "size": 0.75
+    },
+    {
+      "heads_up_mdf": 0.571429,
+      "joint": 0.571429,
+      "opponents": 5,
+      "per_player": 0.155879,
+      "size": 0.75
+    },
+    {
+      "heads_up_mdf": 0.5,
+      "joint": 0.5,
+      "opponents": 1,
+      "per_player": 0.5,
+      "size": 1.0
+    },
+    {
+      "heads_up_mdf": 0.5,
+      "joint": 0.5,
+      "opponents": 2,
+      "per_player": 0.292893,
+      "size": 1.0
+    },
+    {
+      "heads_up_mdf": 0.5,
+      "joint": 0.5,
+      "opponents": 3,
+      "per_player": 0.206299,
+      "size": 1.0
+    },
+    {
+      "heads_up_mdf": 0.5,
+      "joint": 0.5,
+      "opponents": 4,
+      "per_player": 0.159104,
+      "size": 1.0
+    },
+    {
+      "heads_up_mdf": 0.5,
+      "joint": 0.5,
+      "opponents": 5,
+      "per_player": 0.129449,
+      "size": 1.0
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "defense_frequency_multiway",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.odds",
+    "seed": null
+  },
+  "title": {
+    "en": "Multiway defense: per-player and joint frequency",
+    "zh": "多人防守：每人频率与合并频率"
+  },
+  "unverified_claims": []
+}

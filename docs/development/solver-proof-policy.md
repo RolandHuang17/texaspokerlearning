@@ -1,0 +1,136 @@
+# Solver proof policy
+
+> **Single-language by design:** these are contributor-facing engineering docs, and the
+> bilingual-same-PR rule applies to curriculum content only (see adr/0005).
+
+A learner cannot audit CFR output by intuition — auditing it is the skill they are here to acquire.
+So the rule that replaces intuition is not "the numbers look right" and not "it converged". It is
+ADR-0002: **convergence to *something* is guaranteed by the algorithm; convergence to *the right
+thing* has to be demonstrated**, and the demonstration lives in the repository where CI can run it.
+
+## Rule A: no solver claim ships unless it is provable in-repo
+
+Every solver artifact must be validated by at least one of four mechanisms. All four are designed to
+run in CI, and `src/pokergto/solver/proofs.py` is where each one is registered.
+
+**1. Closed-form cross-validation.** The 1-street toy game is constructed so that its own equilibrium
+*is* the algebra taught in chapter 02. At the converged average strategy, the bluffing hand must be
+EV-indifferent, the defender's call frequency must equal `pot/(pot+bet)`, and the bluff share of the
+betting range must equal `bet/(pot+2bet)`. `proofs._one_street_entry` asserts exactly those against
+`pokergto.odds.minimum_defense_frequency` and `pokergto.odds.bluff_fraction_at_indifference` — not
+against a copy of the formula, against the module the chapters teach from. If either half of the
+repository is wrong, CI fails, and it fails naming which. This is the loop that makes the math core
+and the solver each other's test.
+
+**2. Exploitability thresholds.** `src/pokergto/solver/exploitability.py` computes an exact best
+response, and `exploitability = (BR(0) + BR(1)) / 2` in chips per hand (the half-sum convention,
+stated because the "total" convention also exists and mixing them silently halves every comparison).
+Best response must commit to one action per *information set*, aggregating over every deal that shares
+it; argmax per deal measures "how well would a cheat who sees your cards do", which is not a property
+of the strategy at all. Every artifact records its exploitability, it must be at or below
+`ProofEntry.exploitability_threshold`, and it must not increase with iterations. Current gates: Kuhn
+`5e-5` at 20,000 CFR+ iterations, the one-street toys `2e-4` at 4,000. Those numbers come from
+observed convergence, not from wishfulness: plain CFR reaches about `3e-3` in Kuhn's budget and
+CFR+ about `1e-5`, so the gates sit a decade below what a correct run achieves and a decade above what
+a broken one did during development (a squashed-reach bug stalled at 0.89, and no sane threshold
+admits that).
+
+**3. Known analytic results.** Kuhn poker's game value is `-1/18` chips per hand at `ante = 1.0`
+(`proofs.KUHN_VALUE`, computed as `-Fraction(1, 18) * ANTE`, not typed as a decimal), and its
+equilibrium family is parameterised by player 0's jack-bluffing frequency `alpha` in `[0, 1/3]`, with
+player 1 calling the king always and the queen never. Landing on *any* member of that family with that
+value is a hard check: `assert_jack_bluff_in_family` asserts membership, not a particular value,
+because demanding one specific member would be testing the implementation's path rather than game
+theory. Published benchmark values for tiny games are cited as `external` with
+`license: public-domain-math` and a record in `data/src/licensing_manifest.yaml` (see
+[data provenance](./data-provenance.md)).
+
+**4. Property and metamorphic tests.** Regret sums non-negative and normalised; the zero-sum identity
+(`BR(0) + BR(1)` equals the game value at equilibrium — `exploitability.zero_sum_residual` is the
+in-repo handle for it); strategy invariant under infoset renaming and child ordering; a fixed seed
+reproduces bit-identical output.
+
+### The `ready` rule
+
+> **A lesson may not carry `status: ready` in either language if it cites a game that is absent from
+> `src/pokergto/solver/proofs.py`.**
+
+Mechanically: `proofs.PUBLISHED_PROOFS` is the registry, `entry_for(game)` raises `ProofGateError` for
+anything unlisted, and `require_validated(game)` is the handle meant to be called by generators and by
+the docs gate. `tools/run_solver.py` refuses to write an artifact for a game with no entry, so the
+artifact a `ready` lesson would cite cannot be produced at all. The chain is: no proof entry → no
+artifact → nothing to cite → `ready` impossible. `data/schema/common.schema.json#/$defs/status` says
+the same thing in the contract itself.
+
+Contributors who touch the solver must extend `proofs.py` **in the same pull request**, with a real
+anchor. "It converged" is not an anchor.
+
+## Rule B: six small games, not one big one
+
+| Game | Why it is here | Anchor |
+|---|---|---|
+| Kuhn poker | smallest game with bluffing, fully analytic | `-1/18` + equilibrium family |
+| 1-street bluff-catcher, bet sizes ⅓ / ½ / pot | the bridge between chapter 02's algebra and an equilibrium | mechanism 1 |
+| Leduc hold'em | canonical research benchmark, 2 streets, real card abstraction | exploitability → 0 |
+| 2-street "ruddy" toy | protection, and the no-bluff-on-earlier-street result | exploitability → 0 |
+| 1326-combo preflop model, fixed sizes | the real object cash and MTT preflop need; no future streets, so tractable exactly | exploitability → 0 |
+| Push/fold Nash, 10–20bb, 2–6 seats, antes, optional ICM | highest rigour per unit complexity in the project | zero-sum identity + independent reference |
+
+As of this writing `games.py` ships **two** of them (`kuhn`, `one_street_bluff_catcher`) and
+`PUBLISHED_PROOFS` has four entries (Kuhn plus the three one-street bet sizes). Leduc and the two-street
+toy are absent rather than half-built, deliberately: a subtly mis-specified game converges happily to
+the equilibrium of a game that is not the one documented, which is exactly the failure ADR-0002 exists
+to prevent.
+
+### The cut, and the reasoning
+
+**A full 6-max no-limit postflop NLHE solver is cut.** Not deferred — cut.
+
+Producing one in pure Python/numpy is not feasible at useful accuracy; its output could not be
+validated against anything, since there is no analytic 6-max postflop answer to compare with and
+importing a commercial solver's output as "ground truth" is both the memorisation model this project
+argues against and a copyright problem (`NOTICE`); and multiway postflop has no tractable exact
+solution, so "close enough" would be a claim with no evidence under it. An unverifiable solver is not
+a weaker version of a useful one, it is worse than none: it attaches the authority of code to a guess.
+
+What replaces it: preflop *is* solved exactly (the 1326-combo model and push/fold Nash), and postflop
+is taught in structured form — range-vs-range equity, MDF balance, indifference conditions, and
+`src/pokergto/theory/multiway.py` deriving how the algebra changes with player count from
+`d = 1 - (B/(P+B))^(1/N)`. A learner who understands that exponent needs no 6-max chart.
+
+Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
+inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two
+CFR variants, six games.
+
+## Current state, honestly
+
+The pieces that are not wired yet, so a contributor does not mistake a documented rule for a running
+gate:
+
+- `tools/run_solver.py` does not exist, so nothing generates `data/gen/solver/**` today, and
+  `gen_all.py`'s `solver` step is a no-op that returns nothing.
+- `ProofEntry.algorithm` (the string `"cfr_plus"`) is not yet bound to `cfr.solve(..., plus=True)`.
+  That binding is `run_solver.py`'s job. Until it exists, the algorithm field is a claim, not a
+  check.
+- `tools/cost_probe.py`, which ADR-0002 names as the thing that stops the scope from sliding silently
+  (a per-game runtime and memory budget enforced in CI), does not exist. The budget is therefore an
+  intention, and `solver-regression.yml` has a `# TODO(m2):` comment saying so instead of a fabricated
+  command.
+- The mechanism-4 property and metamorphic tests are not present: there is no `tests/` directory yet,
+  and `pytest` currently collects nothing. `pyproject.toml` already registers the `solver` marker that
+  they will live under.
+- One live mismatch to know about: in `proofs.PUBLISHED_PROOFS` the one-third-pot entry is stored
+  under the literal key `toy_1street_0p333333333333`, while `_one_street_entry(Fraction(1, 3))`
+  computes `game = "toy_1street_0p333333"` from `f"{Fraction(1,3):g}"`. `entry_for()` therefore raises
+  `ProofGateError` for the one-third toy's own name. Derived identifiers from float formatting are the
+  bug class; explicit names are the fix. Flagged to the maintainer, not patched here, because
+  `src/pokergto/**` is the maintainer's file.
+
+## What this means for a lesson author
+
+Cite a solver result only for a game in `PUBLISHED_PROOFS`, and cite the artifact, not a screenshot of
+the artifact. A lesson that teaches a *toy* result rather than the exact NLHE answer says so and makes
+the distance between toy and reality part of the lesson — chapter 08-07 ("reading solver output without
+memorising it") exists for that purpose. `status: ready` claims that both languages are complete and
+that every number in the page is generated; if the evidence is not in `proofs.py`, the correct status
+is `draft`, and `draft` is not an insult — it is the label that keeps the curriculum trustworthy.

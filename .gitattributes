@@ -1,0 +1,20 @@
+# Every text file is LF in the repo and LF on checkout. Windows contributors are a
+# supported first-class environment (see docs/development/local-dev.md), so CRLF drift
+# would otherwise poison every generated-JSON byte-diff check.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+
+# Generated artifacts: collapsed diffs by default, and the byte-diff gate is what makes
+# them reviewable rather than noisy (ADR-0001).
+data/gen/** linguist-generated=true
+trainer/public/data/** linguist-generated=true
+
+# Keep markdown diffs readable
+*.md text diff=markdown
+*.py text diff=python

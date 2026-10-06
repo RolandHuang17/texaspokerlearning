@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/spot.schema.json",
+  "title": "A solved or derived decision spot",
+  "description": "The unit of strategy content: one seat, one line, one stack depth, one board. Lessons reference spots; the trainer grades painted ranges against a spot's per-hand EV.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "title", "meta", "scenario", "strategy", "provenance"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "tags"],
+      "properties": {
+        "status": { "$ref": "common.schema.json#/$defs/status" },
+        "tags": { "$ref": "common.schema.json#/$defs/tags" },
+        "prereq": { "type": "array", "items": { "type": "string", "pattern": "^\\d{2}-\\d{2}$" } }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["players", "stacks_bb", "position", "line"],
+      "properties": {
+        "players": { "type": "integer", "minimum": 2, "maximum": 6 },
+        "stacks_bb": { "type": "number", "exclusiveMinimum": 0, "maximum": 400 },
+        "position": { "type": "string" },
+        "line": { "type": "string", "description": "Actions already taken, e.g. 'BTN 2.5x open, BB call'" },
+        "sr": { "type": ["string", "null"], "description": "Preferred synonym for line in older authored YAML" },
+        "street": { "$ref": "common.schema.json#/$defs/street_tag" },
+        "board": {
+          "type": "array",
+          "maxItems": 5,
+          "items": { "type": "string", "pattern": "^(A|K|Q|J|T|9|8|7|6|5|4|3|2)[shdc]$" }
+        },
+        "pot_bb": { "type": ["number", "null"], "minimum": 0 },
+        "spr": { "type": ["number", "null"], "minimum": 0 },
+        "rake_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 0.3 },
+        "antes_bb": { "type": ["number", "null"], "minimum": 0 },
+        "legal_actions": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action"],
+            "properties": {
+              "action": { "enum": ["fold", "call", "check", "bet", "raise", "shove"] },
+              "size_bb": { "type": ["number", "null"], "minimum": 0 },
+              "pot_fraction": { "type": ["number", "null"], "exclusiveMinimum": 0, "maximum": 10 }
+            }
+          }
+        }
+      }
+    },
+    "ranges": {
+      "type": "object",
+      "description": "Player label -> { chart: path under data/gen/ranges }.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["chart"],
+        "properties": { "chart": { "type": "string" } }
+      }
+    },
+    "strategy": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "oneOf": [
+            { "$ref": "common.schema.json#/$defs/frequency_map" },
+            { "type": "number", "minimum": 0, "maximum": 1 }
+          ]
+        }
+      }
+    },
+    "ev_bb": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "per_hand": { "type": "object", "additionalProperties": { "type": "number" } },
+        "aggregate": { "type": "number" },
+        "aggregate_stderr": { "type": ["number", "null"] }
+      }
+    },
+    "balance": {
+      "description": "The indifference facts a spot is expected to satisfy. Filled by src/pokergto/theory/frequencies.py; this is what makes 'the frequencies are balanced' a check rather than an opinion.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "defense_frequency": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "mdf_expected": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "bluff_fraction": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "bluff_fraction_expected": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+        "value_to_bluff_ratio": { "type": ["number", "null"], "minimum": 0 },
+        "exploitability_bb_per_100": { "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "solver_run": { "type": ["string", "null"] },
+    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "unverified_claims": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unverified_claim" }
+    },
+    "checks": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/check" } }
+  }
+}

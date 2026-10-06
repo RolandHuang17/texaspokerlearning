@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/manifest.schema.json",
+  "title": "data/gen/manifest.json - the fingerprint of a generated tree",
+  "description": "The only noisy file in data/gen, and the only one allowed to be. Determinism means a regeneration with no logic change rewrites nothing except this file's engine_version when the version is bumped.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "engine_version", "generator", "artifact_count", "files"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "engine_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "generator": { "const": "tools/gen_all.py" },
+    "python": { "type": ["string", "null"], "description": "Interpreter version string; recorded, never used to gate, because gates belong in content." },
+    "numpy": { "type": ["string", "null"] },
+    "git_sha": { "type": ["string", "null"] },
+    "artifact_count": { "type": "integer", "minimum": 0 },
+    "files": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["sha256", "kind", "bytes"],
+        "properties": {
+          "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "kind": {
+            "enum": ["glossary", "curriculum_index", "table", "range_chart", "spot", "quiz", "hand_example", "solver_run", "pushfold_matrix", "board_taxonomy", "index"]
+          },
+          "bytes": { "type": "integer", "minimum": 0 },
+          "schema": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

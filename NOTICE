@@ -1,0 +1,66 @@
+NOTICE
+======
+
+Licensing split
+---------------
+
+This repository uses two licences on purpose:
+
+  * Computer program code  ->  MIT (file: LICENSE)
+      src/pokergto/**, tools/**, setup/**, trainer/**, .github/**
+  * Curriculum prose and data  ->  CC BY-SA 4.0 (file: LICENSE-docs.md)
+      docs/**, data/**, README*.md, ROADMAP.md, CONTRIBUTING*.md, adr/**
+
+Reason: the code is infrastructure that other projects should be able to vendor without
+legal review, while the curriculum is authored teaching content whose attribution and
+share-alike terms are the point of publishing it.
+
+The provenance pledge
+---------------------
+
+No solver output, range chart, or training-course content owned by anyone else appears in
+this repository. Specifically prohibited, by policy *and by schema*:
+
+  * Range charts or strategy output from PioSolver, GTO Wizard, GTO+, Solwars, Bodrum,
+    Slurm, Postflop+, or any other commercial solver, whether copied, retyped, screenshotted,
+    or traced from a UI.
+  * Transcriptions of paid training videos or articles, including paraphrases close enough to
+    be derivative works.
+  * Scraped data from paid training sites.
+
+Every artifact that states a strategy claim carries a machine-readable `provenance` block with
+`kind` one of:
+
+  derived     produced by this repository's own engine (src/pokergto/theory/** or
+              src/pokergto/solver/**) and pointing at the derivation or solver run
+  reference   hand-authored illustrative content owned by this repository, permitted only when
+              independently checkable (range validity, EV consistency, MDF algebra)
+  external    requires `upstream` plus a `license` value listed in data/src/licensing_manifest.yaml
+              (CC0, CC-BY-4.0, CC-BY-SA-4.0, or public-domain mathematics only)
+
+`tools/check_provenance.py` fails the build on a missing block, on a proprietary licence value,
+and on any `external` entry without a manifest record. That makes the rule structural: an
+unattributed chart cannot validate, rather than being caught in review.
+
+Published equilibrium *values* for tiny games (Kuhn poker's game value of -1/18, the structure
+of its equilibrium family, Leduc benchmarks) are mathematics, not protectable expression, and
+are cited as `external` with `license: public-domain-math` where used as validation anchors.
+
+What we deliberately do not claim
+---------------------------------
+
+  * This repository does not contain, and does not attempt, a full 6-max no-limit postflop
+    solver. See adr/0002-cfr-correctness-is-gated-by-proof.md for why an unverifiable solver
+    would be worse than none.
+  * Numerical claims that are neither derived in-repo nor license-clean are rendered with an
+    explicit UNVERIFIED badge in both languages and listed in the artifact's
+    `unverified_claims` field. As of this writing that includes the popular multiway
+    continuation-bet frequency figures (roughly 65% -> 30% -> 15% -> 8% as player count grows)
+    and the accompanying bluff-to-value tightening, which remain `reference` until
+    `src/pokergto/theory/multiway.py` reproduces them.
+
+Contact
+-------
+
+Attribution requests, licence questions, and provenance reports: open an issue using the
+"Range provenance" template.

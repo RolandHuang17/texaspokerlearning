@@ -1,0 +1,126 @@
+{
+  "caption": {
+    "en": "Needed equity = SPR/(1+2*SPR), bounded by 50%. At SPR 1 you need 33.3%; at SPR 13, 46.4%. The same top pair lives in two different worlds.",
+    "zh": "所需胜率 = SPR/(1+2·SPR)，上限 50%。SPR 1 时只需 33.3%，SPR 13 时要 46.4% —— 同一对顶对，两个世界。"
+  },
+  "checks": [
+    {
+      "detail": "table vs pokergto.spr formula",
+      "kind": "ev_matches_direct_calculation",
+      "pass": false
+    },
+    {
+      "detail": "the threshold is bounded by 1/2, which is why >50% equity always justifies a commit",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "digits": 2,
+      "header": {
+        "en": "SPR",
+        "zh": "SPR"
+      },
+      "key": "spr",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Equity to commit",
+        "zh": "全下所需胜率"
+      },
+      "key": "all_in_equity_needed",
+      "unit": "probability"
+    }
+  ],
+  "id": "table.03-07.spr-commitment",
+  "lesson": "03-07",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.spr#all_in_equity_needed_from_spr",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "all_in_equity_needed": 0.166667,
+      "one_pair_commits": true,
+      "spr": 0.25,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.25,
+      "one_pair_commits": true,
+      "spr": 0.5,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.333333,
+      "one_pair_commits": true,
+      "spr": 1.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.375,
+      "one_pair_commits": true,
+      "spr": 1.5,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.4,
+      "one_pair_commits": true,
+      "spr": 2.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.428571,
+      "one_pair_commits": true,
+      "spr": 3.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.444444,
+      "one_pair_commits": true,
+      "spr": 4.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.461538,
+      "one_pair_commits": true,
+      "spr": 6.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.481481,
+      "one_pair_commits": true,
+      "spr": 13.0,
+      "top_pair_two_kickers_commits": true
+    },
+    {
+      "all_in_equity_needed": 0.487805,
+      "one_pair_commits": true,
+      "spr": 20.0,
+      "top_pair_two_kickers_commits": true
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "spr_commitment_table",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.spr",
+    "seed": null
+  },
+  "title": {
+    "en": "SPR and the equity a commit needs",
+    "zh": "SPR 与全下所需胜率"
+  },
+  "unverified_claims": []
+}

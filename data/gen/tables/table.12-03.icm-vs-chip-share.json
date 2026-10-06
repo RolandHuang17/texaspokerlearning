@@ -1,0 +1,122 @@
+{
+  "caption": {
+    "en": "Five-handed, 6000/4000/3000/2000/1000, 10,000 pool. The 31.6%-of-chips player is worth 30.5% of the money while the 5.3% player is worth 8.6%. ICM assumes equal skill, which is why it is conservative about folding and aggressive about shoving.",
+    "zh": "五人桌、6000/4000/3000/2000/1000 筹码，奖池 10000。筹码占比 31.6% 的人只值 30.5% 的钱，而 5.3% 的人值 8.6%。ICM 假设各人技术相同——这条假设让 ICM 对弃牌偏保守、对全下偏激进。"
+  },
+  "checks": [
+    {
+      "detail": "ICM is conservative: expected prize money sums to the prize pool",
+      "kind": "ev_matches_direct_calculation",
+      "pass": true
+    },
+    {
+      "detail": "big stacks lose value relative to chips, short stacks gain it: the bubble, computed",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Seat",
+        "zh": "座位"
+      },
+      "key": "seat",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Chip share",
+        "zh": "筹码占比"
+      },
+      "key": "chip_share",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Money share",
+        "zh": "奖金占比"
+      },
+      "key": "money_share",
+      "unit": "probability"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Gap (pp)",
+        "zh": "差(百分点)"
+      },
+      "key": "gap_pp",
+      "unit": "percent"
+    }
+  ],
+  "id": "table.12-03.icm-vs-chip-share",
+  "lesson": "12-03",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "ICM 假设所有剩余玩家实力相等。",
+        "zh": "ICM 假设所有剩余玩家实力相等。"
+      },
+      {
+        "en": "ICM assumes every remaining player is equally skilled.",
+        "zh": "ICM assumes every remaining player is equally skilled."
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.icm#icm",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "chip_share": 0.375,
+      "gap_pp": -8.114,
+      "money_share": 0.293864,
+      "seat": 0
+    },
+    {
+      "chip_share": 0.25,
+      "gap_pp": -1.335,
+      "money_share": 0.236654,
+      "seat": 1
+    },
+    {
+      "chip_share": 0.1875,
+      "gap_pp": 1.374,
+      "money_share": 0.201243,
+      "seat": 2
+    },
+    {
+      "chip_share": 0.125,
+      "gap_pp": 3.468,
+      "money_share": 0.159677,
+      "seat": 3
+    },
+    {
+      "chip_share": 0.0625,
+      "gap_pp": 4.606,
+      "money_share": 0.108561,
+      "seat": 4
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "icm",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.icm",
+    "seed": null
+  },
+  "title": {
+    "en": "ICM share against chip share",
+    "zh": "ICM 份额 与 筹码份额 的差"
+  },
+  "unverified_claims": []
+}
