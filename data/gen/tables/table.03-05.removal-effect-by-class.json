@@ -1,0 +1,156 @@
+{
+  "caption": {
+    "en": "Every number comes from Range.with_removed (derived). Two same-suit visible cards and two different-suit visible cards delete different counts, and that difference is lesson 03-05's point.",
+    "zh": "全部由 Range.with_removed 现算（derived）。同点是两张同花还是两张异花，删掉的数量不同——这一列差别就是 03-05 的论点。"
+  },
+  "checks": [
+    {
+      "detail": "removal never increases a class's combo count",
+      "kind": "combo_count",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Class",
+        "zh": "类别"
+      },
+      "key": "class",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Visible cards",
+        "zh": "可见牌"
+      },
+      "key": "visible",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 1,
+      "header": {
+        "en": "Baseline combos",
+        "zh": "原本组合数"
+      },
+      "key": "baseline_combos",
+      "unit": "combos"
+    },
+    {
+      "digits": 1,
+      "header": {
+        "en": "Combos left",
+        "zh": "剩余组合数"
+      },
+      "key": "remaining_combos",
+      "unit": "combos"
+    },
+    {
+      "digits": 1,
+      "header": {
+        "en": "Combos removed",
+        "zh": "被删组合数"
+      },
+      "key": "removed_combos",
+      "unit": "combos"
+    }
+  ],
+  "id": "table.03-05.removal-effect-by-class",
+  "lesson": "03-05",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.ranges#Range.with_removed",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "baseline_combos": 12.0,
+      "class": "AKo",
+      "remaining_combos": 9.0,
+      "removed_combos": 3.0,
+      "visible": "As"
+    },
+    {
+      "baseline_combos": 12.0,
+      "class": "AKo",
+      "remaining_combos": 7.0,
+      "removed_combos": 5.0,
+      "visible": "As+Kh"
+    },
+    {
+      "baseline_combos": 12.0,
+      "class": "AKo",
+      "remaining_combos": 6.0,
+      "removed_combos": 6.0,
+      "visible": "As+Ks"
+    },
+    {
+      "baseline_combos": 6.0,
+      "class": "AA",
+      "remaining_combos": 3.0,
+      "removed_combos": 3.0,
+      "visible": "As"
+    },
+    {
+      "baseline_combos": 6.0,
+      "class": "AA",
+      "remaining_combos": 1.0,
+      "removed_combos": 5.0,
+      "visible": "As+Ah"
+    },
+    {
+      "baseline_combos": 6.0,
+      "class": "99",
+      "remaining_combos": 3.0,
+      "removed_combos": 3.0,
+      "visible": "9d"
+    },
+    {
+      "baseline_combos": 4.0,
+      "class": "KQs",
+      "remaining_combos": 3.0,
+      "removed_combos": 1.0,
+      "visible": "Ks"
+    },
+    {
+      "baseline_combos": 4.0,
+      "class": "KQs",
+      "remaining_combos": 3.0,
+      "removed_combos": 1.0,
+      "visible": "Qh"
+    },
+    {
+      "baseline_combos": 4.0,
+      "class": "KQs",
+      "remaining_combos": 3.0,
+      "removed_combos": 1.0,
+      "visible": "Kh+Qh"
+    },
+    {
+      "baseline_combos": 4.0,
+      "class": "KJs",
+      "remaining_combos": 3.0,
+      "removed_combos": 1.0,
+      "visible": "As+Ks"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "Range.with_removed",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.ranges",
+    "seed": null
+  },
+  "title": {
+    "en": "Removal: combos left in a class once cards are visible",
+    "zh": "移除效应：可见牌之后每个类别还剩几个组合"
+  },
+  "unverified_claims": []
+}

@@ -200,7 +200,10 @@
             "bluff_indifference",
             "combo_count",
             "game_value_closed_form",
-            "determinism"
+            "determinism",
+            "closed_form_residual",
+            "edges_disagree",
+            "monotonicity"
           ]
         },
         "value": { "type": ["number", "null"] },

@@ -303,7 +303,14 @@ PUBLISHED_PROOFS: dict[str, ProofEntry] = {
     KUHN.game: KUHN,
     "toy_1street_one_third": _one_street_entry("toy_1street_one_third", float(Fraction(1, 3))),
     "toy_1street_half_pot": _one_street_entry("toy_1street_half_pot", 0.5),
+    "toy_1street_three_quarter_pot": _one_street_entry(
+        "toy_1street_three_quarter_pot", float(Fraction(3, 4))
+    ),
     "toy_1street_pot": _one_street_entry("toy_1street_pot", 1.0),
+    # The overbet row is not decoration: chapter 04's claim is that a size is a *consequence* of the
+    # range and the board, and the only way to show the closed forms still hold at 2x pot -- where the
+    # bluff share rises to 40% and the value:bluff ratio falls to 3:2 -- is to solve it and check.
+    "toy_1street_two_pot": _one_street_entry("toy_1street_two_pot", 2.0),
 }
 
 

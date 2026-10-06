@@ -1,0 +1,332 @@
+{
+  "caption": {
+    "en": "Closed form e* = ((1-f)B - fP) / (2B(1-f) - fP), solved from ev_bet and ev_check and re-substituted row by row; the residual column is what that substitution leaves behind, shown to eight decimals, so a 0 there means below 1e-8 and the exact bound is in checks. A regime of below means weaker hands want to bet -- the bluff region, produced by the denominator changing sign, not by a slip.",
+    "zh": "闭合式 e* = ((1-f)B - fP) / (2B(1-f) - fP)，由 ev_bet 与 ev_check 代数解出；每一行都用 ev_bet/ev_check 回代验证，residual 那一列就是回代的残差（显示到 8 位，更小的残差显示为 0；精确上界在 checks 里）。regime=below 的行是“越弱越该下注”的诈唬区——分母变号造成的，不是口误。"
+  },
+  "checks": [
+    {
+      "detail": "every threshold in the table re-substitutes into ev_bet - ev_check with zero residual",
+      "kind": "closed_form_residual",
+      "pass": true,
+      "threshold": 1e-12,
+      "value": 0.0
+    },
+    {
+      "detail": "both regimes occur, which is the point: the inequality's direction depends on f and size",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Size",
+        "zh": "尺度"
+      },
+      "key": "size_label",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Fold frequency f",
+        "zh": "对手弃牌率 f"
+      },
+      "key": "fold_frequency",
+      "unit": "probability"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "MDF at this size",
+        "zh": "该尺度的 MDF"
+      },
+      "key": "mdf_of_size",
+      "unit": "probability"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Break-even equity e*",
+        "zh": "盈亏平衡胜率 e*"
+      },
+      "key": "break_even_equity",
+      "unit": "probability"
+    },
+    {
+      "header": {
+        "en": "Regime",
+        "zh": "区间"
+      },
+      "key": "regime",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 8,
+      "header": {
+        "en": "Residual",
+        "zh": "回代残差"
+      },
+      "key": "residual",
+      "unit": "dimensionless"
+    }
+  ],
+  "id": "table.04-05.bet-break-even-equity",
+  "lesson": "04-05",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "Fold frequencies are declared inputs, not measurements of any population: each row answers a conditional question about a stated f.",
+        "zh": "弃牌率是声明的输入，不是任何人群的实测：每一行回答的是“若 f 为此值”的条件式问题。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.ev#break_even_equity_to_bet",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "bet_size": 0.333333,
+      "break_even_equity": 0.0,
+      "fold_frequency": 0.25,
+      "mdf_of_size": 0.75,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "1/3 pot"
+    },
+    {
+      "bet_size": 0.333333,
+      "break_even_equity": null,
+      "fold_frequency": 0.4,
+      "mdf_of_size": 0.75,
+      "regime": "all",
+      "residual": null,
+      "size_label": "1/3 pot"
+    },
+    {
+      "bet_size": 0.333333,
+      "break_even_equity": 2.0,
+      "fold_frequency": 0.5,
+      "mdf_of_size": 0.75,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "1/3 pot"
+    },
+    {
+      "bet_size": 0.333333,
+      "break_even_equity": 1.4,
+      "fold_frequency": 0.6,
+      "mdf_of_size": 0.75,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "1/3 pot"
+    },
+    {
+      "bet_size": 0.333333,
+      "break_even_equity": 1.142857,
+      "fold_frequency": 0.75,
+      "mdf_of_size": 0.75,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "1/3 pot"
+    },
+    {
+      "bet_size": 0.5,
+      "break_even_equity": 0.25,
+      "fold_frequency": 0.25,
+      "mdf_of_size": 0.666667,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "1/2 pot"
+    },
+    {
+      "bet_size": 0.5,
+      "break_even_equity": -0.5,
+      "fold_frequency": 0.4,
+      "mdf_of_size": 0.666667,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "1/2 pot"
+    },
+    {
+      "bet_size": 0.5,
+      "break_even_equity": null,
+      "fold_frequency": 0.5,
+      "mdf_of_size": 0.666667,
+      "regime": "all",
+      "residual": null,
+      "size_label": "1/2 pot"
+    },
+    {
+      "bet_size": 0.5,
+      "break_even_equity": 2.0,
+      "fold_frequency": 0.6,
+      "mdf_of_size": 0.666667,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "1/2 pot"
+    },
+    {
+      "bet_size": 0.5,
+      "break_even_equity": 1.25,
+      "fold_frequency": 0.75,
+      "mdf_of_size": 0.666667,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "1/2 pot"
+    },
+    {
+      "bet_size": 0.75,
+      "break_even_equity": 0.357143,
+      "fold_frequency": 0.25,
+      "mdf_of_size": 0.571429,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "3/4 pot"
+    },
+    {
+      "bet_size": 0.75,
+      "break_even_equity": 0.1,
+      "fold_frequency": 0.4,
+      "mdf_of_size": 0.571429,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "3/4 pot"
+    },
+    {
+      "bet_size": 0.75,
+      "break_even_equity": -0.5,
+      "fold_frequency": 0.5,
+      "mdf_of_size": 0.571429,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "3/4 pot"
+    },
+    {
+      "bet_size": 0.75,
+      "break_even_equity": null,
+      "fold_frequency": 0.6,
+      "mdf_of_size": 0.571429,
+      "regime": "all",
+      "residual": null,
+      "size_label": "3/4 pot"
+    },
+    {
+      "bet_size": 0.75,
+      "break_even_equity": 1.5,
+      "fold_frequency": 0.75,
+      "mdf_of_size": 0.571429,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "3/4 pot"
+    },
+    {
+      "bet_size": 1.0,
+      "break_even_equity": 0.4,
+      "fold_frequency": 0.25,
+      "mdf_of_size": 0.5,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "pot"
+    },
+    {
+      "bet_size": 1.0,
+      "break_even_equity": 0.25,
+      "fold_frequency": 0.4,
+      "mdf_of_size": 0.5,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "pot"
+    },
+    {
+      "bet_size": 1.0,
+      "break_even_equity": 0.0,
+      "fold_frequency": 0.5,
+      "mdf_of_size": 0.5,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "pot"
+    },
+    {
+      "bet_size": 1.0,
+      "break_even_equity": -1.0,
+      "fold_frequency": 0.6,
+      "mdf_of_size": 0.5,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "pot"
+    },
+    {
+      "bet_size": 1.0,
+      "break_even_equity": 2.0,
+      "fold_frequency": 0.75,
+      "mdf_of_size": 0.5,
+      "regime": "below",
+      "residual": 0.0,
+      "size_label": "pot"
+    },
+    {
+      "bet_size": 2.0,
+      "break_even_equity": 0.454545,
+      "fold_frequency": 0.25,
+      "mdf_of_size": 0.333333,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "2 pot"
+    },
+    {
+      "bet_size": 2.0,
+      "break_even_equity": 0.4,
+      "fold_frequency": 0.4,
+      "mdf_of_size": 0.333333,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "2 pot"
+    },
+    {
+      "bet_size": 2.0,
+      "break_even_equity": 0.333333,
+      "fold_frequency": 0.5,
+      "mdf_of_size": 0.333333,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "2 pot"
+    },
+    {
+      "bet_size": 2.0,
+      "break_even_equity": 0.2,
+      "fold_frequency": 0.6,
+      "mdf_of_size": 0.333333,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "2 pot"
+    },
+    {
+      "bet_size": 2.0,
+      "break_even_equity": -1.0,
+      "fold_frequency": 0.75,
+      "mdf_of_size": 0.333333,
+      "regime": "above",
+      "residual": 0.0,
+      "size_label": "2 pot"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "break_even_equity_to_bet",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.ev",
+    "seed": null
+  },
+  "title": {
+    "en": "When betting beats checking: break-even equity by size and fold frequency",
+    "zh": "下注何时优于过牌：每个尺度、每个弃牌率的盈亏平衡胜率"
+  },
+  "unverified_claims": []
+}

@@ -60,6 +60,29 @@ SPOTS: dict[str, dict[str, object]] = {
         "lesson": "02-03",
         "player": "DEF",
     },
+    # Chapter 04's argument is that a size is a *consequence*, and the clearest way to show it is the
+    # same arithmetic drawn at four sizes: the defended slice shrinks and the bluffs it has to support
+    # grow. These are cheap (no sampling), so `gen_all --check` stays usable.
+    **{
+        f"range.04-02.mdf-floor-vs-{label}": {
+            "title": {
+                "zh": f"面对 {human} 下注时必须防守的那部分范围",
+                "en": f"The slice of a range that a {human} bet forces you to defend",
+            },
+            "recipe": "mdf-floor",
+            "pot": 1.0,
+            "bet_fraction": fraction,
+            "street": "flop",
+            "lesson": "04-02",
+            "player": "DEF",
+        }
+        for label, human, fraction in (
+            ("third-pot", "one-third-pot", 1 / 3),
+            ("three-quarter-pot", "three-quarter-pot", 0.75),
+            ("pot", "pot-sized", 1.0),
+            ("two-pot", "double-pot overbet", 2.0),
+        )
+    },
     # Deferred, not deleted: cutting the big blind's calling line by equity needs a pooled Monte Carlo
     # pass. As written it costs ~4.5 minutes per rebuild, which would make `gen_all --check` unusable,
     # and its per-class error bars were wide enough that classes near the cut could flip between runs.

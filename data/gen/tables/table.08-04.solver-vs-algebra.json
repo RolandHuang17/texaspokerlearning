@@ -138,6 +138,34 @@
       "solved_bluff_share": 0.333366,
       "solved_defense": 0.5001,
       "solved_value": 0.25
+    },
+    {
+      "algebra_bluff_share": 0.3,
+      "algebra_mdf": 0.571429,
+      "algebra_value": 0.214286,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_three_quarter_pot.json",
+      "bluff_gap": 0.00017908,
+      "defense_gap": 0.00015843,
+      "exploitability": 9.821e-05,
+      "size_label": "0.7500x pot",
+      "solved_bluff_share": 0.300179,
+      "solved_defense": 0.571587,
+      "solved_value": 0.214286
+    },
+    {
+      "algebra_bluff_share": 0.4,
+      "algebra_mdf": 0.333333,
+      "algebra_value": 0.333333,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_two_pot.json",
+      "bluff_gap": 7.44e-06,
+      "defense_gap": 1.033e-05,
+      "exploitability": 7.92e-06,
+      "size_label": "2.0000x pot",
+      "solved_bluff_share": 0.399993,
+      "solved_defense": 0.333323,
+      "solved_value": 0.333333
     }
   ],
   "schema_version": "1.0.0",

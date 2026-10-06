@@ -1,0 +1,222 @@
+{
+  "algorithm": "cfr_plus",
+  "average_strategy": {
+    "0:0:air": {
+      "bet": 0.666646,
+      "check": 0.333354
+    },
+    "0:0:nut": {
+      "bet": 1.0,
+      "check": 0.0
+    },
+    "1:1:catcher": {
+      "call": 0.333323,
+      "fold": 0.666677
+    }
+  },
+  "checks": [
+    {
+      "detail": "chips per hand, half-sum convention",
+      "kind": "exploitability",
+      "pass": true,
+      "threshold": 0.0002,
+      "value": 7.924944e-06
+    },
+    {
+      "detail": "mdf_equality: measured 0.333323, expected 0.333333",
+      "kind": "mdf_equality",
+      "pass": true,
+      "threshold": 0.002,
+      "value": 0.333323
+    },
+    {
+      "detail": "bluff_indifference: measured 0.399993, expected 0.4",
+      "kind": "bluff_indifference",
+      "pass": true,
+      "threshold": 0.002,
+      "value": 0.399992559908
+    },
+    {
+      "detail": "value_bets_always: measured 1, expected 1",
+      "kind": "frequency_bounds",
+      "pass": true,
+      "threshold": 0.001,
+      "value": 1.0
+    },
+    {
+      "detail": "toy_game_value: measured 0.333333, expected 0.333333",
+      "kind": "game_value_closed_form",
+      "pass": true,
+      "threshold": 0.002,
+      "value": 0.33333331217
+    }
+  ],
+  "config": {
+    "game": "toy_1street_two_pot",
+    "measure_every": 160,
+    "parameters": {
+      "bet_size": 2.0,
+      "pot": 1.0
+    },
+    "tree": {
+      "deals": 2,
+      "decision_nodes": 2,
+      "infosets": 3,
+      "nodes": 5,
+      "terminal_nodes": 3
+    }
+  },
+  "curve": [
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0010676785,
+      "iteration": 160
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0004612083,
+      "iteration": 320
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.00019666,
+      "iteration": 480
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0001397833,
+      "iteration": 640
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.46243e-05,
+      "iteration": 800
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 6.19745e-05,
+      "iteration": 960
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 9.41082e-05,
+      "iteration": 1120
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.000106335,
+      "iteration": 1280
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0001115399,
+      "iteration": 1440
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.75581e-05,
+      "iteration": 1600
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 0.0001008071,
+      "iteration": 1760
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.51242e-05,
+      "iteration": 1920
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 3.60449e-05,
+      "iteration": 2080
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 8.1452e-05,
+      "iteration": 2240
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 4.36554e-05,
+      "iteration": 2400
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.63939e-05,
+      "iteration": 2560
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.51833e-05,
+      "iteration": 2720
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 1.93452e-05,
+      "iteration": 2880
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 8.3791e-06,
+      "iteration": 3040
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 2.14082e-05,
+      "iteration": 3200
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 4.41629e-05,
+      "iteration": 3360
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.67709e-05,
+      "iteration": 3520
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 6.2579e-06,
+      "iteration": 3680
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 5.6789e-05,
+      "iteration": 3840
+    },
+    {
+      "elapsed_seconds": null,
+      "exploitability": 7.9249e-06,
+      "iteration": 4000
+    }
+  ],
+  "determinism_verified": true,
+  "exploitability_bb_per_hand": 7.9249e-06,
+  "exploitability_threshold": 0.0002,
+  "game": "toy_1street",
+  "game_description": {
+    "en": "One-street bluff-catcher game: its equilibrium frequencies are the closed forms of chapter 02.",
+    "zh": "单街诈唬-捕手博弈：均衡频率就是 pot/(pot+bet) 与 bet/(pot+2bet)。"
+  },
+  "game_value_bb_per_hand": 0.3333333122,
+  "id": "solver.toy_1street_two_pot",
+  "iterations": 4000,
+  "peak_memory_mb": null,
+  "proof_entry": "toy_1street_two_pot",
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "src/pokergto/solver/proofs.py#toy_1street_two_pot",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": "data/gen/solver/toy_1street_two_pot.json",
+    "upstream": null,
+    "verified": true
+  },
+  "schema_version": "1.0.0",
+  "seed": 0,
+  "timing_seconds": null
+}

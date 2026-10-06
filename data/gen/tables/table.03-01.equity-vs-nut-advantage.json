@@ -1,0 +1,197 @@
+{
+  "caption": {
+    "en": "The ranges are illustrative inputs authored here (reference); both advantage columns are computed by this repository's evaluator over an exact enumeration (derived, no sampling error). On an incomplete board the nut reference is the best hand reachable *now*, which understates it for the player holding draws. A five-card board is not in this table: after the river there is no equity left to compute, only a showdown.",
+    "zh": "范围是本仓库为讲解设定的示例（reference），两列优势由 evaluate5 与逐组合枚举现算（derived，精确穷举、无抽样误差）。坚果优势在未完成的牌面上按“当前可达最强手”为基准，因此对听牌方偏低；牌面五张时不在这张表里——河牌后没有胜率可算，只剩摊牌。"
+  },
+  "checks": [
+    {
+      "detail": "hero + villain equity equals 1 on every row",
+      "kind": "frequency_bounds",
+      "pass": true
+    },
+    {
+      "detail": "at least one board gives one side the equity edge and the other the nut edge; if none did, the distinction this table exists for would be decorative",
+      "kind": "edges_disagree",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Board",
+        "zh": "牌面"
+      },
+      "key": "board",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Hero",
+        "zh": "Hero"
+      },
+      "key": "hero_label",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Villain",
+        "zh": "Villain"
+      },
+      "key": "villain_label",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Hero equity",
+        "zh": "Hero 胜率"
+      },
+      "key": "hero_equity",
+      "unit": "probability"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Equity edge",
+        "zh": "胜率优势"
+      },
+      "key": "equity_edge",
+      "unit": "probability"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Hero nut share",
+        "zh": "Hero 坚果占比"
+      },
+      "key": "hero_nut_share",
+      "unit": "probability"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Nut edge",
+        "zh": "坚果优势"
+      },
+      "key": "nut_edge",
+      "unit": "probability"
+    },
+    {
+      "header": {
+        "en": "Who bets often",
+        "zh": "谁能常下注"
+      },
+      "key": "can_bet_often",
+      "unit": "ratio"
+    },
+    {
+      "header": {
+        "en": "Who bets big",
+        "zh": "谁能下大注"
+      },
+      "key": "can_bet_big",
+      "unit": "ratio"
+    }
+  ],
+  "id": "table.03-01.equity-vs-nut-advantage",
+  "lesson": "03-01",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "Ranges are illustrative inputs chosen so the exact enumeration stays cheap; they are not a solved strategy.",
+        "zh": "Ranges are illustrative inputs chosen so the exact enumeration stays cheap; they are not a solved strategy."
+      },
+      {
+        "en": "示例范围为讲解而设，不是求解决策；它们让精确穷举保持在几秒内。",
+        "zh": "示例范围为讲解而设，不是求解决策；它们让精确穷举保持在几秒内。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.theory.range_advantage#advantage",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "board": "Kh7s3d",
+      "can_bet_big": "hero",
+      "can_bet_often": "hero",
+      "edges_disagree": false,
+      "equity_edge": 0.430545,
+      "hero_combos": 52.0,
+      "hero_equity": 0.715272,
+      "hero_label": "CO opener",
+      "hero_nut_share": 0.115385,
+      "nut_edge": 0.115385,
+      "villain_combos": 64.0,
+      "villain_equity": 0.284728,
+      "villain_label": "BB caller",
+      "villain_nut_share": 0.0
+    },
+    {
+      "board": "9h6d3c",
+      "can_bet_big": "hero",
+      "can_bet_often": "villain",
+      "edges_disagree": true,
+      "equity_edge": -0.263691,
+      "hero_combos": 66.0,
+      "hero_equity": 0.368154,
+      "hero_label": "BTN opener",
+      "hero_nut_share": 0.090909,
+      "nut_edge": 0.090909,
+      "villain_combos": 60.0,
+      "villain_equity": 0.631846,
+      "villain_label": "BB caller",
+      "villain_nut_share": 0.0
+    },
+    {
+      "board": "As9s5d",
+      "can_bet_big": "villain",
+      "can_bet_often": "hero",
+      "edges_disagree": true,
+      "equity_edge": 0.220466,
+      "hero_combos": 54.0,
+      "hero_equity": 0.610233,
+      "hero_label": "CO opener",
+      "hero_nut_share": 0.0,
+      "nut_edge": -0.166667,
+      "villain_combos": 36.0,
+      "villain_equity": 0.389767,
+      "villain_label": "BB caller",
+      "villain_nut_share": 0.166667
+    },
+    {
+      "board": "Kh7s3d4c",
+      "can_bet_big": "hero",
+      "can_bet_often": "hero",
+      "edges_disagree": false,
+      "equity_edge": 0.53955,
+      "hero_combos": 50.0,
+      "hero_equity": 0.769775,
+      "hero_label": "CO opener (turn)",
+      "hero_nut_share": 0.12,
+      "nut_edge": 0.12,
+      "villain_combos": 48.0,
+      "villain_equity": 0.230225,
+      "villain_label": "BB caller (turn)",
+      "villain_nut_share": 0.0
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "advantage",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.theory.range_advantage",
+    "seed": null
+  },
+  "title": {
+    "en": "Equity advantage and nut advantage: two different questions on one board",
+    "zh": "胜率优势与坚果优势：同一局面里的两个不同问题"
+  },
+  "unverified_claims": []
+}

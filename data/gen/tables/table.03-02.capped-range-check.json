@@ -1,0 +1,187 @@
+{
+  "caption": {
+    "en": "The ranges are illustrative inputs (reference); each range's best holding, the board's reachable ceiling and the capped verdict are computed combo by combo (derived). The ceiling is the best of all 1,326 combos, so capped means not-in-my-range, not not-possible-on-this-board.",
+    "zh": "范围是示例输入（reference）；“范围最强手”“牌面可达上限”与 is_capped 由 evaluate5 逐组合现算（derived）。上限取全部 1326 个组合的最优，所以 capped 说的是“不在我这一份范围里”，不是“这张牌面上不可能出现”。"
+  },
+  "checks": [
+    {
+      "detail": "the table contains both a capped and an uncapped line; if every row agreed, the verdict would be meaningless",
+      "kind": "frequency_bounds",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "header": {
+        "en": "Board",
+        "zh": "牌面"
+      },
+      "key": "board",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Role",
+        "zh": "角色"
+      },
+      "key": "role",
+      "unit": "dimensionless"
+    },
+    {
+      "digits": 1,
+      "header": {
+        "en": "Combos",
+        "zh": "组合数"
+      },
+      "key": "combos",
+      "unit": "combos"
+    },
+    {
+      "header": {
+        "en": "Best in range",
+        "zh": "范围最强手"
+      },
+      "key": "range_best",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Board ceiling",
+        "zh": "牌面可达上限"
+      },
+      "key": "ceiling",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Capped?",
+        "zh": "是否封顶"
+      },
+      "key": "is_capped",
+      "unit": "dimensionless"
+    }
+  ],
+  "id": "table.03-02.capped-range-check",
+  "lesson": "03-02",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [
+      {
+        "en": "Capped means the range's best holding sits below the board's reachable ceiling by more than `tolerance` steps of the evaluator's total order, where a step is one distinct hand strength.",
+        "zh": "封顶的判定是：范围最强手在评估器全序里比牌面可达上限低出超过 tolerance 步；一步 = 一种不同的牌力。"
+      }
+    ],
+    "confidence": "high",
+    "derivation_ref": "pokergto.theory.range_advantage#is_capped",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "board": "Kh7s3d",
+      "ceiling": {
+        "en": "three of a kind K 7 3",
+        "zh": "三条 K 7 3"
+      },
+      "combos": 52.0,
+      "is_capped": true,
+      "range_best": {
+        "en": "three of a kind 7 K 3",
+        "zh": "三条 7 K 3"
+      },
+      "role": "hero",
+      "spec": "AKs,AQs,ATs,KQs,AKo,AQo,99,77"
+    },
+    {
+      "board": "Kh7s3d",
+      "ceiling": {
+        "en": "three of a kind K 7 3",
+        "zh": "三条 K 7 3"
+      },
+      "combos": 64.0,
+      "is_capped": true,
+      "range_best": {
+        "en": "one pair K Q 7 3",
+        "zh": "一对 K Q 7 3"
+      },
+      "role": "villain",
+      "spec": "KJs,QJs,JTs,T9s,98s,A5s-A2s,KQo,AJo,76s"
+    },
+    {
+      "board": "AsKsQh",
+      "ceiling": {
+        "en": "straight A",
+        "zh": "顺子 A"
+      },
+      "combos": 82.0,
+      "is_capped": false,
+      "range_best": {
+        "en": "straight A",
+        "zh": "顺子 A"
+      },
+      "role": "hero",
+      "spec": "AA,KK,QQ,JT,T9,AT,KT"
+    },
+    {
+      "board": "AsKsQh",
+      "ceiling": {
+        "en": "straight A",
+        "zh": "顺子 A"
+      },
+      "combos": 92.0,
+      "is_capped": true,
+      "range_best": {
+        "en": "one pair K A Q 9",
+        "zh": "一对 K A Q 9"
+      },
+      "role": "villain",
+      "spec": "98s,76s,54s,65,K9,K8,Q9,J9"
+    },
+    {
+      "board": "9h6d3c",
+      "ceiling": {
+        "en": "three of a kind 9 6 3",
+        "zh": "三条 9 6 3"
+      },
+      "combos": 66.0,
+      "is_capped": false,
+      "range_best": {
+        "en": "three of a kind 9 6 3",
+        "zh": "三条 9 6 3"
+      },
+      "role": "hero",
+      "spec": "AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs"
+    },
+    {
+      "board": "9h6d3c",
+      "ceiling": {
+        "en": "three of a kind 9 6 3",
+        "zh": "三条 9 6 3"
+      },
+      "combos": 48.0,
+      "is_capped": true,
+      "range_best": {
+        "en": "three of a kind 6 9 3",
+        "zh": "三条 6 9 3"
+      },
+      "role": "villain",
+      "spec": "87s,76s,65s,54s,T8s,T9s,98o,66,55"
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "is_capped",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.theory.range_advantage",
+    "seed": null
+  },
+  "title": {
+    "en": "Capped-range check: does this line contain the nuts",
+    "zh": "范围封顶检查：这条线里有没有坚果"
+  },
+  "unverified_claims": []
+}

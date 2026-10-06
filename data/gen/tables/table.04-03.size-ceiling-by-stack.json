@@ -1,0 +1,176 @@
+{
+  "caption": {
+    "en": "Computed from spr.py (derived), with no notion of hand strength in it. The 6bb pot is one example; changing it changes the numbers and not the conclusion.",
+    "zh": "全部由 spr.py 现算（derived），不含任何牌力概念。pot=6bb 是一个已成池的例子，改变它只改变数值不改变结论。"
+  },
+  "checks": [
+    {
+      "detail": "equity needed to commit rises with SPR; a table where it did not would mean the ratio is being computed backwards",
+      "kind": "monotonicity",
+      "pass": true
+    }
+  ],
+  "columns": [
+    {
+      "digits": 0,
+      "header": {
+        "en": "Stack behind (bb)",
+        "zh": "剩余筹码(bb)"
+      },
+      "key": "stack_bb",
+      "unit": "combos"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "Max bet / pot",
+        "zh": "最大可下注 ÷ 底池"
+      },
+      "key": "max_bet_as_pot_fraction",
+      "unit": "ratio"
+    },
+    {
+      "digits": 1,
+      "header": {
+        "en": "Largest standard size (bb)",
+        "zh": "最大标准尺度(bb)"
+      },
+      "key": "largest_standard_size_bb",
+      "unit": "combos"
+    },
+    {
+      "digits": 2,
+      "header": {
+        "en": "SPR",
+        "zh": "有效筹码底池比"
+      },
+      "key": "spr",
+      "unit": "ratio"
+    },
+    {
+      "digits": 4,
+      "header": {
+        "en": "Equity needed all-in",
+        "zh": "全下所需胜率"
+      },
+      "key": "equity_needed_all_in",
+      "unit": "probability"
+    },
+    {
+      "header": {
+        "en": "Pot bet commits",
+        "zh": "池级下注即全下"
+      },
+      "key": "pot_size_bet_commits",
+      "unit": "dimensionless"
+    }
+  ],
+  "id": "table.04-03.size-ceiling-by-stack",
+  "lesson": "04-03",
+  "markdown": null,
+  "provenance": {
+    "assumptions": [],
+    "confidence": "high",
+    "derivation_ref": "pokergto.spr#all_in_equity_needed_from_spr",
+    "kind": "derived",
+    "license": "CC-BY-SA-4.0",
+    "solver_run": null,
+    "upstream": null,
+    "verified": true
+  },
+  "rows": [
+    {
+      "double_pot_is_legal": false,
+      "equity_needed_all_in": 0.363636,
+      "largest_standard_size_bb": 6.0,
+      "max_bet_as_pot_fraction": 1.3333,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": true,
+      "spr": 1.3333,
+      "stack_bb": 8.0
+    },
+    {
+      "double_pot_is_legal": false,
+      "equity_needed_all_in": 0.384615,
+      "largest_standard_size_bb": 9.0,
+      "max_bet_as_pot_fraction": 1.6667,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": true,
+      "spr": 1.6667,
+      "stack_bb": 10.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.416667,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 2.5,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 2.5,
+      "stack_bb": 15.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.434783,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 3.3333,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 3.3333,
+      "stack_bb": 20.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.454545,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 5.0,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 5.0,
+      "stack_bb": 30.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.471698,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 8.3333,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 8.3333,
+      "stack_bb": 50.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.485437,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 16.6667,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 16.6667,
+      "stack_bb": 100.0
+    },
+    {
+      "double_pot_is_legal": true,
+      "equity_needed_all_in": 0.492611,
+      "largest_standard_size_bb": 12.0,
+      "max_bet_as_pot_fraction": 33.3333,
+      "pot_bb": 6.0,
+      "pot_size_bet_commits": false,
+      "spr": 33.3333,
+      "stack_bb": 200.0
+    }
+  ],
+  "schema_version": "1.0.0",
+  "source": {
+    "args": {},
+    "function": "spr",
+    "generator": "tools/gen_tables.py",
+    "module": "pokergto.spr",
+    "seed": null
+  },
+  "title": {
+    "en": "Size ceiling: what is still behind decides whether a 2x-pot bet exists",
+    "zh": "尺度上限：还剩多少筹码决定你能不能下两倍池"
+  },
+  "unverified_claims": []
+}

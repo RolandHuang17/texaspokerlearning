@@ -137,6 +137,21 @@ def validate_artifact(data: Mapping[str, Any], schema: str) -> None:
 # --- provenance helpers ---------------------------------------------------------------
 
 
+def _assumption(text: str | Mapping[str, str]) -> dict[str, str]:
+    """Normalise one assumption into the schema's ``{zh, en}`` shape.
+
+    A plain string is *duplicated*, which is the honest representation of "this note has only been
+    written in one language" and is exactly why the bilingual form exists: pass a mapping when both
+    languages have been written, and a bare string means the other language is the same sentence.
+    """
+    if isinstance(text, Mapping):
+        missing = {"zh", "en"} - set(text)
+        if missing:
+            raise SchemaDriftError(f"assumption is missing {sorted(missing)}: {dict(text)!r}")
+        return {"zh": str(text["zh"]), "en": str(text["en"])}
+    return {"zh": str(text), "en": str(text)}
+
+
 @dataclass(frozen=True, slots=True)
 class Provenance:
     """Builder for the required ``provenance`` block.
@@ -179,7 +194,7 @@ class Provenance:
         solver_run: str | None = None,
         verified: bool = True,
         confidence: str = "high",
-        assumptions: Sequence[str] = (),
+        assumptions: Sequence[str | Mapping[str, str]] = (),
         note: dict[str, str] | None = None,
     ) -> Provenance:
         return cls(
@@ -188,7 +203,7 @@ class Provenance:
             solver_run=solver_run,
             verified=verified,
             confidence=confidence if verified else "medium",
-            assumptions=[{"zh": text, "en": text} for text in assumptions],
+            assumptions=[_assumption(text) for text in assumptions],
             note=note,
         )
 

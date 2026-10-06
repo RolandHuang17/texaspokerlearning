@@ -29,8 +29,9 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import cast
+from typing import Literal, cast
 
+from .errors import InputError
 from .odds import Number, as_fraction
 
 Result = float | Fraction
@@ -106,6 +107,62 @@ def ev_shove(
 
 
 @dataclass(frozen=True, slots=True)
+class BreakEven:
+    """Where betting beats checking, as a statement about equity.
+
+    ``regime`` is the whole answer and ``threshold`` is its parameter:
+
+    * ``above`` -- betting is worth it iff equity is at least ``threshold``. The usual value-bet case.
+    * ``below`` -- betting is worth it iff equity is *at most* ``threshold``. This is the bluff
+      regime, and it is not a paradox: when the fold frequency is high enough the requirement inverts,
+      because the thing you are replacing is a showdown you were going to lose anyway.
+    * ``all`` / ``none`` -- size and fold frequency alone decide, for every hand in your range.
+    * ``indifferent`` -- ``2b(1−f) = fp``, so bet and check have the same expectation at every equity.
+
+    One coincidence worth being able to recognise: when ``f`` equals the frequency the bet *needs* to
+    steal the pot (``bet/(pot+bet)``, the complement of the minimum defense frequency), the threshold
+    lands exactly on ``0``. Air is then indifferent between betting and checking, which is the same fact
+    as "the opponent is defending MDF" read from the bettor's side -- not a third rule to memorise.
+    """
+
+    threshold: Fraction | None
+    regime: Literal["above", "below", "all", "none", "indifferent"]
+
+    @property
+    def equity(self) -> float | None:
+        """The threshold as a float, for reporting. ``None`` when size alone decides."""
+        return None if self.threshold is None else float(self.threshold)
+
+
+def break_even_equity_to_bet(pot: Number, bet: Number, fold_frequency: Number) -> BreakEven:
+    """Solve ``EV(bet) = EV(check)`` for equity.
+
+    ``f·p + (1−f)(e(p+2b) − b) = e·p`` rearranges to ``e·D = N`` with ``D = 2b(1−f) − f·p`` and
+    ``N = (1−f)b − f·p``. The *sign* of ``D`` is what flips the inequality, and a derivation that
+    divides by ``D`` without asking is how a lesson ends up teaching the bluff regime backwards -- so
+    the sign comes back as ``regime`` rather than living in a footnote.
+
+    Arithmetic is exact (:class:`fractions.Fraction`), and every branch is re-checked numerically by
+    bisection on :func:`ev_bet` and :func:`ev_check` in ``tests/test_ev.py`` and again when
+    ``tools/gen_tables.py`` writes the table.
+    """
+    p, b, f = (as_fraction(x) for x in (pot, bet, fold_frequency))
+    if p < 0 or b < 0 or not 0 <= f <= 1:
+        raise InputError(f"cannot evaluate a bet: pot={p}, bet={b}, fold frequency={f}")
+    denominator = 2 * b * (1 - f) - f * p
+    numerator = (1 - f) * b - f * p
+    if denominator == 0:
+        edge = f * p - (1 - f) * b
+        if edge > 0:
+            return BreakEven(None, "all")
+        if edge < 0:
+            return BreakEven(None, "none")
+        return BreakEven(None, "indifferent")
+    threshold = numerator / denominator
+    return BreakEven(threshold, "above" if denominator > 0 else "below")
+
+
+@dataclass(frozen=True, slots=True)
 class DecisionComparison:
     """The output of :func:`compare`. One row per candidate action, ranked, with regrets."""
 
@@ -114,13 +171,6 @@ class DecisionComparison:
     ev: float
     ev_exact: Fraction
     best: bool
-
-    @property
-    def regret(self) -> float:
-        """EV lost against the best action in this table. A "common mistake" section states this,
-        so the learner knows the price of the leak rather than only that it is a leak.
-        """
-        return 0.0 if self.best else self.ev
 
 
 def compare(
