@@ -9,8 +9,8 @@ like a thousand-line diff. So:
 * floats quantised to 12 decimals before dumping, so a platform-specific last bit cannot leak into
   a diff;
 * **no timestamps inside artifact bodies** — a generated file's content is a function of its inputs
-  and nothing else. Build provenance lives in ``manifest.json`` metadata instead, and even there it
-  is recorded as ``git_sha``/versions rather than a clock;
+  and nothing else, which rules out commit shas and interpreter versions just as surely as clocks.
+  Build provenance is printed to the build log by ``tools/gen_all.py`` instead of being committed;
 * every artifact validates against ``data/schema/*.json`` on both write and read, so a corrupt file
   fails loudly at the boundary instead of halfway through a lesson build.
 """
@@ -252,16 +252,15 @@ def write_manifest(
     *,
     engine_version: str,
     schema_version: str,
-    git_sha: str | None = None,
     root: Path | None = None,
 ) -> Path:
     """``data/gen/manifest.json``: the fingerprint of a generated tree.
 
-    Deliberately excludes its own hash and any clock value, so the manifest can be byte-stable
-    across rebuilds of unchanged inputs.
+    Content only -- no clock, no commit sha, no interpreter version. Those would make the manifest a
+    function of *where* it was built rather than *what* was built, and then `gen_all --check` would
+    fail on every commit and on every matrix leg that is not this machine. Build provenance is worth
+    reporting, so ``tools/gen_all.py`` prints it to the log, where it is useful and harmless.
     """
-    import sys
-
     base = root or GEN_DIR
     entries: dict[str, Any] = {}
     for kind, path, schema in files:
@@ -276,20 +275,9 @@ def write_manifest(
         "schema_version": schema_version,
         "engine_version": engine_version,
         "generator": "tools/gen_all.py",
-        "python": ".".join(str(part) for part in sys.version_info[:3]),
-        "numpy": _numpy_version(),
-        "git_sha": git_sha,
         "artifact_count": len(entries),
         "files": entries,
     }
     path = base / "manifest.json"
     write_artifact(path, payload, schema="manifest")
     return path
-
-
-def _numpy_version() -> str | None:
-    try:
-        import numpy
-    except Exception:  # pragma: no cover - numpy is a hard dependency
-        return None
-    return numpy.__version__

@@ -21,7 +21,7 @@ could disagree forever and nobody would notice.
 2. Lesson prose contains **no hand-typed number**. Every table sits inside an
    `<!-- BEGIN AUTO:id --> … <!-- END AUTO:id -->` block, whose content is produced by
    `tools/inject_doc_tables.py` from `data/gen/tables/*`.
-3. The trainer consumes those same artifacts through one loader (`trainer/src/lib/artifacts.ts`).
+3. The trainer consumes those same artifacts through one loader (`trainer/src/lib/data.ts`).
    It never re-implements poker mathematics in JavaScript.
 4. CI runs `gen_all.py --check`, which regenerates into a temporary directory and fails on any
    byte difference against the committed tree.

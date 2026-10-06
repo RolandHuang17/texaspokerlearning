@@ -344,18 +344,19 @@ the terminal yourself, `PYTHONPATH=src python -m pokergto range "22+,ATs+" --lan
    `--seed 0`; what matters is that the seed lands inside the artifact.
 2. Exact preflop is infeasible for range-versus-range (Example 4's refusal). Then you hold an estimator,
    and the interval travels with it.
-3. Current state of `--check`: `python tools/gen_all.py --check --skip solver` raises
-   `NameError: name '_kind_for' is not defined`; the equivalent that works today is
-   `python tools/gen_all.py --check --skip manifest`. Also, `--check` is not read-only for the manifest
-   step — it does write `data/gen/manifest.json`. Both facts are recorded in
-   `docs/development/local-dev.md` rather than smoothed over. After any `--check` run, look at
-   `git status --short` and delete the leftover if it appeared.
+3. `python tools/gen_all.py --check` is byte-for-byte and read-only, and it did not use to be either.
+   The manifest used to record the commit, the Python version and the numpy version it was built with --
+   so the file being compared named the checkout it came from, and a comparison after any commit could
+   only fail. Those fields now go to the build log (`built by python 3.12.13, numpy 1.26, git …`), and
+   the committed manifest holds content only. Lesson 01-04 makes the same point about seeds: provenance
+   belongs where it can be read, not inside the thing being hashed.
 4. Machine state moves. When this lesson was written, `python -m ruff check . --no-cache` reported 2
    N817 findings, while `local-dev.md` records a historical snapshot of 335. The command is durable;
    the count is a snapshot. Re-run it.
-5. `python -m pytest` works now (`-m "not slow"`: 87 passed, 4 deselected, 19.47s), whereas
-   `local-dev.md` records that `tests/` did not exist yet and nothing was collected. Same distinction:
-   snapshot versus present.
+5. The test count is a snapshot too. This lesson was written while `python -m pytest -q -m "not slow"`
+   reported 87 passed in ~19s; ask the machine instead of the prose with
+   `python -m pytest --collect-only -q | tail -1`. A count quoted in a lesson is the same category of
+   thing as a timing: true when typed, and never the point.
 
 ## 陷阱 / Common mistakes
 
@@ -387,7 +388,7 @@ the terminal yourself, `PYTHONPATH=src python -m pokergto range "22+,ATs+" --lan
   errors each estimate sits from it.
 - Re-run the commands behind Hand 3 (`spr --stack 78 --pot 13` and the 12-out row of the draw table) and
   recompute the −2.02bb yourself.
-- Open `data/gen/manifest.json` and explain why `python`, `numpy` and `git_sha` belong in it.
+- Open `data/gen/manifest.json` and explain why it holds *only* content -- file digests and versions -- while the python, numpy and commit sha that produced it go to the build log. Which of the two would break `gen_all --check`, and on what?
 
 ## 自测清单 / Self-check
 

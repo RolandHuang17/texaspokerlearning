@@ -191,35 +191,24 @@ jobs:
         shell: bash
         run: python tools/check_artifact_schema.py
 
-      - name: Every strategy claim declares its provenance
+      - name: Every strategy claim declares provenance
         shell: bash
         run: python tools/check_provenance.py
 
-      # VERIFIED FAILURE, and the reason this step filters: `check_provenance.py` walks every YAML in
-      # data/src except curriculum.yaml and licensing_manifest.yaml and requires a `provenance` block
-      # on each record, but data/src/glossary.yaml is a terminology authority whose schema forbids extra
-      # properties -- so a glossary entry can never satisfy the gate. Today it reports
-      # "data/src/glossary.yaml: record <no id> has no provenance block". The fix belongs in the tool
-      # (add glossary.yaml to the exemption list, or validate the generated artifact instead of the
-      # source). Flagged to the maintainer; the step is left gating and honest.
+      # `data/src/glossary.yaml` is exempt inside that tool: it is a terminology authority whose schema
+      # forbids extra properties, so a `provenance` block cannot be attached to a term at all. The
+      # generated artifact it feeds (glossary.json) is provenance-carrying and is validated by the
+      # schema job above, which is where a terminology claim should be checked anyway.
       - name: data/gen is byte-identical to a fresh generation
         shell: bash
-        run: python tools/gen_all.py --check --skip solver --skip manifest
+        run: python tools/gen_all.py --check
 
-      # Why the two skips, both verified on this repository:
-      #   --skip solver   the solver is compared by the `solver` job above, which is where its cost
-      #                   belongs; and gen_all._step_solver passes `--out <gen root>` while
-      #                   tools/run_solver.py writes its files directly into the directory it is given,
-      #                   so a full run lands `kuhn.json` at the top of data/gen while the committed
-      #                   tree keeps it in data/gen/solver/. An unfiltered `--check` therefore reports
-      #                   eight "stale artifact" problems plus four "differs" problems. One-line fix:
-      #                   pass `--out <out>/solver`. TODO(m2): flagged, not patched here.
-      #   --skip manifest manifest.json records `git_sha`, `python` and `numpy`. A contributor
-      #                   regenerates it before committing, so the recorded sha is the parent commit,
-      #                   while CI resolves HEAD to the commit being tested: the byte comparison can
-      #                   never agree for a file whose own content names the commit it came from.
-      #                   TODO(m2): either drop git_sha from the committed manifest or exclude
-      #                   manifest.json from the byte diff.
+      # Unfiltered, and it used to need two skips. Both reasons are gone and both are now asserted
+      # rather than hoped for: `gen_all._step_solver` passes `--out <temp>/solver` so solver artifacts
+      # land where the committed tree keeps them, and `manifest.json` records content only -- digests,
+      # `schema_version`, `engine_version` -- while interpreter, numpy and commit sha go to the build
+      # log. A committed, byte-compared file that named the commit it came from could never agree with
+      # CI's HEAD.
 
   docs:
     name: docs build
@@ -256,10 +245,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Guarded by existence, not by a date: `trainer/` is M3 work and does not exist yet. A workflow
-      # that fails because a directory has not been written is a workflow nobody trusts, so the job
-      # reports "skipped, by design" and stays green. When trainer/package.json is committed, the rest
-      # of this job activates with no edits.
+      # Guarded by existence, not by a date: a workflow that fails because a directory has not been
+      # written is a workflow nobody trusts, so a fork without a trainer reports "skipped, by design"
+      # and stays green. `trainer/` itself landed in M3.
       - name: Detect the trainer
         id: probe
         shell: bash
@@ -270,6 +258,14 @@ jobs:
         uses: ./.github/actions/setup-env
         with:
           with-node: 'true'
+
+      # The trainer's contract with the data it consumes is ADR-0004: it reads committed artifacts and
+      # nothing else. This proves the bundle would be built against exactly the artifacts in data/gen,
+      # so a chart cannot quietly render a number an older engine wrote.
+      - name: Trainer data matches data/gen
+        if: steps.probe.outputs.present == 'true'
+        shell: bash
+        run: python tools/sync_trainer_data.py --check
 
       - name: Install and test
         if: steps.probe.outputs.present == 'true'
@@ -285,10 +281,7 @@ jobs:
         working-directory: trainer
         run: npm run build --if-present
 
-      # The trainer's contract with the data it consumes is ADR-0004: it reads committed artifacts and
-      # nothing else. This is the step that proves it is still doing that, once sync_trainer_data.py
-      # exists. TODO(m3): enable alongside tools/sync_trainer_data.py.
       - name: Trainer not authored yet
         if: steps.probe.outputs.present != 'true'
         shell: bash
-        run: echo "::notice::trainer/package.json absent -- the trainer arrives in M3 (adr/0004)"
+        run: echo "::notice::trainer/package.json absent -- skipping the trainer job (adr/0004)"

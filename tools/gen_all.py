@@ -116,13 +116,30 @@ def _step_manifest(out: Path) -> list[Path]:
         files,
         engine_version=__version__,
         schema_version=SCHEMA_VERSION,
-        git_sha=_git_sha(),
         root=out,
     )
     return [out / "manifest.json"]
 
 
 _HEX40 = re.compile(r"^[0-9a-f]{40}$")
+
+
+def _environment_note() -> str:
+    """What machine produced this tree, for the build log only.
+
+    The manifest used to carry these fields, which made a committed artifact a function of the
+    interpreter and the commit rather than of its inputs: ``gen_all --check`` then failed on every new
+    commit and on every CI python version. Provenance is still worth seeing -- it just does not belong
+    in a byte-compared file.
+    """
+    try:
+        import numpy
+
+        numeric = getattr(numpy, "__version__", "unknown")
+    except Exception:  # pragma: no cover - numpy is a hard dependency
+        numeric = "unavailable"
+    interpreter = ".".join(str(part) for part in sys.version_info[:3])
+    return f"python {interpreter}, numpy {numeric}, git {_git_sha() or 'no-commit'}"
 
 
 def _git_sha() -> str | None:
@@ -340,6 +357,7 @@ def main(argv: list[str] | None = None) -> int:
 
     written = generate(GEN_DIR, only=only, skip=skip)
     ok(f"gen_all: wrote {len(written)} artifacts into data/gen")
+    print(f"     built by {_environment_note()}", file=sys.stderr)
     if not written:
         print(
             "     (empty state is expected at M0: add data/src/curriculum.yaml and tables to grow it)",

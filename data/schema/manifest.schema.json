@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://pokergto.dev/schemas/manifest.schema.json",
   "title": "data/gen/manifest.json - the fingerprint of a generated tree",
-  "description": "The only noisy file in data/gen, and the only one allowed to be. Determinism means a regeneration with no logic change rewrites nothing except this file's engine_version when the version is bumped.",
+  "description": "The fingerprint of a generated tree. Content only: no clock, no commit sha, no interpreter version, because those make the manifest a function of the machine rather than the inputs and would break byte-for-byte regeneration across the version matrix. `tools/gen_all.py` prints that provenance to the build log instead.",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "engine_version", "generator", "artifact_count", "files"],
@@ -10,9 +10,6 @@
     "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "engine_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "generator": { "const": "tools/gen_all.py" },
-    "python": { "type": ["string", "null"], "description": "Interpreter version string; recorded, never used to gate, because gates belong in content." },
-    "numpy": { "type": ["string", "null"] },
-    "git_sha": { "type": ["string", "null"] },
     "artifact_count": { "type": "integer", "minimum": 0 },
     "files": {
       "type": "object",

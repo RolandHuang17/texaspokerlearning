@@ -60,9 +60,10 @@ explicitly. CC BY-NC was rejected as not a free-content licence.
 ## ADR-0004 — The trainer is a static artifact consumer
 
 Vue 3 + Vite, deployed to GitHub Pages under `/trainer/`, with `data/gen/**` as its only input. No
-backend, no accounts, no runtime network calls (progress stays in the browser), one loader
-(`trainer/src/lib/artifacts.ts`) with types derived from `data/schema/*.schema.json`, and no
-mathematics re-derived in TypeScript except interpolation of a committed table for the odds/MDF slider.
+backend, no accounts, no network calls to anything but its own static bundle (progress stays in the
+browser), one loader (`trainer/src/lib/data.ts`) with hand-written types that mirror
+`data/schema/*.schema.json`, and no mathematics re-derived in TypeScript: the odds/MDF control steps
+over rows of a committed table, so every number it shows is a cell of an artifact.
 Solver screens play *recorded* runs, not live CFR. `tools/sync_trainer_data.py` copies `data/gen` into
 `trainer/public/data` (gitignored) and writes a manifest of sha256 plus `schema_version` and
 `engine_version`, and the build fails on version skew so a stale trainer cannot be deployed quietly.
@@ -91,5 +92,5 @@ integrity failures, and prose that says "please cite your sources" is not a cont
 | 0001 | `tools/gen_all.py --check`, `tools/inject_doc_tables.py --check`, `data/gen/manifest.json`, `.gitattributes` |
 | 0002 | `src/pokergto/solver/proofs.py`, `src/pokergto/solver/exploitability.py`, `status: ready` checks in `tools/check_bilingual.py`, `workflows/solver-regression.yml` |
 | 0003 | `LICENSE`, `LICENSE-docs.md`, `NOTICE`, `CITATION.cff`, `.github/PULL_REQUEST_TEMPLATE.md` |
-| 0004 | `trainer/src/lib/artifacts.ts`, `tools/sync_trainer_data.py`, `workflows/trainer` job in `ci.yml`, `workflows/pages.yml` |
+| 0004 | `trainer/src/lib/data.ts`, `tools/sync_trainer_data.py`, `workflows/trainer` job in `ci.yml`, `workflows/pages.yml` |
 | 0005 | `data/schema/common.schema.json#/$defs/provenance`, `tools/check_provenance.py`, `CODEOWNERS` on `data/src/**` |

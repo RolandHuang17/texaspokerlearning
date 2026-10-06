@@ -11,6 +11,17 @@ Le résumé est en chinois sous chaque entrée.
 ## [Unreleased]
 
 ### Added / 新增
+- `trainer/`: a static Vue 3 + Vite trainer at `/trainer/` with three screens -- a sizing/MDF scale over
+  the generated tables, a 13x13 range viewer over the generated charts, and a solver deck that plays the
+  recorded exploitability curve and prints the proof ledger. It implements no poker mathematics: the
+  artifact list comes from the synced manifest and every fetched file is sha256-checked against it.
+  新增 `trainer/`（Vue 3 + Vite 静态训练器，发布在 `/trainer/`）：尺度/MDF 滑尺读生成的表格、13×13
+  范围图读生成的图表、求解器观察台播放录好的收敛曲线并打印证明登记表。它不实现任何扑克数学：可用产物
+  清单来自同步后的清单文件，每个抓取到的文件都要与它对 sha256。
+- `tools/sync_trainer_data.py`: the only bridge from `data/gen` to the trainer, with a `--check` mode
+  that CI runs so a bundle built against stale artifacts cannot deploy quietly.
+  `tools/sync_trainer_data.py` 是 `data/gen` 通往训练器的唯一通道，带 CI 用的 `--check`，让"拿旧产物
+  构建出来的包"无法悄悄上线。
 - Chapters 00, 01 and 02 authored bilingual and marked `ready`: 18 lessons, 36 files, every numeric
   claim injected from `data/gen` rather than typed.
   第 00、01、02 章完成双语并已翻到 `ready`：18 节课、36 个文件，课文里的每个数字都由 `data/gen`
@@ -25,6 +36,13 @@ Le résumé est en chinois sous chaque entrée.
   `mkdocs_nav.py`（站点导航由课程骨架生成，登记即到达）。
 
 ### Fixed / 修复
+- `data/gen/manifest.json` recorded the commit sha, the Python version and the numpy version of the
+  machine that built it. A byte-compared file that names its own commit can never agree with a later
+  checkout, so `gen_all --check` was guaranteed to fail after every commit and on every CI Python other
+  than the author's. The manifest now holds content only and that provenance is printed to the build log.
+  `data/gen/manifest.json` 以前会记录生成它的 commit sha、Python 版本与 numpy 版本。一个要被逐字节比对的
+  文件如果写着自己来自哪次提交，就永远和后来的 checkout 对不上：`gen_all --check` 必然在每次提交之后失败，
+  也必然在除作者机器之外的 CI Python 上失败。现在 manifest 只装内容，那三类信息来源打进构建日志。
 - `tools/check_bilingual.py`'s live-hand rule could never fire: its regex required two spaces after
   `<!--`, so a lesson could claim examples it had not written. The declaration is now counted against
   the `hand.*` ids actually present, and both languages must teach the *same* hands.

@@ -164,27 +164,28 @@ All five are fast except the last, which re-runs the 2,598,960-hand enumeration 
 `gen_tables.build_hand_class_counts`. That enumeration is the point of the project, so it is not
 going to be mocked out; but the same cost applies to `gen_all.py` (write mode).
 
-Two verified facts about the current state, both in `tools/gen_all.py`, which is the maintainer's
-file and not edited here:
+Two things `--check` guarantees, both verified rather than assumed:
 
-1. `--check --skip solver` (and any invocation that reaches the `manifest` step with a non-empty
-   generated tree) raises `NameError: name '_kind_for' is not defined` at `tools/gen_all.py:108`;
-   the function is named `_kind_by_name`. Until that line is fixed, the working equivalent is
-   `python tools/gen_all.py --check --skip manifest`, which passes.
-2. `--check` is not read-only for the manifest step. `pokergto.artifacts.write_manifest` writes to
-   `GEN_DIR` — the real `data/gen/` — while `gen_all._step_manifest` returns a path inside the
-   temporary directory, so `--check --only manifest` creates `data/gen/manifest.json` and then dies
-   with `FileNotFoundError` on the temp path. A verification command should never dirty the tree;
-   flagging rather than working around it.
+1. It is read-only. The manifest step writes into the temporary rebuild directory, never into
+   `data/gen/`, so a verification run leaves `git status --short` unchanged. (It used to dirty the
+   tree; the guard is `artifacts.write_manifest(..., root=out)` in `gen_all._step_manifest`.)
+2. `--check --only manifest` is refused with an explanation instead of silently comparing a partial
+   tree, because the manifest fingerprints everything. `FULL_TREE_ONLY` in `tools/gen_all.py` is that
+   guard, and `--check` outside it compares the steps it can actually rebuild.
 
-`pre-commit run --all-files` therefore includes one gate that fails for a reason unrelated to your
-change. Delete `data/gen/manifest.json` if a `--check` run left it behind, and confirm with
-`git status --short` before committing.
+One consequence worth knowing when you bump a version: `manifest.json` holds content only -- digests,
+`schema_version`, `engine_version`. Interpreter, numpy and commit sha are printed to the build log by
+`gen_all` and are deliberately *not* committed, since a byte-compared artifact must not depend on the
+machine that wrote it. Committing without regenerating is therefore fine; committing a generator change
+without regenerating is not.
+
+`pre-commit run --all-files` mirrors the CI jobs; if a hook cannot run offline (a hook environment has
+to be downloaded), say so in the pull request rather than marking it green.
 
 ## Regenerating
 
 ```bash
-python tools/gen_all.py                       # write everything (crashes today: note 1 above)
+python tools/gen_all.py                       # write everything
 python tools/gen_all.py --only tables         # just the numeric tables
 python tools/gen_tables.py --list             # the table ids that have builders
 python tools/gen_tables.py --only table.02-03.mdf-vs-sizing --out data/gen
@@ -213,16 +214,23 @@ file -- and why a lesson that exists on disk but is missing from the nav is a cu
 
 ## Trainer
 
-`trainer/` does not exist yet (M3). When it does:
+`trainer/` is a static Vue 3 + Vite app published under `/trainer/`. It is a *consumer* of
+`data/gen` and contains no poker mathematics (ADR-0004), so it must be synced before it is run:
 
 ```bash
+python tools/sync_trainer_data.py   # copies data/gen -> trainer/public/data, stamps src/generated/manifest.ts
 cd trainer
 npm ci
-npm run dev
+npm run dev                          # http://localhost:5173/trainer/
+npm run build                        # vue-tsc --noEmit && vite build
 ```
 
-`tools/sync_trainer_data.py` (ADR-0004) is what copies `data/gen` into `trainer/public/data` and
-writes the manifest the build checks for version skew; it is not present in `tools/` at M0.
+`tools/sync_trainer_data.py --check` is the CI mode: it compares the copied tree and the stamped
+manifest against `data/gen` without writing, so a bundle built against stale artifacts fails instead of
+rendering a number an older engine wrote. Both `trainer/public/data/` and
+`trainer/src/generated/manifest.ts` are gitignored build products -- if you find them in `git status`,
+something added them by mistake, because a committed copy is a second source of truth for every number
+in the project.
 
 ## If something is broken
 
@@ -230,7 +238,7 @@ writes the manifest the build checks for version skew; it is not present in `too
 python setup/doctor.py       # what is installed, what imports, what is reachable
 python -m pip show pokergto  # is the editable install actually pointing at this checkout?
 python -c "import sys; print(sys.executable)"
-git status --short           # did a --check run leave data/gen/manifest.json behind?
+git status --short           # a --check run must leave the tree clean; if it did not, that is a bug
 ```
 
 `doctor.py` is read-only by contract: it never installs, never writes, never regenerates. If you

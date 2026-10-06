@@ -312,15 +312,16 @@ CO 开池 2.2bb，我方 BTN 3-bet 到 6.5bb，CO 补齐；小盲弃牌，底池
 
 1. 采样类结论本来就不该逐字节相同——除非带上 seed。`--seed` 缺省是 0，写进 artifact 才有意义。
 2. 精确翻前不可行（例 4 的那条错误）。这时你拿到的是估计量，必须连带区间一起报。
-3. `--check` 的当前状态：`python tools/gen_all.py --check --skip solver` 会抛
-   `NameError: name '_kind_for' is not defined`；今天能用的等价写法是
-   `python tools/gen_all.py --check --skip manifest`。另外 `--check` 对 manifest 那一步并不是只读的，
-   它会把 `data/gen/manifest.json` 真写出来。这两条都记在 `docs/development/local-dev.md`，
-   属于"写下来而不是抹平"的东西。踩到之后记得 `git status --short` 看看有没有多出来的文件。
+3. `python tools/gen_all.py --check` 现在是逐字节比对、且不改工作区——这两点它以前都做不到。
+   manifest 曾经记录生成它所在的 commit、Python 版本与 numpy 版本，于是"被比对的文件"里写着"它来自哪次
+   提交"：任何一次提交之后再做比对都只能失败。现在这些信息打到构建日志里
+   （`built by python 3.12.13, numpy 1.26, git …`），已提交的 manifest 只装内容。第 01-04 节讲的是同一件
+   事（种子要写进产物，采样口径不要）：来源该放在能被读到的地方，而不是塞进被哈希的东西里。
 4. 本机状态会漂。本节写这一课时实测 `python -m ruff check . --no-cache` 剩 2 条 N817，
    而 `local-dev` 记的历史快照是 335 条——数字属于快照，命令不属于。想知道现在什么样，跑它。
-5. `python -m pytest` 现在能跑（实测 `-m "not slow"`：87 passed, 4 deselected, 19.47s），
-   而 `local-dev` 记的是"tests/ 目录还不存在、收集不到东西"。同样是快照与现状的分别。
+5. 测试数量同样是快照。写这一节时 `python -m pytest -q -m "not slow"` 报 87 passed、约 19 秒；
+   别信正文，问机器：`python -m pytest --collect-only -q | tail -1`。课文里引用的计数和引用一个耗时
+   是同一类东西——写下来那一刻为真，而且从来不是重点。
 
 ## 陷阱 / Common mistakes
 
@@ -347,7 +348,7 @@ CO 开池 2.2bb，我方 BTN 3-bet 到 6.5bb，CO 补齐；小盲弃牌，底池
   再跑 `--mode exact` 拿真值，检查真值落在几个区间里、点估计偏了几个标准误。
 - 跑 `spr --stack 78 --pot 13` 与 `python -m pokergto equity QJs --range-villain ...` 那两条牌局命令，
   把牌局 3 的 −2.02bb 自己重算一遍。
-- 打开 `data/gen/manifest.json`，说出 `python`、`numpy`、`git_sha` 三个字段为什么必须在那里。
+- 打开 `data/gen/manifest.json`，说明它为什么只装*内容*（文件摘要与版本号），而生成它的 python、numpy 与 commit sha 被写进了构建日志。这两类信息里，哪一类会让 `gen_all --check` 出问题？在什么情况下出问题？
 
 ## 自测清单 / Self-check
 

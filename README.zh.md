@@ -76,8 +76,12 @@ PYTHONPATH=src python -m pokergto equity AhAs 7d2s --mode exact      # 约 3 分
 PYTHONPATH=src python -m pokergto range "22+,ATs+,KJs+" --lang zh
 PYTHONPATH=src python -m pokergto icm --chips 5000,3000,2000 --payouts 6000,3000,1500
 
-python -m pytest -q                                  # 91 项测试，含 2,598,960 手全枚举
+python -m pytest -q                                  # 含 2,598,960 手全枚举
 python -m mkdocs serve                               # http://127.0.0.1:8000
+
+# 训练器读的就是同一批产物，所以它是被"同步"出来的，不是被配置出来的
+python tools/sync_trainer_data.py
+cd trainer && npm ci && npm run dev                  # http://localhost:5173/trainer/
 ```
 
 Windows 与 Anaconda 是一等公民：`setup/install.ps1` 负责引导，`setup/doctor.py` 只读诊断。命令行统一
@@ -107,8 +111,8 @@ UTF-8，中文课文不会变成乱码。
 | 13 群体读牌与剥削 | 剥削 | 6 | GTO 在哪里不再正确：如何测量群体、如何偏离而不自毁 |
 | 14 综合实战 | 共享 | 4 | 完整闭环、你自己的训练计划、GTO 不会告诉你的部分 |
 
-里程碑 M0–M2 已完成（引擎、数据产物、双语闸门、CI、带证明登记表的求解器）；M3–M5 正在进行，
-`ROADMAP.md` 记录每章目前写到什么程度。一节课被标成 `ready` 的唯一理由是两种语言都存在且通过配对闸门
+里程碑 M0–M2 已完成（引擎、数据产物、双语闸门、CI、带证明登记表的求解器）；M3 已完成训练器三块屏与成本预算门，
+未完成 Leduc 与 Pages 上线；M4–M5 正在进行。`ROADMAP.md` 记录每章目前写到什么程度。一节课被标成 `ready` 的唯一理由是两种语言都存在且通过配对闸门
 ——状态是机器判的，不是作者自己说的。
 
 ## 这个仓库不会假装是什么
@@ -134,10 +138,11 @@ src/pokergto/   引擎：牌、评估器、胜率、范围、赔率、EV、SPR�
 docs/en|zh/     92 节课的骨架，路径与章节逐节镜像；写到几节看 ROADMAP.md，机器口径的计数在
                 data/gen/index.zh.json 的 totals 里
 data/schema/    JSON Schema —— 所有产物的冻结契约
-data/src/       人工编写的 YAML：术语表、课程脊柱、spot、牌局、题库
+data/src/       人工编写、需人工签署的 YAML：目前只有 glossary.yaml 与 curriculum.yaml；
+                spot / 牌局 / 题库三块要到 M6，不提前伪造
 data/gen/       生成、提交、字节确定的数据产物
 tools/          生成器与 CI 闸门，含"证明闸门真的会失败"的负向测试
-trainer/        静态 Vue 3 + Vite，只消费 data/gen（里程碑 M3）
+trainer/        静态 Vue 3 + Vite，只消费 data/gen：尺度滑尺、13×13 范围图、求解器观察台
 .github/        CI 矩阵、Pages、发布、issue/PR 模板、dependabot
 adr/            五条难以逆转的决策，以及它们各自否决掉的方案
 ```

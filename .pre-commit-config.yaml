@@ -136,13 +136,13 @@ repos:
         language: system
         pass_filenames: false
         files: ^(src/pokergto/|data/src/|tools/gen_)
-        # VERIFIED FAILURE: as of this writing this hook aborts with
-        #   NameError: name '_kind_for' is not defined   (tools/gen_all.py:108)
-        # because the manifest step calls a function that does not exist; the generator's own
-        # docstring advertises exactly this `--skip solver` mode. The working equivalent today is
-        # `python tools/gen_all.py --check --skip manifest`. This line stays as the contract and the
-        # failure stays visible, rather than quietly pointing at the weaker subset: the fix belongs in
-        # tools/gen_all.py, which is the maintainer's file.
+        # `--skip solver` is about waiting, not about correctness: the re-solve is the slowest thing in
+        # the repository, and the `solver` CI job runs it unfiltered on every pull request. This hook
+        # therefore checks everything else -- tables, ranges, glossary, curriculum index, and the
+        # manifest that fingerprints them. It used to need `--skip manifest` too, because the manifest
+        # recorded the commit it was built in and a byte comparison could never agree with a checkout
+        # whose HEAD had moved. That field is gone: the committed manifest holds content only, and
+        # interpreter, numpy and commit sha go to the build log.
 
   # --- non-Python formatters and spelling, isolated environments --------------------------------
   - repo: https://github.com/rbubley/mirrors-prettier

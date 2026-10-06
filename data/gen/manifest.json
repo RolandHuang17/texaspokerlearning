@@ -112,8 +112,5 @@
     }
   },
   "generator": "tools/gen_all.py",
-  "git_sha": "0891108c2c7083f04eaea7abdac3142235cb7d12",
-  "numpy": "1.26.4",
-  "python": "3.12.13",
   "schema_version": "1.0.0"
 }

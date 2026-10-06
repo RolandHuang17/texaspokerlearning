@@ -119,12 +119,15 @@ currently no-ops and a range chart has no generator to feed yet. Authoring one t
 the generator in the same pull request (M4 for preflop ranges, M2 for solver runs), and
 `check_artifact_schema.py` will tell you immediately whether the shape is right.
 
-**A derived theory result.** `src/pokergto/theory/**` does not exist yet either. When it does, the
-provenance is `derived` with a `derivation_ref` into it and a test that executes the derivation —
-that combination, and only that combination, earns `verified: true`.
+**A derived theory result.** `src/pokergto/theory/**` is where a "why" claim belongs:
+`range_advantage.py`, `frequencies.py` and `multiway.py` are cited by lessons and each has a test that
+executes the derivation. That combination, and only that combination, earns `verified: true` -- which
+is also why three theory modules that were written and then deleted (`sizing`, `polarization`,
+`blockers`) are absent: they computed precise-looking numbers from invented exponents, and a test could
+only have confirmed the invention.
 
 After any of the above: `python tools/check_artifact_schema.py && python tools/check_provenance.py &&
-python tools/gen_all.py --check --skip manifest`.
+python tools/gen_all.py --check`.
 
 ## `licensing_manifest.yaml`
 

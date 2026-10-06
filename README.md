@@ -84,8 +84,12 @@ PYTHONPATH=src python -m pokergto equity AhAs 7d2s --mode exact      # ~3 minute
 PYTHONPATH=src python -m pokergto range "22+,ATs+,KJs+" --lang zh
 PYTHONPATH=src python -m pokergto icm --chips 5000,3000,2000 --payouts 6000,3000,1500
 
-python -m pytest -q                                  # 91 tests, incl. the 2,598,960-hand enumeration
+python -m pytest -q                                  # incl. the 2,598,960-hand enumeration
 python -m mkdocs serve                               # http://127.0.0.1:8000
+
+# the trainer reads the same artifacts, so it is synced rather than configured
+python tools/sync_trainer_data.py
+cd trainer && npm ci && npm run dev                  # http://localhost:5173/trainer/
 ```
 
 Windows and Anaconda are first-class: `setup/install.ps1` bootstraps, `setup/doctor.py` diagnoses
@@ -117,9 +121,10 @@ structural (they do not change), so this table is safe to cite:
 | 14 Capstone | shared | 4 | The full loop, your own training plan, what GTO does not tell you |
 
 Milestones M0–M2 are complete (engine, artifacts, bilingual gates, CI, solver with its proof
-registry); M3–M5 are in progress, and `ROADMAP.md` records which chapters are currently drafted in
-which language. A lesson is `ready` only when both languages exist and pass the parity gate — so the
-statuses are machine-checked, not aspirational.
+registry). M3 is partly complete: the trainer's three screens and the solver cost budget are in, Leduc
+and the Pages deployment are not. M4–M5 are in progress, and `ROADMAP.md` records which chapters are
+currently drafted in which language. A lesson is `ready` only when both languages exist and pass the
+parity gate — so the statuses are machine-checked, not aspirational.
 
 ## What this repository will not pretend to be
 
@@ -147,10 +152,11 @@ src/pokergto/   engine: cards, evaluator, equity, ranges, odds, ev, spr, varianc
 docs/en|zh/     the 92-lesson spine, mirrored path-for-path and section-for-section; ROADMAP.md
                 records how many are authored, and data/gen/index.en.json holds the machine count
 data/schema/    JSON Schemas — the frozen contract for every artifact
-data/src/       authored YAML: glossary, curriculum spine, spots, hands, quizzes
+data/src/       authored YAML, human-signed-off: glossary.yaml and curriculum.yaml today; the
+                spots/hands/quizzes banks arrive with M6 and are not faked before then
 data/gen/       generated, committed, byte-deterministic artifacts
 tools/          generators and the CI gates, incl. negative tests that prove the gates fail
-trainer/        static Vue 3 + Vite consumer of data/gen (milestone M3)
+trainer/        static Vue 3 + Vite consumer of data/gen: sizing scale, 13x13 viewer, solver deck
 .github/        CI matrix, Pages, releases, templates, dependabot
 adr/            five decisions that are expensive to reverse, with the alternatives they rejected
 ```

@@ -23,7 +23,7 @@
 |---|---|---|---|
 | 教材 | `docs/en/**`、`docs/zh/**` | 讲清一件事为什么成立 | 读它，但不要在它里面抄数字 |
 | 引擎 | `src/pokergto/**` | 算出每一个数字 | 自己跑一遍，跑出来的就是答案 |
-| 训练器 | `trainer/**` | 把同一批数字变成反复练习 | 里程碑 M3 才有，现在这个目录还不存在 |
+| 训练器 | `trainer/**` | 把同一批数字变成反复练习 | 已有三块屏：尺度滑尺、13×13 范围图、求解器观察台；范围打分要等 M4 的 EV 基准 |
 
 引擎和教材之间隔着一次生成：`tools/gen_all.py` 把引擎的结果写成 `data/gen/**` 下的 JSON，
 `tools/inject_doc_tables.py` 再把这些 JSON 渲染进课节的 AUTO 区块。方向是单向的，所以正文里的数字
@@ -274,12 +274,10 @@ T    .. .. .. .. @@ .. .. .. .. .. .. .. ..
 这套读法成立的前提是：**`data/gen` 与代码同时代**。它在这几种情况下会失效，而且都是当下就会踩到的：
 
 1. `data/gen/**` 落后于 `src/pokergto/**`。表还是那张表，公式已经改了。识别方法是跑
-   `python tools/gen_all.py --check --skip manifest`，它会重新算一遍并逐字节比。
-   （`--check` 不加 `--skip manifest` 目前在 `tools/gen_all.py` 上会报 `NameError`，
-   `docs/development/local-dev.md` 把这条写进了已验证状态，不是隐藏它。）
+   `python tools/gen_all.py --check`，它会把整棵树重算一遍并逐字节比；这条命令只读，不会把工作区弄脏。
 2. 你读的是缓存的网页而不是仓库文件。生成物会随提交变，`manifest.json` 里记着每个文件的 sha256。
-3. 课节状态是 `draft`。现在 `index.zh.json` 的 `totals` 写着 `lessons_ready: 0`，
-   也就是全部 92 课都还是草稿；草稿的分节可能是骨架，数字可能还没接上 AUTO 块。
+3. 课节状态是 `draft`。骨架到底写了多少，去看 `data/gen/index.zh.json` 的 `totals`，
+   别信任何散文里引用的计数；草稿的分节可能是骨架，数字可能还没接上 AUTO 块。
 4. 有人手改了 AUTO 区块里的数字。这是本仓库定义的类别错误，`inject_doc_tables.py --check` 会说。
 5. 你按课时号去找文件。路径里只有 slug。
 
@@ -327,7 +325,7 @@ T    .. .. .. .. @@ .. .. .. .. .. .. .. ..
 | 内容 | 来源类型 | 位置 |
 |---|---|---|
 | 15 节模板、课节 id、prereq | 授权来源 | `data/src/curriculum.yaml` 的 `lesson_template` 与 `chapters` |
-| 92 课 / 184 文件 / `lessons_ready: 0` | 生成物 | `data/gen/index.zh.json` 的 `totals`；184 = 92 × 2 |
+| 92 课 / 184 文件，以及其中多少节 `ready` | 生成物 | `data/gen/index.zh.json` 的 `totals`——计数去那里读；本节课故意不抄一份数字进正文 |
 | MDF、所需胜率、诈唬占比 | `derived` | `src/pokergto/odds.py`；`pokergto mdf`、`pokergto odds` |
 | 114 组合 / 8.60% / 22 类 | `derived` | `pokergto range "22+,ATs+"`；`data/gen/tables/table.01-01.combo-decomposition.json` |
 | 37.26%、46.77%、10.72%、17.49% | `derived` | `pokergto equity ... --mode exact`，穷举 1,176 个 runout，标准误 0 |

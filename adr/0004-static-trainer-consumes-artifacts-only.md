@@ -23,11 +23,14 @@ The trainer is a **static single-page application** (Vue 3 + Vite, deployed to G
 
 1. **No backend, no accounts, no network calls at runtime.** Progress is stored locally in the
    browser. There is nothing to secure, no bill, and the site cannot go down.
-2. **One loader.** Every artifact read goes through `trainer/src/lib/artifacts.ts`, with types
-   derived from `data/schema/*.schema.json`. Ad-hoc `fetch` of a data file is not permitted.
-3. **No mathematics re-derived in TypeScript**, with one narrow exception: the odds/MDF slider may
-   interpolate a *committed* table, and `tools/check_quiz_answers.py` proves the trainer's answer
-   keys equal the engine's computed ones.
+2. **One loader.** Every artifact read goes through `trainer/src/lib/data.ts`, with types that mirror
+   `data/schema/*.schema.json`. Ad-hoc `fetch` of a data file is not permitted, and neither is a
+   hand-kept list of artifacts: the file list comes from the synced manifest, so a new artifact becomes
+   selectable without an edit in the trainer.
+3. **No mathematics re-derived in TypeScript.** The odds/MDF control steps over rows of a *committed*
+   table, so every value on screen is a cell of an artifact. When the graded drills land (M6),
+   `tools/check_quiz_answers.py` is what proves the trainer's answer keys equal the engine's computed
+   ones.
 4. **Solver screens play recorded runs**, not live CFR: exploitability-vs-iteration CSVs and
    average-strategy JSON produced by `tools/run_solver.py`.
 5. **Data sync is versioned.** `tools/sync_trainer_data.py` copies `data/gen` into

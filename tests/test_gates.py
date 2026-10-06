@@ -515,3 +515,26 @@ def test_an_unrenderable_cell_raises_instead_of_stringifying() -> None:
     }
     with pytest.raises(InvariantError):
         table_from_artifact(artifact, locale="en")
+
+
+def test_the_trainer_sync_detects_a_stale_copy(tmp_path: Path, monkeypatch) -> None:
+    """ADR-0004's enforcement point: a bundle built against old artifacts must not pass.
+
+    The trainer renders numbers it did not compute, so its only claim to correctness is that
+    ``trainer/public/data`` still equals ``data/gen``. This writes a real sync into a temporary
+    trainer, corrupts one copied byte, and requires ``--check`` to notice.
+    """
+    sync_tool = _tool("sync_trainer_data")
+
+    trainer = tmp_path / "trainer"
+    trainer.mkdir()
+    monkeypatch.setattr(sync_tool, "TRAINER", trainer)
+    monkeypatch.setattr(sync_tool, "PUBLIC_DATA", trainer / "public" / "data")
+    monkeypatch.setattr(sync_tool, "MANIFEST_TS", trainer / "src" / "generated" / "manifest.ts")
+
+    assert sync_tool.sync(check=False) == 0
+    assert sync_tool.sync(check=True) == 0, "a fresh sync must verify clean"
+
+    victim = trainer / "public" / "data" / "tables" / "table.02-03.mdf-vs-sizing.json"
+    victim.write_bytes(victim.read_bytes().replace(b"0.75", b"0.74", 1))
+    assert sync_tool.sync(check=True) == 1, "a mutated artifact must fail the version check"

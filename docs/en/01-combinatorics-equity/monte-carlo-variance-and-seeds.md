@@ -71,7 +71,7 @@ Therefore:
 
 - The spread you see by changing seeds *is* the size the error bar should report. Measured here: AA vs 72o at `n = 2000` over 40 seeds ranges `[86.75%, 89.45%]` -- **2.70 points of spread** -- entirely normal.
 - A fourth decimal place (`88.1937%`) should make you ask whether this was enumerated or sampled. An exact run reports `stderr = 0` and a degenerate `ci95`, and those two fields are themselves the receipt that exact was affordable.
-- The engine returns byte-identical output for the same `seed` -- that is `adr/0001`'s promise, and the promise is *within a pinned dependency set*: `data/gen/manifest.json` records the Python and numpy versions, because stream stability is a per-version guarantee, not a universal one.
+- The engine returns byte-identical output for the same `seed` -- that is `adr/0001`'s promise, and the promise is *within a pinned dependency set*: `python tools/gen_all.py` prints the Python and numpy versions and the commit it built from, because stream stability is a per-version guarantee, not a universal one. That provenance goes to the build log rather than into a committed artifact, because a file that is byte-compared must depend on its inputs and nothing else.
 
 ## 算例 / Worked examples
 
@@ -195,7 +195,7 @@ Legend: `··` <1% · `::` 1-34% · `++` 34-67% · `##` 67-90% · `@@` >90%; the
 1. **`p` near 0 or 1.** The normal approximation degrades at the boundary; `error_bar_95` clipping to `[0,1]` stops the bleeding but does not cure it. Measuring a 2% event properly requires re-running the sample-size formula (the worst-case column above gives the scale).
 2. **The reported figure is a bound.** It overstates when `t > 0` (Example 4: 2.64x). Fine for conservative decisions, wrong for significance tests, where you should use `sqrt(p - t/4 - p²)`.
 3. **With few seeds, the measured standard deviation is itself an estimate.** The sd from 8 seeds carries about 27% relative uncertainty (Example 2, last row). "Proving" an error bar is wrong using a handful of seeds is bad reasoning.
-4. **Reproducibility is versioned.** `numpy.random.default_rng(seed)` is stable for a given numpy version; upgrading numpy may change the stream. Committed artifacts cover this with the Python/numpy versions recorded in `manifest.json` plus a pinned seed -- and every number in this lesson still needs one re-run on your machine.
+4. **Reproducibility is versioned.** `numpy.random.default_rng(seed)` is stable for a given numpy version; upgrading numpy may change the stream. Committed artifacts cover this with a pinned seed, and the Python/numpy versions that produced them are printed by `tools/gen_all.py` -- and every number in this lesson still needs one re-run on your machine.
 5. **One measured discrepancy that remains unexplained (stated plainly).** Take `01-03`'s defense chart (884 combos) against its complement (442 combos) on `Kh7h2d`: exact is `55.92%`. Simulations of the same question: `n = 20000, seed = 3` gives `54.64% +/- 0.69pp`, `n = 200000, seed = 9` gives `55.16% +/- 0.22pp` -- both below exact, and the first miss is about 3.6 times its own reported standard error. **This repository does not explain that.** Until it is explained, prefer exact for range-vs-range where the budget allows, and treat simulated range numbers as estimates under question. Reproduction commands are in the table below.
 
 ## 陷阱 / Common mistakes

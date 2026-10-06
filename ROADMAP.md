@@ -68,12 +68,20 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
       `PUBLISHED_PROOFS`, and `tools/cost_probe.py` enforces a per-family runtime and memory budget
 - [x] Chapter **08 Toy Solvers** lessons 01–04 bilingual, each with generated AUTO tables
 
-## M3 — CFR+, Leduc, and the visible differentiator  ← strongest early announcement
+## M3 — CFR+, Leduc, and the visible differentiator  ← partly done
 
-- [ ] `cfr_plus.py`; Leduc, ruddy and 2-street toys; per-game exploitability CSV
-- [ ] GitHub Pages live: docs at root, trainer at `/trainer/`
-- [ ] Trainer stood up as a **pure artifact consumer**: solver observation deck, 13×13 viewer,
-      odds/MDF slider. Intentionally *no* range grading yet — the EV oracle lands in M4.
+- [ ] Leduc, ruddy and 2-street toys (`cfr_plus` landed as a mode of `CFRSolver`, recorded under M2;
+      per-game exploitability CSVs exist for the four registered proofs)
+- [ ] GitHub Pages live: docs at root, trainer at `/trainer/` -- the workflow is written
+      (`pages.yml` builds both and skips the trainer when `trainer/` is absent), the deployment is not,
+      because publishing is the maintainer's call and has not been made yet
+- [x] Trainer stood up as a **pure artifact consumer**: `trainer/` (Vue 3 + Vite, base `/trainer/`)
+      with the odds/MDF scale stepping over `data/gen/tables/*.json`, a 13x13 viewer over
+      `data/gen/ranges/*.json`, and a solver deck that plays the recorded curve and average strategy
+      from `data/gen/solver/*.json`. One loader, file lists read from the synced manifest, each fetched
+      file sha256-checked against it, and no formula in TypeScript.
+      Graded range scoring is intentionally absent -- the EV oracle lands in M4.
+- [x] `tools/sync_trainer_data.py` (copy + version stamp, `--check` mode) and the CI step that runs it
 
 ## M4 — Preflop engine, cash theory, and graded drills
 

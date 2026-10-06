@@ -23,7 +23,7 @@ The repository holds three things, each with one job, and confusing them is wher
 |---|---|---|---|
 | The curriculum | `docs/en/**`, `docs/zh/**` | Explain why something is true | Read it, never copy a number into it |
 | The engine | `src/pokergto/**` | Compute every number | Run it yourself; its output is the answer |
-| The trainer | `trainer/**` | Turn the same numbers into repetition | Milestone M3; the directory does not exist yet |
+| The trainer | `trainer/**` | Turn the same numbers into repetition | Three screens exist (sizing scale, 13x13 viewer, solver deck); graded range scoring waits for the M4 EV oracle |
 
 One generation step sits between the engine and the prose: `tools/gen_all.py` writes the engine's
 results into JSON under `data/gen/**`, and `tools/inject_doc_tables.py` renders that JSON into a
@@ -307,13 +307,13 @@ The reading method works while **`data/gen` is the same age as the code**. It st
 situations, all of which are reachable today:
 
 1. `data/gen/**` falls behind `src/pokergto/**`. The table is the old one, the formula is new.
-   Detect it with `python tools/gen_all.py --check --skip manifest`, which recomputes and byte-compares.
-   (Without `--skip manifest` the tool currently raises `NameError`; `docs/development/local-dev.md`
-   records that in its verified state rather than hiding it.)
+   Detect it with `python tools/gen_all.py --check`, which recomputes the whole tree and byte-compares
+   it; it is read-only, so nothing you check will dirty the working copy.
 2. You are reading a cached site instead of the repository. Generated files move with commits, and
    `data/gen/manifest.json` stores a sha256 for each one.
-3. The lesson is `draft`. `totals` in `index.zh.json` currently reports `lessons_ready: 0`: all 92
-   lessons are drafts, so a section may still be scaffolding and a number may not yet be wired to an
+3. The lesson is `draft`. `data/gen/index.en.json`'s `totals` says how far the spine has actually been
+   authored -- read it rather than trusting a count quoted in prose, because a draft section may still
+   be scaffolding and a number may not yet be wired to an
    AUTO block.
 4. Someone edited a digit inside an AUTO block. That is this repository's category error, and
    `inject_doc_tables.py --check` says so in public.
@@ -373,7 +373,7 @@ anywhere in it.
 | Content | Source type | Location |
 |---|---|---|
 | 15-section template, lesson ids, prereq | Authored source of record | `data/src/curriculum.yaml`: `lesson_template`, `chapters` |
-| 92 lessons / 184 files / `lessons_ready: 0` | Generated artifact | `data/gen/index.zh.json` `totals`; 184 = 92 × 2 |
+| 92 lessons / 184 files, and how many are `ready` | Generated artifact | `data/gen/index.en.json` `totals` -- read the count there; this lesson deliberately does not quote one |
 | MDF, equity needed, bluff share | `derived` | `src/pokergto/odds.py`; `pokergto mdf`, `pokergto odds` |
 | 114 combos / 8.60% / 22 classes | `derived` | `pokergto range "22+,ATs+"`; `data/gen/tables/table.01-01.combo-decomposition.json` |
 | 37.26%, 46.77%, 10.72%, 17.49% | `derived` | `pokergto equity ... --mode exact`, enumerating 1,176 runouts, standard error 0 |
