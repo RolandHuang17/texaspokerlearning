@@ -764,11 +764,15 @@ def build_solver_vs_algebra() -> dict[str, Any]:
     )
 
 
-#: Boards whose reachable ceiling the two ranges are measured against (lesson 03-02).
+#: Boards whose reachable ceiling the two ranges are measured against (lesson 03-02). These three
+#: ranges are shared verbatim with ``ADVANTAGE_SPOTS`` below -- the same "BTN opener versus BB caller on
+#: 9h6d3c" label has to mean one range set or the two tables disagree about the same sentence in the
+#: same chapter. Adding the fourth spot to the other table would change that table's numbers, so the
+#: sharing is asserted in a check rather than widened silently.
 CAPPED_SPOTS: tuple[tuple[str, str, str], ...] = (
     ("Kh7s3d", "AKs,AQs,ATs,KQs,AKo,AQo,99,77", "KJs,QJs,JTs,T9s,98s,A5s-A2s,KQo,AJo,76s"),
     ("AsKsQh", "AA,KK,QQ,JT,T9,AT,KT", "98s,76s,54s,65,K9,K8,Q9,J9"),
-    ("9h6d3c", "AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs", "87s,76s,65s,54s,T8s,T9s,98o,66,55"),
+    ("9h6d3c", "AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs", "87s,76s,65s,54s,T8s,T9s,98o,97o,66,55"),
 )
 
 
@@ -794,11 +798,15 @@ def build_capped_ranges() -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     for board_text, hero_spec, villain_spec in CAPPED_SPOTS:
         board = parse_cards(board_text)
+        # Ranges are narrowed here, once, so the ceiling and each range are measured over combos that
+        # can actually be dealt. ``is_capped`` refuses anything else, which is the point: the first
+        # version of this table divided a nut share by six combos of "77" on a board showing a seven.
+        narrowed = {spec: parse(spec, exclude=board) for spec in (hero_spec, villain_spec)}
         ceiling = max(
             best_score((Card.from_index(a), Card.from_index(b)), board) for a, b in ALL_COMBOS
         )
         for role, spec in (("hero", hero_spec), ("villain", villain_spec)):
-            rng = parse(spec)
+            rng = narrowed[spec]
             held = [
                 best_score((first, second), board) for first, second, weight in rng if weight > 0
             ]
@@ -901,6 +909,8 @@ def build_removal_effects() -> dict[str, Any]:
 
     rows: list[dict[str, Any]] = []
     for spec, visible in REMOVAL_PROBES:
+        # Deliberately *not* excluding: this table's subject is the subtraction itself, so the
+        # baseline must be the untouched 6/4/12 and the subtraction stays visible as a column.
         full = parse(spec)
         cards = [Card.parse(code) for code in visible]
         removed = full.with_removed(*cards)
@@ -1213,6 +1223,7 @@ ADVANTAGE_SPOTS: tuple[dict[str, str], ...] = (
     {
         "board": "9h6d3c",
         "hero_label": "BTN opener",
+        # Shared verbatim with CAPPED_SPOTS; the consistency check below depends on this exact tuple.
         "hero_spec": "AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs",
         "villain_label": "BB caller",
         "villain_spec": "87s,76s,65s,54s,T8s,T9s,98o,97o,66,55",
@@ -1250,10 +1261,20 @@ def build_equity_vs_nut_advantage() -> dict[str, Any]:
     from pokergto.theory.range_advantage import advantage
 
     rows: list[dict[str, Any]] = []
+    # Per-board totals for the spec as written, before any card on the board is taken out of it. The
+    # narrowing check compares against these, not against a re-parse: `parse` now honours `exclude`, so
+    # re-parsing a row's own spec returns the narrowed count and the comparison would be between equal
+    # numbers -- a check that cannot fail is not a check.
+    un_narrowed = {
+        spot["board"]: parse(spot["hero_spec"]).total_combos() for spot in ADVANTAGE_SPOTS
+    }
     for spot in ADVANTAGE_SPOTS:
         board = parse_cards(spot["board"])
-        hero = parse(spot["hero_spec"])
-        villain = parse(spot["villain_spec"])
+        # Board cards are excluded here, not left to the caller: see notation.parse's docstring. The
+        # first version of this builder counted "77" as six combos on a board showing a seven, which
+        # inflated every nut share on this table.
+        hero = parse(spot["hero_spec"], exclude=board)
+        villain = parse(spot["villain_spec"], exclude=board)
         # Fail rather than hang: exact enumeration is chosen because it is affordable here, and the
         # moment a spot is not affordable the table must say so instead of quietly sampling.
         runouts = 1 if len(board) == 5 else math.comb(52 - len(board) - 0, 5 - len(board))
@@ -1267,6 +1288,8 @@ def build_equity_vs_nut_advantage() -> dict[str, Any]:
         rows.append(
             {
                 "board": spot["board"],
+                "hero_spec": spot["hero_spec"],
+                "villain_spec": spot["villain_spec"],
                 "hero_label": spot["hero_label"],
                 "villain_label": spot["villain_label"],
                 "hero_combos": round(hero.total_combos(), 1),
@@ -1301,6 +1324,16 @@ def build_equity_vs_nut_advantage() -> dict[str, Any]:
         lesson="03-01",
         columns=[
             {"key": "board", "header": {"zh": "牌面", "en": "Board"}, "unit": "dimensionless"},
+            {
+                "key": "hero_spec",
+                "header": {"zh": "Hero 范围", "en": "Hero range"},
+                "unit": "dimensionless",
+            },
+            {
+                "key": "villain_spec",
+                "header": {"zh": "Villain 范围", "en": "Villain range"},
+                "unit": "dimensionless",
+            },
             {"key": "hero_label", "header": {"zh": "Hero", "en": "Hero"}, "unit": "dimensionless"},
             {
                 "key": "villain_label",
@@ -1359,6 +1392,24 @@ def build_equity_vs_nut_advantage() -> dict[str, Any]:
                     for row in rows
                 ),
                 "detail": "hero + villain equity equals 1 on every row",
+            },
+            {
+                "kind": "combo_count",
+                # Board exclusion is asserted rather than trusted: the shares in this table divide by
+                # what the range actually contains, so a future change that quietly stopped narrowing
+                # would restore the old inflated numbers with nothing else complaining.
+                "pass": bool(rows)
+                and all(row["hero_combos"] < un_narrowed[row["board"]] for row in rows),
+                "detail": "every row lost at least one combo to the board, before any share was divided",
+            },
+            {
+                "kind": "determinism",
+                "pass": any(
+                    (spot["board"], spot["hero_spec"], spot["villain_spec"]) in CAPPED_SPOTS
+                    for spot in ADVANTAGE_SPOTS
+                ),
+                "detail": "at least one board/range pair is shared with table.03-02 by value, so the two "
+                "tables cannot describe the same spot with quietly different ranges",
             },
             {
                 "kind": "edges_disagree",

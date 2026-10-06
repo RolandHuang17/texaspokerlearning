@@ -12,13 +12,13 @@
       "bytes": 71008,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "246f1db57bf0c49684da25d88f80ec2dd514cb6d777e721e9b3d92dc2ce2d109"
+      "sha256": "84264952b73bdbaaa5d048492740079257f9397eb4d1f1944a4740c5f95b3e98"
     },
     "index.zh.json": {
       "bytes": 71008,
       "kind": "curriculum_index",
       "schema": "index",
-      "sha256": "cac4406ab62a7d48019bf92a4c312ae1e641e8f95cbea76507b1a56f67b797e1"
+      "sha256": "8fbc9b1e7803cb25353e802bb41a42654bd5ed0f01212cd484c90959de78b258"
     },
     "ranges/range.02-03.mdf-floor-vs-half-pot.json": {
       "bytes": 6044,
@@ -123,16 +123,16 @@
       "sha256": "f53b6de823168eb643a1d120c21e293a8dec08eb9bde3d1e9df363e659d00bcf"
     },
     "tables/table.03-01.equity-vs-nut-advantage.json": {
-      "bytes": 5717,
+      "bytes": 6859,
       "kind": "table",
       "schema": "table",
-      "sha256": "865acff6cf5c5c0db977201e8d7b86f0d67cb0a5edc0f94e91063d6d64d33b0c"
+      "sha256": "2cb82889ad7ecc286a013e7bd2ec4e19c7bd87a79088d2bc639b0979eb0c7737"
     },
     "tables/table.03-02.capped-range-check.json": {
-      "bytes": 4908,
+      "bytes": 4912,
       "kind": "table",
       "schema": "table",
-      "sha256": "7722bd3ead74dec8be6a52bf4511782414c89d13b2f55e9718e6f67cd790d192"
+      "sha256": "87e4a1089d64201744aa69763303161ca5ef9fe5e8b8c839920ec46699fb9221"
     },
     "tables/table.03-05.removal-effect-by-class.json": {
       "bytes": 3602,

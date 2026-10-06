@@ -21,6 +21,24 @@
     - 'One notation for every action: call, bet, raise and shove': en/02-the-math-of-one-decision/ev-unified-formula.md
     - 'Thin value bets: when winning only a little is still worth betting': en/02-the-math-of-one-decision/the-thin-value-bet.md
     - 'Sizing asymmetry: raise risk against what a fold is worth': en/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md
+  - 03 Range Advantage:
+    - 'Who already has the straight on this flop: nut advantage, not equity': en/03-range-advantage/equity-advantage-vs-nut-advantage.md
+    - 'Capped ranges: why one line contains no nuts': en/03-range-advantage/capped-ranges.md
+    - 'Advantage changes hands: flop, turn and river ranges are not the same argument': en/03-range-advantage/advantage-street-by-street.md
+    - 'Board texture classes: whom monochrome, two-tone, paired and connected boards help': en/03-range-advantage/board-texture-and-advantage.md
+    - 'Blockers as range effects: which hands a card keeps out of a range': en/03-range-advantage/blockers-as-range-effects.md
+    - 'Removal inside your own range: my hole cards delete my own nuts': en/03-range-advantage/removal-in-your-own-range.md
+    - 'SPR: stack depth and pot size collapsed into one number': en/03-range-advantage/spr-and-commitment.md
+    - 'Commit or hold back: the two levels of commitment SPR creates': en/03-range-advantage/commit-or-float.md
+    - Range advantage means something different heads-up and three-way: en/03-range-advantage/range-advantage-heads-up-vs-3way.md
+  - 04 Bet Sizing:
+    - 'Who governs the size: frequency logic against range logic': en/04-bet-sizing/sizing-governance.md
+    - 'Why small sizes exist: converting pot fraction into defence burden': en/04-bet-sizing/why-one-third-pot-exists.md
+    - 'Why overbets exist: nut capacity that carries a huge size': en/04-bet-sizing/why-overbets-exist.md
+    - 'Two sizes on one street: how a mixed-size policy splits the range': en/04-bet-sizing/multiple-sizes-one-street.md
+    - 'Polarized, merged and linear: three range shapes, three sizing logics': en/04-bet-sizing/polarized-vs-merged-vs-linear.md
+    - 'Protection or value: what changes the reason for betting': en/04-bet-sizing/protection-versus-value.md
+    - 'Governing the checking range: what a check line must still carry': en/04-bet-sizing/check-size-governance.md
   - 08 Toy Solvers and CFR:
     - 'Game trees, information sets and strategy profiles: what a player can actually see': en/08-toy-solvers/game-trees-infosets-strategies.md
     - 'Regret matching: iterating only on what you should have done': en/08-toy-solvers/regret-matching.md
@@ -49,6 +67,24 @@
     - 一套符号管住所有动作：跟注、下注、加注与全下: zh/02-the-math-of-one-decision/ev-unified-formula.md
     - 薄价值下注：只赢一点点也值得打的判定条件: zh/02-the-math-of-one-decision/the-thin-value-bet.md
     - 尺度的不对称：被加注的风险与弃牌带来的收益: zh/02-the-math-of-one-decision/sizing-risk-and-fold-asymmetry.md
+  - 03 范围优势:
+    - 同一翻面上谁已经成顺子：用坚果优势而非胜率区分: zh/03-range-advantage/equity-advantage-vs-nut-advantage.md
+    - 封顶范围：为什么这条线里不存在坚果: zh/03-range-advantage/capped-ranges.md
+    - 优势会换手：翻牌、转牌、河牌上的范围优势各不相同: zh/03-range-advantage/advantage-street-by-street.md
+    - 牌面质地分类：单色、双色、成对与连张各自偏向谁: zh/03-range-advantage/board-texture-and-advantage.md
+    - 把阻断牌读成范围效应：谁的手里不可能有那手牌: zh/03-range-advantage/blockers-as-range-effects.md
+    - 自己范围里的移除效应：我的底牌删掉了我的坚果: zh/03-range-advantage/removal-in-your-own-range.md
+    - SPR：把筹码深度与底池尺寸压成同一个数: zh/03-range-advantage/spr-and-commitment.md
+    - 套池还是收着打：SPR 决定的两种承诺程度: zh/03-range-advantage/commit-or-float.md
+    - 单挑与三人池的范围优势不是同一件事: zh/03-range-advantage/range-advantage-heads-up-vs-3way.md
+  - 04 下注尺度:
+    - 谁决定尺度：频率法与范围法的分工: zh/04-bet-sizing/sizing-governance.md
+    - 小尺度为什么存在：底池比例与防守负担的换算: zh/04-bet-sizing/why-one-third-pot-exists.md
+    - 超池下注为什么存在：坚果容量撑起尺度: zh/04-bet-sizing/why-overbets-exist.md
+    - 一条街用两个尺度：混合尺度如何切分范围: zh/04-bet-sizing/multiple-sizes-one-street.md
+    - 极化、合并与线性：三种范围形状对应三种尺度逻辑: zh/04-bet-sizing/polarized-vs-merged-vs-linear.md
+    - 保护还是价值：一张牌如何改变下注的理由: zh/04-bet-sizing/protection-versus-value.md
+    - 过牌的范围同样要被治理：过牌线里必须留什么: zh/04-bet-sizing/check-size-governance.md
   - 08 简化求解器:
     - 博弈树、信息集与策略组合：一名玩家实际能看见什么: zh/08-toy-solvers/game-trees-infosets-strategies.md
     - 遗憾匹配：只按当初该做什么来迭代: zh/08-toy-solvers/regret-matching.md

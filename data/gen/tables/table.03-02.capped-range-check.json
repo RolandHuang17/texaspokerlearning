@@ -86,7 +86,7 @@
         "en": "three of a kind K 7 3",
         "zh": "三条 K 7 3"
       },
-      "combos": 52.0,
+      "combos": 44.0,
       "is_capped": true,
       "range_best": {
         "en": "three of a kind 7 K 3",
@@ -101,7 +101,7 @@
         "en": "three of a kind K 7 3",
         "zh": "三条 K 7 3"
       },
-      "combos": 64.0,
+      "combos": 58.0,
       "is_capped": true,
       "range_best": {
         "en": "one pair K Q 7 3",
@@ -116,7 +116,7 @@
         "en": "straight A",
         "zh": "顺子 A"
       },
-      "combos": 82.0,
+      "combos": 65.0,
       "is_capped": false,
       "range_best": {
         "en": "straight A",
@@ -131,7 +131,7 @@
         "en": "straight A",
         "zh": "顺子 A"
       },
-      "combos": 92.0,
+      "combos": 80.0,
       "is_capped": true,
       "range_best": {
         "en": "one pair K A Q 9",
@@ -146,7 +146,7 @@
         "en": "three of a kind 9 6 3",
         "zh": "三条 9 6 3"
       },
-      "combos": 66.0,
+      "combos": 63.0,
       "is_capped": false,
       "range_best": {
         "en": "three of a kind 9 6 3",
@@ -168,7 +168,7 @@
         "zh": "三条 6 9 3"
       },
       "role": "villain",
-      "spec": "87s,76s,65s,54s,T8s,T9s,98o,66,55"
+      "spec": "87s,76s,65s,54s,T8s,T9s,98o,97o,66,55"
     }
   ],
   "schema_version": "1.0.0",

@@ -60,7 +60,7 @@ AUTO_BEGIN = re.compile(r"<!--\s*BEGIN AUTO:([A-Za-z0-9._-]+)\s*-->")
 AUTO_END = re.compile(r"<!--\s*END AUTO:([A-Za-z0-9._-]+)\s*-->")
 HEADING = re.compile(r"^(#{1,3})\s+(.*)$", re.MULTILINE)
 HAND_COUNT = re.compile(r"<!--\s*hands:\s*(\d+)\s*-->")
-TERMS_LIST = re.compile(r"<!--\s*terms:\s*([A-Za-z0-9,._-]*)\s*-->")
+TERMS_LIST = re.compile(r"<!--\s*terms:\s*([A-Za-z0-9.,_\s-]*)\s*-->")
 #: A live hand is a backticked ``hand.*`` id written inside the Live hands section. Counting them is
 #: what turns ``<!-- hands: 2 -->`` from an author's promise into a checked fact.
 LIVE_HANDS_HEADING = re.compile(r"^##\s+[^\n]*(?:Live hands|实战牌局)[^\n]*$", re.MULTILINE)
@@ -197,7 +197,9 @@ def check(registry: CurriculumRegistry, glossary: dict[str, object]) -> list[str
                 )
             listed = TERMS_LIST.findall(text)
             if listed:
-                for term in [part for chunk in listed for part in chunk.split(",") if part]:
+                for term in [
+                    part.strip() for chunk in listed for part in chunk.split(",") if part.strip()
+                ]:
                     if term not in glossary:
                         problems.append(
                             f"docs/{locale}/{relative}: term {term!r} is not registered in "

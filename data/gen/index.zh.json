@@ -473,7 +473,7 @@
           ],
           "slug": "equity-advantage-vs-nut-advantage",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Who already has the straight on this flop: nut advantage, not equity",
@@ -494,7 +494,7 @@
           ],
           "slug": "capped-ranges",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Capped ranges: why one line contains no nuts",
@@ -516,7 +516,7 @@
           ],
           "slug": "advantage-street-by-street",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Advantage changes hands: flop, turn and river ranges are not the same argument",
@@ -538,7 +538,7 @@
           ],
           "slug": "board-texture-and-advantage",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Board texture classes: whom monochrome, two-tone, paired and connected boards help",
@@ -560,7 +560,7 @@
           ],
           "slug": "blockers-as-range-effects",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Blockers as range effects: which hands a card keeps out of a range",
@@ -582,7 +582,7 @@
           ],
           "slug": "removal-in-your-own-range",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Removal inside your own range: my hole cards delete my own nuts",
@@ -604,7 +604,7 @@
           ],
           "slug": "spr-and-commitment",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "SPR: stack depth and pot size collapsed into one number",
@@ -625,7 +625,7 @@
           ],
           "slug": "commit-or-float",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Commit or hold back: the two levels of commitment SPR creates",
@@ -647,7 +647,7 @@
           ],
           "slug": "range-advantage-heads-up-vs-3way",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Range advantage means something different heads-up and three-way",
@@ -694,7 +694,7 @@
           ],
           "slug": "sizing-governance",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Who governs the size: frequency logic against range logic",
@@ -717,7 +717,7 @@
           ],
           "slug": "why-one-third-pot-exists",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Why small sizes exist: converting pot fraction into defence burden",
@@ -740,7 +740,7 @@
           ],
           "slug": "why-overbets-exist",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Why overbets exist: nut capacity that carries a huge size",
@@ -762,7 +762,7 @@
           ],
           "slug": "multiple-sizes-one-street",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Two sizes on one street: how a mixed-size policy splits the range",
@@ -784,7 +784,7 @@
           ],
           "slug": "polarized-vs-merged-vs-linear",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Polarized, merged and linear: three range shapes, three sizing logics",
@@ -807,7 +807,7 @@
           ],
           "slug": "protection-versus-value",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Protection or value: what changes the reason for betting",
@@ -829,7 +829,7 @@
           ],
           "slug": "check-size-governance",
           "spot_ids": [],
-          "status": "draft",
+          "status": "ready",
           "table_ids": [],
           "title": {
             "en": "Governing the checking range: what a check line must still carry",
@@ -2392,8 +2392,8 @@
     "chapters": 15,
     "hands": 0,
     "lessons": 92,
-    "lessons_draft": 70,
-    "lessons_ready": 22,
+    "lessons_draft": 54,
+    "lessons_ready": 38,
     "quizzes": 0,
     "spots": 0,
     "tables": 15

@@ -20,9 +20,10 @@ of hearts only". ``to_spec`` raises in strict mode and sets ``lossy`` when it co
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from typing import Final
 
-from .cards import GRID_RANKS, combos_for_class
+from .cards import GRID_RANKS, Card, combos_for_class
 from .errors import NotationError
 from .ranges import Range
 
@@ -136,8 +137,18 @@ def _expand(token: str) -> list[tuple[str, float]]:
     return [(anchor, frequency)]
 
 
-def parse(spec: str) -> Range:
-    """``"22+, ATs+, KJo+"`` -> Range. Unknown tokens raise with the offending token named."""
+def parse(spec: str, *, exclude: Sequence[Card] = ()) -> Range:
+    """``"22+, ATs+, KJo+"`` -> Range. Unknown tokens raise with the offending token named.
+
+    ``exclude`` is not a convenience. A range described *after a flop has been dealt* cannot contain a
+    combo using a board card, yet the 169-class notation has no way to say that: "77" on
+    ``Kh7s3d`` is written the same way as "77" preflop. Without this parameter the only defence was to
+    remember to chain :meth:`pokergto.ranges.Range.with_removed` at every call site, and the nut-share
+    figures in ``table.03-01`` and ``table.03-02`` were computed exactly that way -- hero's share read
+    0.1154 where the physical combos give 0.0682, because six combos of the eight that were counted
+    cannot be dealt. Defaulting to ``()`` keeps every preflop use identical, so the safe case stays the
+    one that needs no thought.
+    """
     cleaned = []
     for line in spec.splitlines():
         stripped = line.strip()
@@ -157,7 +168,8 @@ def parse(spec: str) -> Range:
             entries[key] = max(previous, frequency)
     if not entries:
         raise NotationError(f"range spec {spec!r} is empty")
-    return Range.from_classes(entries)
+    rng = Range.from_classes(entries)
+    return rng.with_removed(*exclude) if exclude else rng
 
 
 def expand(spec: str) -> list[tuple[str, int]]:

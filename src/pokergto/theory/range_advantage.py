@@ -22,10 +22,11 @@ That understates it, and the docstring of :func:`nut_advantage` says by how much
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Literal
 
-from ..cards import Card
+from ..cards import ALL_COMBOS, Card
 from ..equity import range_equity
 from ..errors import InputError
 from ..evaluator import best_score
@@ -99,6 +100,13 @@ def nut_advantage(
     a combo counts as nut-tier when it is within ``near_nuts`` steps below it, where a step is one rank
     in the evaluator's total order. With ``near_nuts=0`` this is the literal nuts.
 
+    A range handed to this function must already exclude the board. It cannot detect the collision
+    itself, because "the best hand in range" and "how many combos are in range" are both computed off
+    the combo list it receives -- so ``AKs`` written on ``AhKsQh`` would be counted four ways when only
+    two of those hands are dealt, and the share would be wrong in a direction that never looks wrong.
+    :func:`pokergto.notation.parse` takes an ``exclude`` parameter for exactly this; callers are
+    expected to use it, and ``table.03-01`` / ``table.03-02`` do.
+
     On an incomplete board the reference is the best hand *currently* reachable, not the best hand
     after every runout, so the shares are upper-biased for the player who is already holding a made
     hand and lower-biased for the one drawing. That difference is exactly what lesson 03-03 is about,
@@ -106,6 +114,7 @@ def nut_advantage(
     """
     if not 3 <= len(board) <= 5:
         raise InputError("board must be 3 to 5 cards")
+    _assert_board_excluded(hero, villain, board=board, where="nut_advantage")
 
     def scores(rng: Range) -> list[tuple[int, float]]:
         return [
@@ -128,12 +137,39 @@ def nut_advantage(
     return share(hero_scores), share(villain_scores)
 
 
-def is_capped(rng: Range, board: tuple[Card, ...], *, tolerance: int = 2) -> bool:
-    """Whether a range's best possible holding sits clearly below the reachable ceiling.
+def _assert_board_excluded(
+    *ranges: Range, board: Sequence[Card], where: str
+) -> None:
+    """Refuse a range that still contains a board card.
 
-    A capped range cannot hold the nuts, which removes the threat that licenses big bets and raises.
-    That is why "your range is capped here" is a *sizing* conclusion and not a hand-strength one, and
-    why chapter 03 leads into chapter 04.
+    Two columns of an advantage number can be computed against different denominators without this:
+    :func:`pokergto.equity.range_equity` masks colliding combos internally, while a nut share divides by
+    the combos it was handed. The result is a table where equity is honest and the share beside it is
+    inflated -- by a factor that never looks like an error. Failing at the boundary is the only fix that
+    does not depend on the caller remembering, and one already forgot.
+    """
+    dead = {card.index for card in board}
+    for position, rng in enumerate(ranges):
+        for first, second, weight in rng:
+            if weight > 0 and (first.index in dead or second.index in dead):
+                raise InputError(
+                    f"{where}: range {position} still holds {first.code}{second.code}, a card on the "
+                    f"board. Narrow it with Range.with_removed(*board) or notation.parse(spec, "
+                    "exclude=board); nut shares and combo counts divide by what the range contains."
+                )
+
+
+def is_capped(rng: Range, board: tuple[Card, ...], *, tolerance: int = 0) -> bool:
+    """Whether the range holds the best hand this board can deal at all.
+
+    ``tolerance`` is in steps of the evaluator's *total order* -- one step is one distinct hand strength
+    -- so the default says what it means: capped means the nuts are absent. A positive tolerance answers
+    the softer question "is it a clear margin below the ceiling", and must be asked explicitly, because
+    the packed scores two hand strengths apart differ by thousands of integers and a small numeric
+    tolerance is not a small margin.
+
+    The ceiling is the best hand any two cards could make here, taken over all 1326 combos rather than
+    only the ones this range holds: capped means "not in *my* range", not "not achievable in principle".
     """
     if not 3 <= len(board) <= 5:
         raise InputError("board must be 3 to 5 cards")
@@ -142,14 +178,10 @@ def is_capped(rng: Range, board: tuple[Card, ...], *, tolerance: int = 2) -> boo
     ]
     if not pairs:
         raise InputError("range has no combos")
-    # The ceiling is the best hand any two cards could make on this board, taken over all 1326 combos
-    # rather than only the ones this range holds: capped means "not in *my* range", not "not
-    # achievable in principle".
-    from ..cards import ALL_COMBOS
-    from ..cards import Card as _Card
+    _assert_board_excluded(rng, board=board, where="is_capped")
 
     ceiling = max(
-        best_score((_Card.from_index(a), _Card.from_index(b)), board) for a, b in ALL_COMBOS
+        best_score((Card.from_index(a), Card.from_index(b)), board) for a, b in ALL_COMBOS
     )
     return max(score for score, _weight in pairs) < ceiling - tolerance
 
@@ -173,13 +205,18 @@ def advantage(
         iterations=iterations,
         seed=seed,
     )
-    hero_nut, villain_nut = nut_advantage(hero, villain, board, near_nuts=near_nuts)
+    # The equity path narrows itself -- ``range_equity`` masks combos colliding with the board -- but
+    # the nut share divides by whatever it is handed, so the same narrowing has to happen here or the
+    # two columns of one Advantage answer two different questions.
+    hero_clean = hero.with_removed(*board)
+    villain_clean = villain.with_removed(*board)
+    hero_nut, villain_nut = nut_advantage(hero_clean, villain_clean, board, near_nuts=near_nuts)
     return Advantage(
         board=tuple(card.code for card in board),
         hero_equity=hero_equity,
         villain_equity=villain_equity,
         hero_nut_share=hero_nut,
         villain_nut_share=villain_nut,
-        hero_combos=hero.total_combos(),
-        villain_combos=villain.total_combos(),
+        hero_combos=hero_clean.total_combos(),
+        villain_combos=villain_clean.total_combos(),
     )

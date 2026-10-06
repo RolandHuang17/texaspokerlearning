@@ -378,8 +378,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [range-advantage, nut-advantage, equity-advantage, the-nuts, capacity, range]
         prereq: ["01-07", "02-04"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-02"
         order: 2
         slug: capped-ranges
@@ -394,8 +394,8 @@ chapters:
           streets: [multi-street]
           concepts: [capped-range, range-advantage, the-nuts, capacity, line]
         prereq: ["03-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-03"
         order: 3
         slug: advantage-street-by-street
@@ -410,8 +410,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [runout, range-advantage, nut-advantage, equity-advantage, equity-realization]
         prereq: ["03-01", "01-05"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-04"
         order: 4
         slug: board-texture-and-advantage
@@ -426,8 +426,8 @@ chapters:
           streets: [flop, turn]
           concepts: [board-texture, monochrome-board, two-tone-board, rainbow-board, paired-board, connected-board, static-board, dynamic-board, wet-board, dry-board, broadway-board, backdoor-draw, flush-draw]
         prereq: ["03-01", "01-07"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-05"
         order: 5
         slug: blockers-as-range-effects
@@ -442,8 +442,8 @@ chapters:
           streets: [river]
           concepts: [blocker, removal-effect, range, bluff-range, combos, minimum-defense-frequency]
         prereq: ["01-02", "03-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-06"
         order: 6
         slug: removal-in-your-own-range
@@ -458,8 +458,8 @@ chapters:
           streets: [multi-street]
           concepts: [removal-effect, blocker, range, capacity, combos, nut-advantage]
         prereq: ["03-05", "01-07"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-07"
         order: 7
         slug: spr-and-commitment
@@ -474,8 +474,8 @@ chapters:
           streets: [preflop, flop]
           concepts: [spr, effective-stack, shove, required-equity, pot]
         prereq: ["02-06", "01-07"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-08"
         order: 8
         slug: commit-or-float
@@ -490,8 +490,8 @@ chapters:
           streets: [flop, turn]
           concepts: [pot-commitment, spr, effective-stack, shove, implied-odds]
         prereq: ["03-07"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "03-09"
         order: 9
         slug: range-advantage-heads-up-vs-3way
@@ -506,8 +506,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [multiway, range-advantage, nut-advantage, capacity, the-nuts]
         prereq: ["03-01", "03-04"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
   - id: "04"
     order: 4
     slug: 04-bet-sizing
@@ -535,8 +535,8 @@ chapters:
           streets: [flop, turn, river]
           concepts: [frequency-approach, range-approach, betting-frequency, checking-frequency, bet-size]
         prereq: ["02-03", "03-02"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-02"
         order: 2
         slug: why-one-third-pot-exists
@@ -551,8 +551,8 @@ chapters:
           streets: [flop]
           concepts: [pot-fraction, min-bet, minimum-defense-frequency, betting-frequency, board-texture]
         prereq: ["04-01", "02-03"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-03"
         order: 3
         slug: why-overbets-exist
@@ -567,8 +567,8 @@ chapters:
           streets: [turn, river]
           concepts: [overbet, capped-range, capacity, nut-advantage, pot-fraction]
         prereq: ["04-02", "03-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-04"
         order: 4
         slug: multiple-sizes-one-street
@@ -583,8 +583,8 @@ chapters:
           streets: [flop, turn]
           concepts: [size-set, mixed-strategy, betting-frequency, checking-frequency, bet-size]
         prereq: ["04-01", "02-04"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-05"
         order: 5
         slug: polarized-vs-merged-vs-linear
@@ -599,8 +599,8 @@ chapters:
           streets: [multi-street]
           concepts: [polarized, merged, linear, value-range, bluff-range, range-approach]
         prereq: ["04-04", "03-01"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-06"
         order: 6
         slug: protection-versus-value
@@ -615,8 +615,8 @@ chapters:
           streets: [flop, turn]
           concepts: [protection-bet, semi-bluff, value-bet, equity-realization, flush-draw]
         prereq: ["04-05", "01-06"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
       - id: "04-07"
         order: 7
         slug: check-size-governance
@@ -631,8 +631,8 @@ chapters:
           streets: [flop, turn]
           concepts: [checking-range, checking-frequency, minimum-defense-frequency, capped-range, frequency-approach]
         prereq: ["04-01", "02-03"]
-        status_zh: draft
-        status_en: draft
+        status_zh: ready
+        status_en: ready
 
   - id: "05"
     order: 5

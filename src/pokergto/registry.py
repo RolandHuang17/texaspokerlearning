@@ -140,21 +140,26 @@ class CurriculumRegistry:
         "unregistered:zh": [...]}``. Empty lists for every key is the passing state.
         """
         expected: dict[str, set[str]] = {"en": set(), "zh": set()}
+        registered: dict[str, set[str]] = {"en": set(), "zh": set()}
         for lesson in self.ordered_lessons():
             for locale in ("en", "zh"):
+                path = lesson.path(locale)
+                registered[locale].add(path)
                 # A draft is a promise not yet kept, so it owes the build no file. Only a lesson that
                 # claims a status beyond draft is required to have its file -- otherwise this gate is
                 # a list of unwritten chapters and can never pass before the last one lands.
-                if getattr(lesson, f"status_{locale}") == "draft":
-                    continue
-                expected[locale].add(lesson.path(locale))
+                if getattr(lesson, f"status_{locale}") != "draft":
+                    expected[locale].add(path)
         present: dict[str, set[str]] = {"en": set(), "zh": set()}
         for locale in ("en", "zh"):
             base = docs_root / locale
             if not base.exists():
                 continue
-            for path in base.rglob("*.md"):
-                relative = path.relative_to(docs_root).as_posix()
+            # ``on_disk`` rather than ``path``: the loop above binds ``path`` to a lesson file path as a
+            # string, and reusing the name for the rglob result made mypy right to complain -- the two
+            # are different things that happened to want the same word.
+            for on_disk in base.rglob("*.md"):
+                relative = on_disk.relative_to(docs_root).as_posix()
                 if relative.startswith("development/") or "/development/" in relative:
                     continue
                 if relative.endswith("index.md") or relative.endswith("README.md"):
@@ -166,7 +171,10 @@ class CurriculumRegistry:
         report: dict[str, list[str]] = {}
         for locale in ("en", "zh"):
             report[f"missing_file:{locale}"] = sorted(expected[locale] - present[locale])
-            report[f"unregistered:{locale}"] = sorted(present[locale] - expected[locale])
+            # The two directions are deliberately asymmetric. A draft lesson may legally have no file;
+            # a file that no lesson registers may not exist at all, draft or not -- that is the page no
+            # navigation, no index and no prerequisite list can ever reach.
+            report[f"unregistered:{locale}"] = sorted(present[locale] - registered[locale])
         return report
 
     def duplicate_paths(self) -> list[str]:

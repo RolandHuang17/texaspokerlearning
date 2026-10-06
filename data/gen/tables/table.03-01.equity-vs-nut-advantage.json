@@ -10,6 +10,16 @@
       "pass": true
     },
     {
+      "detail": "every row lost at least one combo to the board, before any share was divided",
+      "kind": "combo_count",
+      "pass": true
+    },
+    {
+      "detail": "at least one board/range pair is shared with table.03-02 by value, so the two tables cannot describe the same spot with quietly different ranges",
+      "kind": "determinism",
+      "pass": true
+    },
+    {
       "detail": "at least one board gives one side the equity edge and the other the nut edge; if none did, the distinction this table exists for would be decorative",
       "kind": "edges_disagree",
       "pass": true
@@ -22,6 +32,22 @@
         "zh": "牌面"
       },
       "key": "board",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Hero range",
+        "zh": "Hero 范围"
+      },
+      "key": "hero_spec",
+      "unit": "dimensionless"
+    },
+    {
+      "header": {
+        "en": "Villain range",
+        "zh": "Villain 范围"
+      },
+      "key": "villain_spec",
       "unit": "dimensionless"
     },
     {
@@ -122,15 +148,17 @@
       "can_bet_often": "hero",
       "edges_disagree": false,
       "equity_edge": 0.430545,
-      "hero_combos": 52.0,
+      "hero_combos": 44.0,
       "hero_equity": 0.715272,
       "hero_label": "CO opener",
-      "hero_nut_share": 0.115385,
-      "nut_edge": 0.115385,
-      "villain_combos": 64.0,
+      "hero_nut_share": 0.068182,
+      "hero_spec": "AKs,AQs,ATs,KQs,AKo,AQo,99,77",
+      "nut_edge": 0.068182,
+      "villain_combos": 58.0,
       "villain_equity": 0.284728,
       "villain_label": "BB caller",
-      "villain_nut_share": 0.0
+      "villain_nut_share": 0.0,
+      "villain_spec": "KJs,QJs,JTs,T9s,98s,A5s-A2s,KQo,AJo,76s"
     },
     {
       "board": "9h6d3c",
@@ -138,15 +166,17 @@
       "can_bet_often": "villain",
       "edges_disagree": true,
       "equity_edge": -0.263691,
-      "hero_combos": 66.0,
+      "hero_combos": 63.0,
       "hero_equity": 0.368154,
       "hero_label": "BTN opener",
-      "hero_nut_share": 0.090909,
-      "nut_edge": 0.090909,
-      "villain_combos": 60.0,
+      "hero_nut_share": 0.047619,
+      "hero_spec": "AKo,AQo,AJs,KQo,TT,99,88,AKs,AQs",
+      "nut_edge": 0.047619,
+      "villain_combos": 48.0,
       "villain_equity": 0.631846,
       "villain_label": "BB caller",
-      "villain_nut_share": 0.0
+      "villain_nut_share": 0.0,
+      "villain_spec": "87s,76s,65s,54s,T8s,T9s,98o,97o,66,55"
     },
     {
       "board": "As9s5d",
@@ -154,15 +184,17 @@
       "can_bet_often": "hero",
       "edges_disagree": true,
       "equity_edge": 0.220466,
-      "hero_combos": 54.0,
+      "hero_combos": 46.0,
       "hero_equity": 0.610233,
       "hero_label": "CO opener",
       "hero_nut_share": 0.0,
-      "nut_edge": -0.166667,
-      "villain_combos": 36.0,
+      "hero_spec": "AKo,AQo,AJs,ATs,KTs,QQ,JJ,TT",
+      "nut_edge": -0.103448,
+      "villain_combos": 29.0,
       "villain_equity": 0.389767,
       "villain_label": "BB caller",
-      "villain_nut_share": 0.166667
+      "villain_nut_share": 0.103448,
+      "villain_spec": "KQs,QJs,KJs,JTs,98s,76s,99,55"
     },
     {
       "board": "Kh7s3d4c",
@@ -170,15 +202,17 @@
       "can_bet_often": "hero",
       "edges_disagree": false,
       "equity_edge": 0.53955,
-      "hero_combos": 50.0,
+      "hero_combos": 40.0,
       "hero_equity": 0.769775,
       "hero_label": "CO opener (turn)",
-      "hero_nut_share": 0.12,
-      "nut_edge": 0.12,
-      "villain_combos": 48.0,
+      "hero_nut_share": 0.075,
+      "hero_spec": "AKo,AQo,ATs,KQs,99,77,44",
+      "nut_edge": 0.075,
+      "villain_combos": 44.0,
       "villain_equity": 0.230225,
       "villain_label": "BB caller (turn)",
-      "villain_nut_share": 0.0
+      "villain_nut_share": 0.0,
+      "villain_spec": "KJs,QJs,JTs,T9s,98s,A5s,KQo,AJo"
     }
   ],
   "schema_version": "1.0.0",

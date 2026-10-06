@@ -1,7 +1,7 @@
 # Minimum defense frequency: why pot/(pot+bet)
 
 <!-- hands: 2 -->
-<!-- terms: mdf, pot, bet, fold, call, bluff, value-hand, equity, combos, range -->
+<!-- terms: minimum-defense-frequency, value-bet, bluff, pot, bet, fold, call, equity, combos, range -->
 
 ## 本节目标 / Objectives
 
@@ -225,7 +225,7 @@ Every number here is computed in this repository. No range chart or strategy out
 
 ## 术语 / Terms
 
-<!-- terms: mdf, pot, bet, fold, call, bluff, value-hand, equity, combos, range -->
+<!-- terms: minimum-defense-frequency, value-bet, bluff, pot, bet, fold, call, equity, combos, range -->
 
 | Abbrev | 中文 | English | Meaning in this lesson |
 |---|---|---|---|

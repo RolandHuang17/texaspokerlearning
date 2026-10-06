@@ -234,6 +234,56 @@ def test_draft_lessons_may_legally_have_no_files_yet() -> None:
     }
 
 
+def test_a_draft_lesson_may_have_a_file_without_being_unregistered(
+    tmp_path: Path, monkeypatch: Any
+) -> None:
+    """The authoring order the whole pipeline depends on: file first, status later.
+
+    An earlier revision of ``find_orphans`` made ``unregistered`` compare against the *ready* set, so
+    every drafted lesson on disk -- which is every lesson between an author's first commit and the
+    maintainer's status flip -- was reported as a page nobody registered. The gate then failed the one
+    state the repository is designed to support: work in progress.
+    """
+    bilingual = _tool("check_bilingual")
+    registry = _registry_with(
+        [
+            {
+                "id": "02-01",
+                "order": 1,
+                "slug": "probe",
+                "title": {"zh": "探针", "en": "probe"},
+                "tags": {"scenario": ["shared"]},
+                "status_zh": "draft",
+                "status_en": "draft",
+            }
+        ]
+    )
+    text = _lesson_text(2, ("hand.02-01-a", "hand.02-01-b"))
+    monkeypatch.setattr(bilingual, "DOCS", _write_pair(tmp_path, text, text))
+    problems = bilingual.check(registry, {})
+    assert not problems, problems
+    # ...and the same file becomes a real failure the moment the lesson claims to be ready.
+    ready = _registry_with(
+        [
+            {
+                "id": "02-01",
+                "order": 1,
+                "slug": "probe",
+                "title": {"zh": "探针", "en": "probe"},
+                "tags": {"scenario": ["shared"]},
+                "status_zh": "ready",
+                "status_en": "ready",
+            }
+        ]
+    )
+    missing = ready.find_orphans(tmp_path)
+    assert not missing["missing_file:en"] and not missing["unregistered:en"]
+    absent = ready.find_orphans(tmp_path / "nothing-here")
+    assert absent["missing_file:en"] == ["docs/en/02-probe/probe.md"], (
+        "the same lesson claiming `ready` with no file must be reported"
+    )
+
+
 def test_a_ready_lesson_with_no_file_on_disk_is_orphaned() -> None:
     """The other half of the same rule: ``ready`` is a claim, and a claim without a file fails.
 

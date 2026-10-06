@@ -1,7 +1,7 @@
 # 矛头防守频率：为什么是 pot/(pot+bet)
 
 <!-- hands: 2 -->
-<!-- terms: mdf, pot, bet, fold, call, bluff, value-hand, equity, combos, range -->
+<!-- terms: minimum-defense-frequency, value-bet, bluff, pot, bet, fold, call, equity, combos, range -->
 
 ## 本节目标 / Objectives
 
@@ -225,7 +225,7 @@ MDF = 1 − f = 1 − B/(P+B) = P/(P+B)
 
 ## 术语 / Terms
 
-<!-- terms: mdf, pot, bet, fold, call, bluff, value-hand, equity, combos, range -->
+<!-- terms: minimum-defense-frequency, value-bet, bluff, pot, bet, fold, call, equity, combos, range -->
 
 | 缩写 | 中文 | English | 本节里的含义 |
 |---|---|---|---|
