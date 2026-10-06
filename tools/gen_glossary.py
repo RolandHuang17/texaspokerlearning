@@ -16,11 +16,11 @@ make it stick:
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 import yaml
-from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
+
+from _bootstrap import bootstrap_path, fail, ok
 
 bootstrap_path()
 
@@ -128,7 +128,10 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if not args.check:
         write_artifact(args.out, to_artifact(terms), schema="glossary")
-    ok(f"glossary: {len(terms)} terms validated" + (" (check only)" if args.check else f" -> {args.out.name}"))
+    ok(
+        f"glossary: {len(terms)} terms validated"
+        + (" (check only)" if args.check else f" -> {args.out.name}")
+    )
     return 0
 
 

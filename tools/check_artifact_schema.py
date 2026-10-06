@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
@@ -62,7 +61,7 @@ def check(files: list[Path]) -> list[str]:
     problems: list[str] = []
     unvalidated: list[str] = []
     for file in files:
-        if not file.suffix == ".json":
+        if file.suffix != ".json":
             continue
         try:
             payload = json.loads(file.read_text(encoding="utf-8"))
@@ -75,7 +74,7 @@ def check(files: list[Path]) -> list[str]:
             continue
         try:
             validate_artifact(payload if isinstance(payload, dict) else payload[0], schema)
-        except Exception as error:  # noqa: BLE001 - reported as a build failure, not re-raised
+        except Exception as error:
             problems.append(f"{file.relative_to(REPO_ROOT)}: {error}")
     if unvalidated:
         problems.append(

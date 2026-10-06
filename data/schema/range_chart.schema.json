@@ -13,7 +13,10 @@
     "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
     "id": { "$ref": "common.schema.json#/$defs/id" },
     "title": { "$ref": "common.schema.json#/$defs/lang_string" },
-    "spot": { "$ref": "common.schema.json#/$defs/id" },
+    "spot": {
+      "type": ["string", "null"],
+      "description": "The spot this chart answers, when there is one. The derived charts in chapters 01-02 illustrate an arithmetic property and belong to no spot, so null is legal and the lesson id carries the context."
+    },
     "player": { "type": "string", "pattern": "^[A-Z]{1,3}$" },
     "street": { "$ref": "common.schema.json#/$defs/street_tag" },
     "sizing": {
@@ -52,6 +55,12 @@
       "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
     },
     "total_combos": { "type": "number", "minimum": 0, "maximum": 1326 },
+    "threshold": {
+      "type": ["number", "null"],
+      "description": "The arithmetic cut that produced this chart: an MDF floor, or the equity a call needs. A chart without a stated threshold is an assertion with a colour map.",
+      "minimum": 0,
+      "maximum": 1
+    },
     "range_percentage": {
       "type": "number",
       "minimum": 0,

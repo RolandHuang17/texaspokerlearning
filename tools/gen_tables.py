@@ -16,14 +16,14 @@ import argparse
 import json
 import math
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from _bootstrap import REPO_ROOT, bootstrap_path, ok
 
 bootstrap_path()
 
-from pokergto import __version__  # noqa: E402
 from pokergto.artifacts import GEN_DIR, Provenance, write_artifact  # noqa: E402
 from pokergto.cards import combos_for_class  # noqa: E402
 from pokergto.equity import draw_probability  # noqa: E402
@@ -101,7 +101,8 @@ def build_sizing_mdf() -> dict[str, Any]:
         {
             "kind": "mdf_equality",
             "pass": all(
-                abs(row["mdf"] - float(minimum_defense_frequency(1, row["size"]))) < 1e-9 for row in rows
+                abs(row["mdf"] - float(minimum_defense_frequency(1, row["size"]))) < 1e-9
+                for row in rows
             ),
             "detail": "mdf column == pot/(pot+bet) recomputed independently",
         },
@@ -120,9 +121,24 @@ def build_sizing_mdf() -> dict[str, Any]:
         lesson="02-03",
         columns=[
             {"key": "size_label", "header": {"zh": "尺度", "en": "Size"}, "unit": "dimensionless"},
-            {"key": "mdf", "header": {"zh": "MDF 防守频率", "en": "MDF"}, "unit": "probability", "digits": 2},
-            {"key": "fold_frequency_needed", "header": {"zh": "诈唬所需弃牌率", "en": "Fold freq a bluff needs"}, "unit": "probability", "digits": 2},
-            {"key": "equity_needed", "header": {"zh": "跟注所需胜率", "en": "Equity to call"}, "unit": "probability", "digits": 2},
+            {
+                "key": "mdf",
+                "header": {"zh": "MDF 防守频率", "en": "MDF"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "fold_frequency_needed",
+                "header": {"zh": "诈唬所需弃牌率", "en": "Fold freq a bluff needs"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "equity_needed",
+                "header": {"zh": "跟注所需胜率", "en": "Equity to call"},
+                "unit": "probability",
+                "digits": 2,
+            },
         ],
         rows=[dict(row) for row in rows],
         derivation_ref="pokergto.odds#minimum_defense_frequency",
@@ -147,7 +163,9 @@ def build_bluff_value() -> dict[str, Any]:
     checks = [
         {
             "kind": "ev_matches_direct_calculation",
-            "pass": all(abs(item["value_to_bluff"] - item["closed_form"]) < 1e-9 for item in derived),
+            "pass": all(
+                abs(item["value_to_bluff"] - item["closed_form"]) < 1e-9 for item in derived
+            ),
             "tol": 1e-9,
             "detail": "generated column vs pokergto.odds.value_to_bluff_ratio",
         }
@@ -162,8 +180,18 @@ def build_bluff_value() -> dict[str, Any]:
         lesson="02-04",
         columns=[
             {"key": "size_label", "header": {"zh": "尺度", "en": "Size"}, "unit": "dimensionless"},
-            {"key": "bluff_fraction", "header": {"zh": "诈唬占比", "en": "Bluff share of betting range"}, "unit": "probability", "digits": 2},
-            {"key": "value_to_bluff", "header": {"zh": "价值:诈唬", "en": "Value : bluff"}, "unit": "ratio", "digits": 3},
+            {
+                "key": "bluff_fraction",
+                "header": {"zh": "诈唬占比", "en": "Bluff share of betting range"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "value_to_bluff",
+                "header": {"zh": "价值:诈唬", "en": "Value : bluff"},
+                "unit": "ratio",
+                "digits": 3,
+            },
         ],
         rows=derived,
         derivation_ref="pokergto.odds#bluff_fraction_at_indifference",
@@ -191,8 +219,17 @@ def build_equity_needed() -> dict[str, Any]:
         },
         lesson="02-02",
         columns=[
-            {"key": "size_label", "header": {"zh": "对手下注(倍底池)", "en": "Bet (x pot)"}, "unit": "dimensionless"},
-            {"key": "equity_needed", "header": {"zh": "所需胜率", "en": "Equity needed"}, "unit": "probability", "digits": 2},
+            {
+                "key": "size_label",
+                "header": {"zh": "对手下注(倍底池)", "en": "Bet (x pot)"},
+                "unit": "dimensionless",
+            },
+            {
+                "key": "equity_needed",
+                "header": {"zh": "所需胜率", "en": "Equity needed"},
+                "unit": "probability",
+                "digits": 2,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.odds#equity_needed_to_call",
@@ -234,17 +271,39 @@ def build_multiway_defense() -> dict[str, Any]:
     ]
     return _artifact(
         table_id="table.07-01.multiway-defense",
-        title={"zh": "多人防守：每人频率与合并频率", "en": "Multiway defense: per-player and joint frequency"},
+        title={
+            "zh": "多人防守：每人频率与合并频率",
+            "en": "Multiway defense: per-player and joint frequency",
+        },
         caption={
             "zh": "d = 1 - (B/(P+B))^(1/N)。指数是 1/N 而不是 N-1：底池下注、2 名对手时每人防守 29.29%，而合并防守仍是 50%。假设各防守者独立，牌力移除效应使真实值偏离（见 provenance.assumptions）。",
             "en": "d = 1 - (B/(P+B))^(1/N). The exponent is 1/N, not N-1: a pot-sized bet facing 2 opponents needs 29.29% from each while the joint defense stays 50%. Assumes independent defenders; card removal makes that an approximation.",
         },
         lesson="07-01",
         columns=[
-            {"key": "opponents", "header": {"zh": "对手数", "en": "Opponents"}, "unit": "dimensionless"},
-            {"key": "per_player", "header": {"zh": "每人防守频率", "en": "Per-player defense"}, "unit": "probability", "digits": 2},
-            {"key": "joint", "header": {"zh": "至少一人防守", "en": "At least one defends"}, "unit": "probability", "digits": 2},
-            {"key": "heads_up_mdf", "header": {"zh": "单挑 MDF", "en": "Heads-up MDF"}, "unit": "probability", "digits": 2},
+            {
+                "key": "opponents",
+                "header": {"zh": "对手数", "en": "Opponents"},
+                "unit": "dimensionless",
+            },
+            {
+                "key": "per_player",
+                "header": {"zh": "每人防守频率", "en": "Per-player defense"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "joint",
+                "header": {"zh": "至少一人防守", "en": "At least one defends"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "heads_up_mdf",
+                "header": {"zh": "单挑 MDF", "en": "Heads-up MDF"},
+                "unit": "probability",
+                "digits": 2,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.odds#defense_frequency_multiway",
@@ -289,7 +348,10 @@ def build_draw_probability() -> dict[str, Any]:
     ]
     return _artifact(
         table_id="table.01-03.draw-probability-exact-vs-rule",
-        title={"zh": "抽牌胜率：精确值 与 2/4 法则", "en": "Draw probability: exact values against the rule of 2 and 4"},
+        title={
+            "zh": "抽牌胜率：精确值 与 2/4 法则",
+            "en": "Draw probability: exact values against the rule of 2 and 4",
+        },
         caption={
             "zh": "同花听牌 9 outs：转牌精确 19.15%（法则说 18%），河牌精确 34.97%（法则说 36%）。记法则是近似，不是数学。",
             "en": "Nine-out flush draw: 19.15% on the turn exactly (the rule says 18%), 34.97% by the river exactly (the rule says 36%). The rule is an approximation, not the maths.",
@@ -297,10 +359,30 @@ def build_draw_probability() -> dict[str, Any]:
         lesson="01-03",
         columns=[
             {"key": "outs", "header": {"zh": "补牌数", "en": "Outs"}, "unit": "dimensionless"},
-            {"key": "exact_turn", "header": {"zh": "转牌精确", "en": "Exact, next card"}, "unit": "probability", "digits": 2},
-            {"key": "rule_of_two", "header": {"zh": "x2 法则", "en": "Rule of 2"}, "unit": "probability", "digits": 2},
-            {"key": "exact_by_river", "header": {"zh": "两张精确", "en": "Exact, two cards"}, "unit": "probability", "digits": 2},
-            {"key": "rule_of_four", "header": {"zh": "x4 法则", "en": "Rule of 4"}, "unit": "probability", "digits": 2},
+            {
+                "key": "exact_turn",
+                "header": {"zh": "转牌精确", "en": "Exact, next card"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "rule_of_two",
+                "header": {"zh": "x2 法则", "en": "Rule of 2"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "exact_by_river",
+                "header": {"zh": "两张精确", "en": "Exact, two cards"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "rule_of_four",
+                "header": {"zh": "x4 法则", "en": "Rule of 4"},
+                "unit": "probability",
+                "digits": 2,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.equity#draw_probability",
@@ -342,7 +424,11 @@ def build_combo_decomposition() -> dict[str, Any]:
         columns=[
             {"key": "shape", "header": {"zh": "形态", "en": "Shape"}, "unit": "dimensionless"},
             {"key": "classes", "header": {"zh": "类数", "en": "Classes"}, "unit": "dimensionless"},
-            {"key": "combos_each", "header": {"zh": "每类组合数", "en": "Combos each"}, "unit": "dimensionless"},
+            {
+                "key": "combos_each",
+                "header": {"zh": "每类组合数", "en": "Combos each"},
+                "unit": "dimensionless",
+            },
             {"key": "combos", "header": {"zh": "总组合数", "en": "Combos"}, "unit": "combos"},
         ],
         rows=rows,
@@ -415,16 +501,28 @@ def build_hand_class_counts() -> dict[str, Any]:
     ]
     return _artifact(
         table_id="table.01-05.hand-class-counts",
-        title={"zh": "五人手的类别计数（全枚举）", "en": "Five-card category counts (full enumeration)"},
+        title={
+            "zh": "五人手的类别计数（全枚举）",
+            "en": "Five-card category counts (full enumeration)",
+        },
         caption={
             "zh": "对本仓库的 evaluate5 全量枚举 C(52,5)=2,598,960 手所得。同花顺 40 手（含皇家 4 手）。",
             "en": "Produced by enumerating all C(52,5)=2,598,960 hands through this repository's own evaluate5. The 40 straight flushes include the 4 royals.",
         },
         lesson="01-05",
         columns=[
-            {"key": "category", "header": {"zh": "牌型", "en": "Category"}, "unit": "dimensionless"},
+            {
+                "key": "category",
+                "header": {"zh": "牌型", "en": "Category"},
+                "unit": "dimensionless",
+            },
             {"key": "count", "header": {"zh": "手数", "en": "Hands"}, "unit": "hands"},
-            {"key": "probability", "header": {"zh": "概率", "en": "Probability"}, "unit": "probability", "digits": 4},
+            {
+                "key": "probability",
+                "header": {"zh": "概率", "en": "Probability"},
+                "unit": "probability",
+                "digits": 4,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.evaluator#evaluate5",
@@ -440,7 +538,8 @@ def build_spr_commitment() -> dict[str, Any]:
         {
             "kind": "ev_matches_direct_calculation",
             "pass": all(
-                abs(row["all_in_equity_needed"] - float(all_in_equity_needed_from_spr(row["spr"]))) < 1e-9
+                abs(row["all_in_equity_needed"] - float(all_in_equity_needed_from_spr(row["spr"])))
+                < 1e-9
                 for row in rows
             ),
             "detail": "table vs pokergto.spr formula",
@@ -460,8 +559,18 @@ def build_spr_commitment() -> dict[str, Any]:
         },
         lesson="03-07",
         columns=[
-            {"key": "spr", "header": {"zh": "SPR", "en": "SPR"}, "unit": "dimensionless", "digits": 2},
-            {"key": "all_in_equity_needed", "header": {"zh": "全下所需胜率", "en": "Equity to commit"}, "unit": "probability", "digits": 2},
+            {
+                "key": "spr",
+                "header": {"zh": "SPR", "en": "SPR"},
+                "unit": "dimensionless",
+                "digits": 2,
+            },
+            {
+                "key": "all_in_equity_needed",
+                "header": {"zh": "全下所需胜率", "en": "Equity to commit"},
+                "unit": "probability",
+                "digits": 2,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.spr#all_in_equity_needed_from_spr",
@@ -506,9 +615,24 @@ def build_icm_shares() -> dict[str, Any]:
         lesson="12-03",
         columns=[
             {"key": "seat", "header": {"zh": "座位", "en": "Seat"}, "unit": "dimensionless"},
-            {"key": "chip_share", "header": {"zh": "筹码占比", "en": "Chip share"}, "unit": "probability", "digits": 2},
-            {"key": "money_share", "header": {"zh": "奖金占比", "en": "Money share"}, "unit": "probability", "digits": 2},
-            {"key": "gap_pp", "header": {"zh": "差(百分点)", "en": "Gap (pp)"}, "unit": "percent", "digits": 2},
+            {
+                "key": "chip_share",
+                "header": {"zh": "筹码占比", "en": "Chip share"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "money_share",
+                "header": {"zh": "奖金占比", "en": "Money share"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "gap_pp",
+                "header": {"zh": "差(百分点)", "en": "Gap (pp)"},
+                "unit": "percent",
+                "digits": 2,
+            },
         ],
         rows=rows,
         derivation_ref="pokergto.icm#icm",
@@ -531,11 +655,20 @@ def build_solver_vs_algebra() -> dict[str, Any]:
     lesson 02-03 both point a learner at these numbers, so the rows carry both values and the gap.
     """
     rows: list[dict[str, Any]] = []
-    for path in sorted((GEN_DIR / "solver").glob("toy_1street_*.json")) if (GEN_DIR / "solver").exists() else []:
+    for path in (
+        sorted((GEN_DIR / "solver").glob("toy_1street_*.json"))
+        if (GEN_DIR / "solver").exists()
+        else []
+    ):
         artifact = json.loads(path.read_text(encoding="utf-8"))
         report = artifact["average_strategy"]
-        checks = {str(record["kind"]): record for record in artifact["checks"]}
-        bet_fraction = float(path.stem.rsplit("_", 1)[1].replace("p", "."))
+        # The solver artifact carries its own gate results. Carrying them through is the difference
+        # between "these numbers agree" and "these numbers agree *and* the solve they came from passed
+        # its proof assertions" -- the second is the claim the lesson actually makes.
+        gate_records = {str(record["kind"]): bool(record["pass"]) for record in artifact["checks"]}
+        # Read the size from the artifact's own record. The filename is a stable key chosen for
+        # humans, not a number to be parsed back out.
+        bet_fraction = float(artifact["config"]["parameters"]["bet_size"])
         call = report["1:1:catcher"]["call"]
         nut = report["0:0:nut"]["bet"]
         air = report["0:0:air"]["bet"]
@@ -554,7 +687,7 @@ def build_solver_vs_algebra() -> dict[str, Any]:
                 "solved_value": round(float(artifact["game_value_bb_per_hand"]), 6),
                 "algebra_value": round(bet_fraction / (2.0 * (1.0 + bet_fraction)), 6),
                 "exploitability": round(float(artifact["exploitability_bb_per_hand"]), 8),
-                "all_gates_passed": all(bool(record["pass"]) for record in artifact["checks"]),
+                "all_gates_passed": all(gate_records.values()),
                 "artifact": f"data/gen/solver/{path.name}",
             }
         )
@@ -573,11 +706,14 @@ def build_solver_vs_algebra() -> dict[str, Any]:
         },
         {
             "kind": "game_value_closed_form",
-            "pass": all(
-                abs(row["solved_value"] - row["algebra_value"]) < 5e-3 for row in rows
-            ),
+            "pass": all(abs(row["solved_value"] - row["algebra_value"]) < 5e-3 for row in rows),
             "threshold": 5e-3,
             "detail": "solver's game value vs pot*bet/(2(pot+bet))",
+        },
+        {
+            "kind": "frequency_bounds",
+            "pass": bool(rows) and all(row["all_gates_passed"] for row in rows),
+            "detail": "every cited solver run passed its own assertions in solver/proofs.py",
         },
     ]
     if not rows:
@@ -590,10 +726,13 @@ def build_solver_vs_algebra() -> dict[str, Any]:
         )
     return _artifact(
         table_id="table.08-04.solver-vs-algebra",
-        title={"zh": "求解器解出的频率 与 第 02 章代数", "en": "Frequencies the solver found, against chapter 02's algebra"},
+        title={
+            "zh": "求解器解出的频率 与 第 02 章代数",
+            "en": "Frequencies the solver found, against chapter 02's algebra",
+        },
         caption={
             "zh": "左列是 CFR+ 自己收敛出来的，右列是 pot/(pot+bet) 与 bet/(pot+2bet)。两列相同不是巧合，"
-                  "而是 adr/0002 的交叉验证：数学核心或求解器任一处写错，这张表就生不成。",
+            "而是 adr/0002 的交叉验证：数学核心或求解器任一处写错，这张表就生不成。",
             "en": "The left columns are what CFR+ converged to; the right columns are pot/(pot+bet) and "
             "bet/(pot+2bet). Agreement is not a coincidence but the cross-validation of adr/0002: if "
             "either the math core or the solver is wrong, this table cannot be generated.",
@@ -601,11 +740,36 @@ def build_solver_vs_algebra() -> dict[str, Any]:
         lesson="08-04",
         columns=[
             {"key": "size_label", "header": {"zh": "尺度", "en": "Size"}, "unit": "dimensionless"},
-            {"key": "solved_defense", "header": {"zh": "求解器防守", "en": "Solved defence"}, "unit": "probability", "digits": 2},
-            {"key": "algebra_mdf", "header": {"zh": "代数 MDF", "en": "Algebraic MDF"}, "unit": "probability", "digits": 2},
-            {"key": "solved_bluff_share", "header": {"zh": "求解器诈唬占比", "en": "Solved bluff share"}, "unit": "probability", "digits": 2},
-            {"key": "algebra_bluff_share", "header": {"zh": "代数诈唬占比", "en": "Algebraic bluff share"}, "unit": "probability", "digits": 2},
-            {"key": "exploitability", "header": {"zh": "可剥削度(筹码/手)", "en": "Exploitability (chips/hand)"}, "unit": "chips_per_hand", "digits": 6},
+            {
+                "key": "solved_defense",
+                "header": {"zh": "求解器防守", "en": "Solved defence"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "algebra_mdf",
+                "header": {"zh": "代数 MDF", "en": "Algebraic MDF"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "solved_bluff_share",
+                "header": {"zh": "求解器诈唬占比", "en": "Solved bluff share"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "algebra_bluff_share",
+                "header": {"zh": "代数诈唬占比", "en": "Algebraic bluff share"},
+                "unit": "probability",
+                "digits": 2,
+            },
+            {
+                "key": "exploitability",
+                "header": {"zh": "可剥削度(筹码/手)", "en": "Exploitability (chips/hand)"},
+                "unit": "chips_per_hand",
+                "digits": 6,
+            },
         ],
         rows=rows,
         derivation_ref="src/pokergto/solver/proofs.py#PUBLISHED_PROOFS",
@@ -645,7 +809,9 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--out", type=Path, default=GEN_DIR)
     parser.add_argument("--only", action="append", dest="only")
-    parser.add_argument("--skip-expensive", action="store_true", help="omit the 2.6M-hand enumeration")
+    parser.add_argument(
+        "--skip-expensive", action="store_true", help="omit the 2.6M-hand enumeration"
+    )
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args(argv)
 

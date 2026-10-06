@@ -148,7 +148,6 @@ def check(registry: CurriculumRegistry, glossary: dict[str, object]) -> list[str
         for text, locale in ((en_text, "en"), (zh_text, "zh")):
             counts = HAND_COUNT.findall(text)
             if counts and int(counts[-1]) < 2 and _lesson_is_ready(registry, relative):
-                hands = int(counts[-1])
                 problems.append(
                     f"docs/{locale}/{relative}: {int(counts[-1])} live-hand examples, ready lessons "
                     "need at least 2 (see adr/0005 and CONTRIBUTING.md)"
@@ -168,7 +167,7 @@ def _lesson_is_ready(registry: CurriculumRegistry, relative: str) -> bool:
     stem = Path(relative).stem
     try:
         lesson = registry.lesson(stem_to_id(stem, registry))
-    except Exception:  # noqa: BLE001 - unregistered files are reported by another check
+    except Exception:
         return False
     return lesson.is_ready
 

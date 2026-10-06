@@ -26,9 +26,10 @@ own prior money — the most common arithmetic error in self-taught hand reviews
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Sequence
+from typing import cast
 
 from .odds import Number, as_fraction
 
@@ -69,15 +70,21 @@ def ev_bet(
     return value if exact else float(value)
 
 
-def ev_pure_bluff(pot: Number, bet: Number, fold_frequency: Number, *, exact: bool = False) -> Result:
+def ev_pure_bluff(
+    pot: Number, bet: Number, fold_frequency: Number, *, exact: bool = False
+) -> Result:
     """``f·pot - (1-f)·bet``. Named separately because it is the equation MDF is *derived from*;
-    a learner should be able to write it down from memory."""
+    a learner should be able to write it down from memory.
+    """
     return ev_bet(pot, bet, fold_frequency, 0, exact=exact)
 
 
-def ev_pure_value(pot: Number, bet: Number, fold_frequency: Number, *, exact: bool = False) -> Result:
+def ev_pure_value(
+    pot: Number, bet: Number, fold_frequency: Number, *, exact: bool = False
+) -> Result:
     """The always-called-and-wins bound: ``f·pot + (1-f)·(pot + bet)``. Useful for sizing: a
-    monster's EV rises with bet size only through the fold frequency it can sustain."""
+    monster's EV rises with bet size only through the fold frequency it can sustain.
+    """
     return ev_bet(pot, bet, fold_frequency, 1, exact=exact)
 
 
@@ -88,10 +95,13 @@ def ev_check(pot: Number, equity_at_showdown: Number, *, exact: bool = False) ->
     return value if exact else float(value)
 
 
-def ev_shove(pot: Number, stack: Number, equity: Number, call_frequency: Number, *, exact: bool = False) -> Result:
+def ev_shove(
+    pot: Number, stack: Number, equity: Number, call_frequency: Number, *, exact: bool = False
+) -> Result:
     """All-in as a special case of :func:`ev_bet` with ``bet = stack``. Keeping it as its own entry
     point is a teaching choice: short-stack MTT play *is* the case where ``bet`` is not a free
-    variable, and chapter 12 works entirely in these terms."""
+    variable, and chapter 12 works entirely in these terms.
+    """
     return ev_bet(pot, stack, 1 - as_fraction(call_frequency), equity, exact=exact)
 
 
@@ -108,7 +118,8 @@ class DecisionComparison:
     @property
     def regret(self) -> float:
         """EV lost against the best action in this table. A "common mistake" section states this,
-        so the learner knows the price of the leak rather than only that it is a leak."""
+        so the learner knows the price of the leak rather than only that it is a leak.
+        """
         return 0.0 if self.best else self.ev
 
 
@@ -128,17 +139,19 @@ def compare(
     for action, size in candidates:
         bet = as_fraction(size)
         if bet == 0:
-            value = ev_check(pot, equities_when_called[action], exact=True)
+            value = cast(Fraction, ev_check(pot, equities_when_called[action], exact=True))
         else:
-            value = ev_bet(
-                pot, bet, fold_frequencies[action], equities_when_called[action], exact=True
+            value = cast(
+                Fraction,
+                ev_bet(
+                    pot, bet, fold_frequencies[action], equities_when_called[action], exact=True
+                ),
             )
-        rows.append(
-            DecisionComparison(action, float(bet), float(value), value, False)
-        )
+        rows.append(DecisionComparison(action, float(bet), float(value), value, False))
     best_value = max(row.ev_exact for row in rows)
     ranked = [
-        DecisionComparison(r.action, r.bet, r.ev, r.ev_exact, r.ev_exact == best_value) for r in rows
+        DecisionComparison(r.action, r.bet, r.ev, r.ev_exact, r.ev_exact == best_value)
+        for r in rows
     ]
     ranked.sort(key=lambda row: row.ev_exact, reverse=True)
     return ranked
@@ -146,7 +159,8 @@ def compare(
 
 def regret(rows: Sequence[DecisionComparison]) -> dict[str, float]:
     """EV lost by each action relative to the best. This is the quantity the trainer reports as
-    bb/100, and the quantity a "leak" is defined as."""
+    bb/100, and the quantity a "leak" is defined as.
+    """
     if not rows:
         return {}
     best = max(row.ev_exact for row in rows)

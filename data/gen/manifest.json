@@ -1,5 +1,5 @@
 {
-  "artifact_count": 17,
+  "artifact_count": 18,
   "engine_version": "0.1.0",
   "files": {
     "glossary.json": {
@@ -20,29 +20,35 @@
       "schema": "index",
       "sha256": "6bcfd71106a4e1d1a71ca892588b32f2266e1b3686f903d34225cf6760c03e03"
     },
+    "ranges/range.02-03.mdf-floor-vs-half-pot.json": {
+      "bytes": 6044,
+      "kind": "range_chart",
+      "schema": "range_chart",
+      "sha256": "3c5b880e0cf14986d51099c06c4f291f40e61706124188c82fc71dc898e6fd33"
+    },
     "solver/kuhn.json": {
-      "bytes": 7091,
+      "bytes": 7136,
       "kind": "solver_run",
       "schema": "solver_run",
-      "sha256": "0d1dac2fb29c44d0ddc1059752cd71063b236274b89ffcbe1934bf34e2a0d2f7"
+      "sha256": "d168664fe07b1ca39c7306b29b3430917cf67c6b2686a8c21565e4edabbe4cc9"
     },
-    "solver/toy_1street_0p333333333333.json": {
-      "bytes": 4968,
+    "solver/toy_1street_half_pot.json": {
+      "bytes": 5043,
       "kind": "solver_run",
       "schema": "solver_run",
-      "sha256": "05be84296c58911ff9026ce458db6852b47939dd874ed12f2a78dd074258b185"
+      "sha256": "8759e04e12736a4885345e8940721ea82ffc5db0d0e61b9f238a8ac01b61edfd"
     },
-    "solver/toy_1street_0p5.json": {
-      "bytes": 4951,
+    "solver/toy_1street_one_third.json": {
+      "bytes": 5051,
       "kind": "solver_run",
       "schema": "solver_run",
-      "sha256": "cd1f91eb5c1cda49952429cc6c0b7d1cddee4187f9ea724477eaae161af99baf"
+      "sha256": "736ac9758fd8726b0d3e74505028f93b5f860eae187161a250edf9b8176fc6d5"
     },
-    "solver/toy_1street_1.json": {
-      "bytes": 4933,
+    "solver/toy_1street_pot.json": {
+      "bytes": 5010,
       "kind": "solver_run",
       "schema": "solver_run",
-      "sha256": "3a37922e3161b903d5c0c588b881f8401d1d55f58ab42e7f693f5d5e22764446"
+      "sha256": "5df929374eb5964cae40abeb1ba352dc3a12aab609a96404cc931f2487dd9254"
     },
     "tables/table.01-01.combo-decomposition.json": {
       "bytes": 2182,
@@ -93,10 +99,10 @@
       "sha256": "deb9fb185e9ce2475da00aa22bee3fb657d00f82491ae4bc1f8df59148f94e2d"
     },
     "tables/table.08-04.solver-vs-algebra.json": {
-      "bytes": 4142,
+      "bytes": 4298,
       "kind": "table",
       "schema": "table",
-      "sha256": "185d25ad8e47a75494a5d5ae20db0a0b6b2371e18ae631db2c1491edf1a82458"
+      "sha256": "6c68a73257d7373aa03ba5cd2fd7278fa9dc16f287b7333d24133305929cff12"
     },
     "tables/table.12-03.icm-vs-chip-share.json": {
       "bytes": 3031,
@@ -106,7 +112,7 @@
     }
   },
   "generator": "tools/gen_all.py",
-  "git_sha": null,
+  "git_sha": "7aabc6dbdc3168641724333216b703bf636bea53",
   "numpy": "1.26.4",
   "python": "3.12.13",
   "schema_version": "1.0.0"

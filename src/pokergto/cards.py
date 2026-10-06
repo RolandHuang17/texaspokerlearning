@@ -14,10 +14,11 @@ codebase that could be wrong.
 
 from __future__ import annotations
 
+from collections.abc import Iterator, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from itertools import combinations
-from typing import Final, Iterator, Sequence
+from typing import Final
 
 from .errors import InputError, InvariantError
 
@@ -146,9 +147,7 @@ def standard_deck() -> tuple[Card, ...]:
 # --- hole-card encodings ---------------------------------------------------------------
 
 #: Axis order of every 13x13 chart in the repository. Descending rank, ACE first.
-GRID_RANKS: Final[tuple[Rank, ...]] = tuple(
-    Rank.from_char(c) for c in "AKQJT98765432"
-)
+GRID_RANKS: Final[tuple[Rank, ...]] = tuple(Rank.from_char(c) for c in "AKQJT98765432")
 
 
 def class_key(first: Card, second: Card) -> str:
@@ -214,7 +213,8 @@ def enumerate_combos() -> Iterator[tuple[tuple[int, int], str]]:
 
 def remove_cards(available: Sequence[int], removed: Sequence[Card]) -> list[int]:
     """Card removal. Explicit, because 'blocker' claims that ignore it are the most common
-    arithmetic error in poker content."""
+    arithmetic error in poker content.
+    """
     gone = {c.index for c in removed}
     return [i for i in available if i not in gone]
 

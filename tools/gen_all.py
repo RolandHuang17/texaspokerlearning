@@ -21,22 +21,21 @@ from __future__ import annotations
 import argparse
 import filecmp
 import re
-import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 from _bootstrap import REPO_ROOT, bootstrap_path, ok
 
 bootstrap_path()
 
-from pokergto import __version__  # noqa: E402
-from pokergto.artifacts import GEN_DIR, SCHEMA_DIR  # noqa: E402
 import gen_curriculum_index  # noqa: E402
 import gen_glossary  # noqa: E402
 import gen_tables  # noqa: E402
+from pokergto import __version__  # noqa: E402
+from pokergto.artifacts import GEN_DIR  # noqa: E402
 
 TOOLS = REPO_ROOT / "tools"
 SCHEMA_VERSION = "1.0.0"
@@ -49,7 +48,9 @@ def _step_glossary(out: Path) -> list[Path]:
     if not src.exists():
         return []
     terms = gen_glossary.load(src)
-    problems = gen_glossary.check(terms, curriculum_path=REPO_ROOT / "data" / "src" / "curriculum.yaml")
+    problems = gen_glossary.check(
+        terms, curriculum_path=REPO_ROOT / "data" / "src" / "curriculum.yaml"
+    )
     if problems:
         raise SystemExit("glossary invalid: " + "; ".join(problems[:5]))
     target = out / "glossary.json"
@@ -92,10 +93,12 @@ def _step_index(out: Path) -> list[Path]:
         return []
     argv = ["--out", str(out), "--docs", str(REPO_ROOT), "--allow-unauthored"]
     gen_curriculum_index.main(argv)
-    written = [out / f"index.{locale}.json" for locale in ("en", "zh") if (out / f"index.{locale}.json").exists()]
-    written.extend(
-        path for path in (REPO_ROOT / "docs" / "gen").glob("nav.*.yml") if path.exists()
-    )
+    written = [
+        out / f"index.{locale}.json"
+        for locale in ("en", "zh")
+        if (out / f"index.{locale}.json").exists()
+    ]
+    written.extend(path for path in (REPO_ROOT / "docs" / "gen").glob("nav.*.yml") if path.exists())
     return written
 
 
@@ -181,7 +184,11 @@ def _schema_for(path: Path) -> str | None:
 
 def _run(script: Path, *args: str) -> None:
     result = subprocess.run(
-        [sys.executable, str(script), *args], cwd=REPO_ROOT, capture_output=True, text=True, check=False
+        [sys.executable, str(script), *args],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
     )
     if result.returncode != 0:
         sys.stderr.write(result.stdout or "")
@@ -210,7 +217,9 @@ STEPS: list[tuple[str, Step]] = [
 FULL_TREE_ONLY = {"manifest"}
 
 
-def generate(out: Path, *, only: set[str] | None = None, skip: set[str] | None = None) -> list[Path]:
+def generate(
+    out: Path, *, only: set[str] | None = None, skip: set[str] | None = None
+) -> list[Path]:
     filtered = bool(only or skip)
     written: list[Path] = []
     for name, step in STEPS:
@@ -234,7 +243,9 @@ def compare(committed: Path, rebuilt: Path) -> list[str]:
     problems: list[str] = []
     if not committed.exists():
         return [f"{committed} does not exist but generated output was produced"]
-    committed_files = {path.relative_to(committed): path for path in committed.rglob("*") if path.is_file()}
+    committed_files = {
+        path.relative_to(committed): path for path in committed.rglob("*") if path.is_file()
+    }
     rebuilt_files = {
         path.relative_to(rebuilt): path
         for path in rebuilt.rglob("*")
@@ -243,7 +254,9 @@ def compare(committed: Path, rebuilt: Path) -> list[str]:
     for relative in sorted(set(committed_files) - set(rebuilt_files)):
         if relative.suffix not in {".json", ".csv", ".svg"}:
             continue
-        problems.append(f"stale artifact committed with no generator producing it: data/gen/{relative.as_posix()}")
+        problems.append(
+            f"stale artifact committed with no generator producing it: data/gen/{relative.as_posix()}"
+        )
     for relative in sorted(set(rebuilt_files) - set(committed_files)):
         problems.append(f"generated but not committed: data/gen/{relative.as_posix()}")
     for relative in sorted(set(rebuilt_files) & set(committed_files)):
@@ -273,7 +286,10 @@ def main(argv: list[str] | None = None) -> int:
     unknown = (only or set()) | (skip or set())
     known = {name for name, _ in STEPS}
     if unknown - known:
-        print(f"error: unknown step(s) {sorted(unknown - known)}; available: {sorted(known)}", file=sys.stderr)
+        print(
+            f"error: unknown step(s) {sorted(unknown - known)}; available: {sorted(known)}",
+            file=sys.stderr,
+        )
         return 2
 
     if args.check:
@@ -293,14 +309,18 @@ def main(argv: list[str] | None = None) -> int:
                 ok("nothing generated and nothing committed: data gate passes on an empty tree")
                 return 0
             if not GEN_DIR.exists():
-                problems = ["data/gen does not exist but generators produced output: run tools/gen_all.py"]
+                problems = [
+                    "data/gen does not exist but generators produced output: run tools/gen_all.py"
+                ]
             elif only or skip:
                 # A partial check compares only what it regenerated. Whole-tree staleness is the
                 # unfiltered job's business, so a fast local loop can never report false staleness.
                 for path in produced:
                     counterpart = GEN_DIR / path.relative_to(rebuilt)
                     if not counterpart.exists():
-                        problems.append(f"data/gen/{path.relative_to(rebuilt).as_posix()} is not committed")
+                        problems.append(
+                            f"data/gen/{path.relative_to(rebuilt).as_posix()} is not committed"
+                        )
                     elif counterpart.read_bytes() != path.read_bytes():
                         problems.append(
                             f"data/gen/{path.relative_to(rebuilt).as_posix()} differs from what the "

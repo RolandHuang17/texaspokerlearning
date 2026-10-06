@@ -1,0 +1,69 @@
+name: Deploy GitHub Pages
+
+# Docs at the site root, trainer at /trainer/. One Pages artifact, one domain, so the language
+# switcher and the cross-links between docs and trainer keep working.
+#
+# The trainer is optional *by design*: it is milestone M3 and the docs must not go dark because it is
+# absent. The job below checks for trainer/package.json and skips the trainer build when it is not
+# there, rather than failing.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-env
+        with:
+          with-node: 'true'
+      - name: Generate data and nav
+        run: python tools/gen_all.py
+      - name: Build docs
+        run: python -m mkdocs build --strict
+      - name: Build trainer (if it exists yet)
+        id: trainer
+        shell: bash
+        run: |
+          if [ -f trainer/package.json ]; then
+            npm --prefix trainer ci
+            npm --prefix trainer run build
+            echo "built=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Trainer not present; publishing docs only." >> "$GITHUB_STEP_SUMMARY"
+            echo "built=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Assemble site
+        shell: bash
+        run: |
+          mkdir -p _site
+          cp -r site/. _site/
+          if [ '${{ steps.trainer.outputs.built }}' = 'true' ]; then
+            mkdir -p _site/trainer && cp -r trainer/dist/. _site/trainer/
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.out.outputs.page_url }}
+    steps:
+      - id: out
+        uses: actions/deploy-pages@v4

@@ -23,11 +23,10 @@ squashed-reach bug stalled at 0.89 exploitability, which no sane threshold would
 
 from __future__ import annotations
 
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from fractions import Fraction
-from typing import Any, Callable, Sequence
-
-import numpy as np
+from typing import Any
 
 from ..errors import ProofGateError
 from ..odds import bluff_fraction_at_indifference, minimum_defense_frequency
@@ -61,6 +60,10 @@ class ProofEntry:
     algorithm: str
     iterations: int
     exploitability_threshold: float
+    #: How the game was parameterised, recorded into every artifact it produces. Without this a
+    #: reader -- or a table generator -- has to infer ``bet_size`` from a filename, which is exactly
+    #: what broke when these keys stopped being formatted numbers.
+    parameters: dict[str, float] = field(default_factory=dict)
     measure_every: int = 0
     assertions: tuple[Assertion, ...] = ()
     tolerances: dict[str, float] = field(default_factory=dict)
@@ -89,11 +92,15 @@ def _report(result: SolveResult) -> dict[str, dict[str, float]]:
     return result.strategy_report()
 
 
-def assert_kuhn_value(_tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+def assert_kuhn_value(
+    _tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+) -> tuple[float, float]:
     return result.game_value, KUHN_VALUE
 
 
-def assert_king_calls_when_faced(_tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+def assert_king_calls_when_faced(
+    _tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+) -> tuple[float, float]:
     """Calling with the king when facing a bet is strictly dominant for either player, so every
     equilibrium does it. This is a *dominance* claim, which is why it can be asserted -- unlike "always
     open a bet with the king", which cannot (see the note on KUHN)."""
@@ -101,14 +108,18 @@ def assert_king_calls_when_faced(_tree: GameTree, result: SolveResult, _cfg: dic
     return 0.5 * (report["2:0:K"]["call"] + report["3:1:K"]["call"]), 1.0
 
 
-def assert_jack_never_calls(_tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+def assert_jack_never_calls(
+    _tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+) -> tuple[float, float]:
     """Folding the jack to a bet is strictly dominant: it never wins a showdown, so calling only adds
     money to a lost pot."""
     report = _report(result)
     return 0.5 * (report["2:0:J"]["call"] + report["3:1:J"]["call"]), 0.0
 
 
-def assert_jack_bluff_in_family(_tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+def assert_jack_bluff_in_family(
+    _tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+) -> tuple[float, float]:
     """Player 0's jack-bluffing frequency may be anywhere in ``[0, 1/3]`` -- the equilibrium is a
     family, not a point. The assertion is on membership: demanding one particular member would be
     testing the implementation's trajectory, not game theory.
@@ -120,23 +131,45 @@ def assert_jack_bluff_in_family(_tree: GameTree, result: SolveResult, _cfg: dict
     return report["0:0:J"]["bet"], 1.0 / 3.0
 
 
-def _one_street_entry(bet_size: float, iterations: int = 4000) -> ProofEntry:
-    def assert_defense(tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+def _make_one_street_builder(size: float) -> Callable[[], GameTree]:
+    """Bound the bet size into its own function.
+
+    A default-argument lambda (``lambda size=bet_size: ...``) is the usual shortcut and mypy cannot
+    infer through it; a named factory makes the closure explicit and keeps the registry readable when
+    the same game appears at three sizes.
+    """
+
+    def build() -> GameTree:
+        return build_one_street(pot=1.0, bet_size=size)
+
+    return build
+
+
+def _one_street_entry(game: str, bet_size: float, iterations: int = 4000) -> ProofEntry:
+    def assert_defense(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
         report = _report(result)
         return report["1:1:catcher"]["call"], float(minimum_defense_frequency(1.0, bet_size))
 
-    def assert_bluff_share(tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+    def assert_bluff_share(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
         report = _report(result)
         nut = report["0:0:nut"]["bet"]
         air = report["0:0:air"]["bet"]
         measured = air / (nut + air) if (nut + air) > 0 else 0.0
         return measured, float(bluff_fraction_at_indifference(1.0, bet_size))
 
-    def assert_value_bets(tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+    def assert_value_bets(
+        tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
         report = _report(result)
         return report["0:0:nut"]["bet"], 1.0
 
-    def assert_toy_game_value(_tree: GameTree, result: SolveResult, _cfg: dict[str, Any]) -> tuple[float, float]:
+    def assert_toy_game_value(
+        _tree: GameTree, result: SolveResult, _cfg: dict[str, Any]
+    ) -> tuple[float, float]:
         """Hero's equilibrium value is ``pot * bet / (2 * (pot + bet))`` -- a third independent
         quantity that has to agree, not just the two frequencies.
 
@@ -147,10 +180,14 @@ def _one_street_entry(bet_size: float, iterations: int = 4000) -> ProofEntry:
         """
         return result.game_value, bet_size / (2.0 * (1.0 + bet_size))
 
+    # The key is a name, not a formatted number: ``f"{1/3:g}"`` and ``f"{float(Fraction(1,3)):g}"``
+    # differ in trailing digits, and an artifact filename that depends on float repr is how a
+    # byte-determinism check starts failing for reasons nobody can read.
     return ProofEntry(
-        game=f"toy_1street_{bet_size:g}".replace(".", "p").replace("/", "_"),
+        game=game,
+        parameters={"pot": 1.0, "bet_size": bet_size},
         family="toy_1street",
-        builder=lambda size=bet_size: build_one_street(pot=1.0, bet_size=size),
+        builder=_make_one_street_builder(bet_size),
         algorithm="cfr_plus",
         iterations=iterations,
         exploitability_threshold=2e-4,
@@ -201,6 +238,7 @@ def _one_street_entry(bet_size: float, iterations: int = 4000) -> ProofEntry:
 
 KUHN = ProofEntry(
     game="kuhn",
+    parameters={"ante": ANTE},
     family="kuhn",
     builder=lambda: build_kuhn(ante=ANTE),
     algorithm="cfr_plus",
@@ -246,9 +284,9 @@ KUHN = ProofEntry(
     },
     notes={
         "zh": "Kuhn 是唯一有完整解析解的含诈唬博弈，因此它是求解器的验收标准。注意这里只断言占优关系与族边界，"
-              "不断言开注频率：本仓库的 CFR+ 找到的均衡里，P0 用国王只下注约 64%，因为当 P1 用后两张牌弃掉"
-              "三分之二时，国王下注与过牌恰好无差别。教科书里那句'国王总是下注'是均衡选择，不是必然结论，"
-              "而这件事本身就是 08-03 的一课。",
+        "不断言开注频率：本仓库的 CFR+ 找到的均衡里，P0 用国王只下注约 64%，因为当 P1 用后两张牌弃掉"
+        "三分之二时，国王下注与过牌恰好无差别。教科书里那句'国王总是下注'是均衡选择，不是必然结论，"
+        "而这件事本身就是 08-03 的一课。",
         "en": "Kuhn is the only bluffing game with a complete analytic solution, which makes it the "
         "solver's acceptance test. Note what is asserted here: dominance relations and the family "
         "bound, never an opening frequency. This repository's CFR+ lands on an equilibrium where "
@@ -263,9 +301,9 @@ KUHN = ProofEntry(
 #: solved, committed, and cited. Without an entry the artifact cannot exist.
 PUBLISHED_PROOFS: dict[str, ProofEntry] = {
     KUHN.game: KUHN,
-    "toy_1street_0p333333333333": _one_street_entry(Fraction(1, 3)),
-    "toy_1street_0p5": _one_street_entry(0.5),
-    "toy_1street_1": _one_street_entry(1.0),
+    "toy_1street_one_third": _one_street_entry("toy_1street_one_third", float(Fraction(1, 3))),
+    "toy_1street_half_pot": _one_street_entry("toy_1street_half_pot", 0.5),
+    "toy_1street_pot": _one_street_entry("toy_1street_pot", 1.0),
 }
 
 

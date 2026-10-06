@@ -25,8 +25,8 @@ same indifference conditions, and :mod:`pokergto.solver.proofs` checks that they
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from itertools import permutations
-from typing import Sequence
 
 import numpy as np
 
@@ -95,19 +95,31 @@ def kuhn(ante: float = DEFAULT_ANTE) -> GameTree:
     builder.add_terminal(terminal_p1_calls, winner * 2.0 * ante)
 
     builder.add_decision(
-        node_p1_facing_bet, 1, ("fold", "call"), (terminal_p1_folds, terminal_p1_calls),
+        node_p1_facing_bet,
+        1,
+        ("fold", "call"),
+        (terminal_p1_folds, terminal_p1_calls),
         [cards[int(rank)] for rank in villain],
     )
     builder.add_decision(
-        node_p0_facing_bet, 0, ("fold", "call"), (terminal_p0_folds, terminal_p0_calls),
+        node_p0_facing_bet,
+        0,
+        ("fold", "call"),
+        (terminal_p0_folds, terminal_p0_calls),
         [cards[int(rank)] for rank in hero],
     )
     builder.add_decision(
-        node_p1_after_check, 1, ("check", "bet"), (terminal_check_check, node_p0_facing_bet),
+        node_p1_after_check,
+        1,
+        ("check", "bet"),
+        (terminal_check_check, node_p0_facing_bet),
         [cards[int(rank)] for rank in villain],
     )
     builder.add_decision(
-        node_p0, 0, ("check", "bet"), (node_p1_after_check, node_p1_facing_bet),
+        node_p0,
+        0,
+        ("check", "bet"),
+        (node_p1_after_check, node_p1_facing_bet),
         [cards[int(rank)] for rank in hero],
     )
     return builder.build(node_p0)
@@ -160,29 +172,14 @@ def one_street_bluff_catcher(pot: float = 1.0, bet_size: float = 0.5) -> GameTre
     builder.add_terminal(terminal_fold, np.array([prior, prior]))
     builder.add_terminal(terminal_call, np.array([prior + stake, -(prior + stake)]))
 
-    builder.add_decision(node_p1, 1, ("fold", "call"), (terminal_fold, terminal_call), ["catcher", "catcher"])
+    builder.add_decision(
+        node_p1, 1, ("fold", "call"), (terminal_fold, terminal_call), ["catcher", "catcher"]
+    )
     builder.add_decision(node_p0, 0, ("check", "bet"), (terminal_showdown, node_p1), ["nut", "air"])
     return builder.build(node_p0)
 
 
-def game_value(tree: GameTree) -> float:
-    """Expected net chips for player 0 under the *uniform random* strategy. Not an equilibrium
-    quantity -- it exists so a test can confirm the payoff vector is zero-sum-ish sane before the
-    solver touches it."""
-    root = tree.nodes[tree.root]
-    del root
-    terminal_payoff = 0.0
-    for node in tree.nodes:
-        if node.is_terminal:
-            # Without a strategy there is no unique reachability, so this weights terminal payoffs by
-            # deal probability only, which is enough to catch a sign error.
-            terminal_payoff += float(np.dot(node.payoff, tree.deal_prob)) / max(
-                1, sum(1 for candidate in tree.nodes if candidate.is_terminal)
-            )
-    return terminal_payoff
-
-
-GAME_BUILDERS: dict[str, Sequence[str]] = {
+GAME_BUILDERS: dict[str, tuple[str, Sequence[str]]] = {
     "kuhn": ("kuhn", ("ante",)),
     "toy_1street": ("one_street_bluff_catcher", ("pot", "bet_size")),
 }

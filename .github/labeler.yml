@@ -1,0 +1,24 @@
+# Path -> label, so a contributor learns which subsystem they touched without reading the tree.
+engine:
+  - src/**
+  - tests/**
+solver:
+  - src/pokergto/solver/**
+  - data/gen/solver/**
+data-contracts:
+  - data/schema/**
+docs-en:
+  - docs/en/**
+docs-zh:
+  - docs/zh/**
+curriculum-spine:
+  - data/src/curriculum.yaml
+  - data/src/glossary.yaml
+trainer:
+  - trainer/**
+tooling:
+  - tools/**
+  - .pre-commit-config.yaml
+  - pyproject.toml
+ci:
+  - .github/**

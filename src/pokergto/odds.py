@@ -29,9 +29,10 @@ the lesson, because a named assumption is a smaller lie than an implied one.
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from fractions import Fraction
-from typing import Iterable, Sequence
+from typing import cast
 
 Number = int | float | Fraction
 
@@ -52,7 +53,8 @@ STANDARD_SIZES: tuple[Fraction, ...] = (
 
 def as_fraction(value: Number) -> Fraction:
     """Convert without decimal round-trips. Floats go through ``limit_denominator`` so that
-    ``0.3333333333333333`` becomes ``1/3`` rather than a 17-digit rational."""
+    ``0.3333333333333333`` becomes ``1/3`` rather than a 17-digit rational.
+    """
     if isinstance(value, Fraction):
         return value
     if isinstance(value, int):
@@ -66,7 +68,8 @@ def _out(value: Fraction, *, exact: bool) -> Number:
 
 def pot_odds(pot: Number, bet: Number, *, exact: bool = False) -> Number:
     """Odds offered by calling ``bet`` into ``pot``: ``pot / bet`` (expressed as a ratio, e.g. 2.0
-    for "2:1"). The *equity* you need is the reciprocal-ish form below."""
+    for "2:1"). The *equity* you need is the reciprocal-ish form below.
+    """
     p, b = as_fraction(pot), as_fraction(bet)
     if b <= 0:
         raise ValueError("pot_odds needs a positive bet")
@@ -102,7 +105,8 @@ def required_fold_frequency(pot: Number, bet: Number, *, exact: bool = False) ->
 
 def minimum_defense_frequency(pot: Number, bet: Number, *, exact: bool = False) -> Number:
     """MDF: the fraction of your range you must continue with (call or raise) so that a pure bluff
-    cannot print money: ``pot / (pot + bet)``."""
+    cannot print money: ``pot / (pot + bet)``.
+    """
     p, b = as_fraction(pot), as_fraction(bet)
     if p + b <= 0:
         raise ValueError("pot + bet must be positive")
@@ -117,7 +121,8 @@ mdf = minimum_defense_frequency
 
 def bluff_fraction_at_indifference(pot: Number, bet: Number, *, exact: bool = False) -> Number:
     """Fraction of a *betting* range that must be bluffs for a bluff-catcher to be indifferent
-    between calling and folding: ``bet / (pot + 2*bet)``."""
+    between calling and folding: ``bet / (pot + 2*bet)``.
+    """
     p, b = as_fraction(pot), as_fraction(bet)
     return _out(b / (p + 2 * b), exact=exact)
 
@@ -130,7 +135,7 @@ def value_to_bluff_ratio(pot: Number, bet: Number, *, exact: bool = False) -> Nu
     overbet side of that chart looks so bluff-heavy: a big bet only needs its bluffs to work less
     often because it risks more, and the ratio moves the opposite way to intuition.
     """
-    b = bluff_fraction_at_indifference(pot, bet, exact=True)
+    b = as_fraction(bluff_fraction_at_indifference(pot, bet, exact=True))
     if b == 0:
         raise ValueError("zero bluffs has no finite ratio")
     return _out((1 - b) / b, exact=exact)
@@ -161,7 +166,7 @@ def defense_frequency_multiway(
         )
     p, b = as_fraction(pot), as_fraction(bet)
     single_fold = float(b / (p + b))
-    return 1.0 - single_fold ** (1.0 / n_opponents)
+    return float(1.0 - single_fold ** (1.0 / n_opponents))
 
 
 def at_least_one_defense(per_player_frequency: Number, n_opponents: int) -> float:
@@ -175,7 +180,8 @@ def at_least_one_defense(per_player_frequency: Number, n_opponents: int) -> floa
 def effective_mdf_from_multiway(pot: Number, bet: Number, n_opponents: int) -> float:
     """The joint defense requirement, which is the single number worth memorising: it is exactly the
     heads-up MDF. Per-player defense falls as opponents are added; the *table's* total defense does
-    not. Chapter 07-01 turns this into a lesson."""
+    not. Chapter 07-01 turns this into a lesson.
+    """
     return at_least_one_defense(defense_frequency_multiway(pot, bet, n_opponents), n_opponents)
 
 
@@ -234,7 +240,8 @@ def indifference_check(
     pot: Number, bet: Number, fold_frequency: Number, *, tol: float = 1e-12
 ) -> bool:
     """Is a pure bluff EV-zero at this fold frequency? Used by the solver's closed-form gate: the
-    converged strategy must answer *yes* here, or the math module and the solver disagree."""
+    converged strategy must answer *yes* here, or the math module and the solver disagree.
+    """
     p, b, f = (as_fraction(x) for x in (pot, bet, fold_frequency))
     return abs(float(f - b / (p + b))) <= tol
 
@@ -244,11 +251,13 @@ def summarize(rows: Sequence[dict[str, object]]) -> str:
     header = "size        equity    mdf      bluff%   value:bluff"
     lines = [header]
     for row in rows:
+        equity = cast(float, row["equity_needed"])
+        defense = cast(float, row["mdf"])
+        bluff = cast(float, row["bluff_fraction"])
+        ratio = cast(float, row["value_to_bluff"])
         lines.append(
-            f"{row['size_label']:<11} "
-            f"{100 * float(row['equity_needed']):6.2f}%  "
-            f"{100 * float(row['mdf']):6.2f}%  "
-            f"{100 * float(row['bluff_fraction']):5.2f}%  "
-            f"{float(row['value_to_bluff']):5.2f}:1"
+            f"{cast(str, row['size_label']):<11} "
+            f"{100 * equity:6.2f}%  {100 * defense:6.2f}%  "
+            f"{100 * bluff:5.2f}%  {ratio:5.2f}:1"
         )
     return "\n".join(lines)

@@ -1,0 +1,31 @@
+name: Release
+
+# A release is a promise about the four public surfaces named in CONTRIBUTING.md: engine signatures,
+# data/schema contracts, lesson ids, and CLI report shape. Hence the gate: a version-bumping release
+# must have a populated Unreleased section, so CHANGELOG.md cannot drift from the tags.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-env
+      - name: CHANGELOG has content for this version
+        run: python tools/check_release_notes.py
+      - name: Full test suite
+        run: python -m pytest -q
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: .release-notes.md
+          generate_release_notes: true

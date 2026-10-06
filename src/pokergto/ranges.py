@@ -80,7 +80,8 @@ class Range:
     @classmethod
     def from_classes(cls, entries: Iterable[str] | Mapping[str, float]) -> Range:
         """Build from 169-class keys. A bare key means the class is fully included; a mapping value
-        is that class's *frequency*, so ``{"AKs": 0.5}`` holds half of its four combos = 2 combos."""
+        is that class's *frequency*, so ``{"AKs": 0.5}`` holds half of its four combos = 2 combos.
+        """
         weights = np.zeros(1326, dtype=np.float64)
         items: Iterable[Any]
         if isinstance(entries, Mapping):
@@ -107,7 +108,9 @@ class Range:
         return float(self.weights.sum())
 
     def weight(self, first: Card, second: Card) -> float:
-        position = _COMBO_POSITION.get((min(first.index, second.index), max(first.index, second.index)))
+        position = _COMBO_POSITION.get(
+            (min(first.index, second.index), max(first.index, second.index))
+        )
         if position is None:
             raise InputError(f"{first}{second} is not a canonical combo")
         return float(self.weights[position])
@@ -123,7 +126,8 @@ class Range:
 
     def frequency_map(self) -> dict[str, float]:
         """Class -> frequency in [0,1] relative to that class's own combo count. This is what a
-        13x13 chart cell holds, and what a solver's strategy vector holds."""
+        13x13 chart cell holds, and what a solver's strategy vector holds.
+        """
         out: dict[str, float] = {}
         for key, positions in _CLASS_POSITIONS.items():
             total = combos_for_class(key)
@@ -151,7 +155,8 @@ class Range:
 
     def union(self, other: Range) -> Range:
         """Element-wise max: 'in either range'. Two ranges each holding one combo of AKs do not
-        become two combos of AKs, which is why this is max and not add."""
+        become two combos of AKs, which is why this is max and not add.
+        """
         return Range(np.maximum(self.weights, other.weights))
 
     def intersect(self, other: Range) -> Range:
@@ -172,7 +177,8 @@ class Range:
 
     def with_removed(self, *cards: Card) -> Range:
         """Card removal, expressed the only way that is safe: zero out combos that contain a
-        specified card. A blocker claim that skips this step is arithmetic, not opinion."""
+        specified card. A blocker claim that skips this step is arithmetic, not opinion.
+        """
         gone = {c.index for c in cards}
         weights = self.weights.copy()
         for position, (first, second) in enumerate(ALL_COMBOS):
@@ -202,7 +208,8 @@ class Range:
 
 def from_chart(artifact: Mapping[str, Any]) -> Range:
     """``data/gen/ranges/*.json`` -> Range. Generated charts carry combo-weighted entries plus the
-    ``cell_combos`` table so this function never has to trust a hand-typed count."""
+    ``cell_combos`` table so this function never has to trust a hand-typed count.
+    """
     weights = np.zeros(1326, dtype=np.float64)
     orientation = artifact.get("orientation")
     if orientation != "akqjt98765432-desc-diagonal-pairs-upper-suited":
@@ -213,14 +220,17 @@ def from_chart(artifact: Mapping[str, Any]) -> Range:
         declared = artifact.get("cell_combos", {}).get(key)
         expected = combos_for_class(key)
         if declared is not None and declared != expected:
-            raise InputError(f"chart {artifact.get('id')} declares {declared} combos for {key}, expected {expected}")
+            raise InputError(
+                f"chart {artifact.get('id')} declares {declared} combos for {key}, expected {expected}"
+            )
         weights[_CLASS_POSITIONS[key]] = float(frequency) * expected
     return Range(weights)
 
 
 def to_chart_payload(rng: Range, *, digits: int = 6) -> dict[str, float]:
     """Class -> frequency, rounded for artifact writing. Rounding is centralised here so every
-    generator formats numbers identically (ADR-0001 determinism)."""
+    generator formats numbers identically (ADR-0001 determinism).
+    """
     return {key: round(value, digits) for key, value in rng.frequency_map().items() if value > 0.0}
 
 

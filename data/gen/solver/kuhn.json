@@ -91,6 +91,9 @@
   "config": {
     "game": "kuhn",
     "measure_every": 500,
+    "parameters": {
+      "ante": 1.0
+    },
     "tree": {
       "deals": 6,
       "decision_nodes": 4,

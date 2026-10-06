@@ -1,0 +1,41 @@
+version: 2
+
+# Three ecosystems, grouped so the review queue stays readable. The engine deliberately has no
+# optional runtime dependency here beyond numpy/PyYAML/jsonschema: see pyproject.toml.
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+    groups:
+      python-dev:
+        patterns:
+          - "pytest*"
+          - "ruff"
+          - "mypy"
+          - "pre-commit"
+          - "mkdocs*"
+          - "pymdown-extensions"
+    commit-message:
+      prefix: chore(ci)
+
+  - package-ecosystem: npm
+    directory: /trainer
+    schedule:
+      interval: weekly
+      day: sunday
+    groups:
+      trainer-build:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: chore(trainer)
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: sunday
+    commit-message:
+      prefix: chore(workflows)

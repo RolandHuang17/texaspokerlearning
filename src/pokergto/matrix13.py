@@ -19,6 +19,7 @@ pins that, because an orientation bug in a chart is invisible to the eye and cat
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any, Final
 
 import numpy as np
@@ -97,7 +98,7 @@ class Grid13:
         return grid
 
     @classmethod
-    def from_chart(cls, artifact: dict[str, Any]) -> Grid13:
+    def from_chart(cls, artifact: Mapping[str, Any]) -> Grid13:
         if artifact.get("orientation") != ORIENTATION:
             raise InputError(
                 f"chart {artifact.get('id')!r} has orientation {artifact.get('orientation')!r}, "
@@ -150,7 +151,8 @@ class Grid13:
 
     def to_chart(self, *, digits: int = 6) -> dict[str, Any]:
         """The payload half of a ``range_chart`` artifact, with combo counts taken from the module
-        constants rather than trusted from a caller."""
+        constants rather than trusted from a caller.
+        """
         return {
             "orientation": ORIENTATION,
             "rows": list(AXIS),
@@ -158,15 +160,17 @@ class Grid13:
             "cell_combos": {
                 class_for_cell(i, j): int(CELL_COMBOS[i, j]) for i in range(13) for j in range(13)
             },
-            "weights": {
-                key: round(value, digits) for key, value in sorted(self.classes().items())
-            },
+            "weights": {key: round(value, digits) for key, value in sorted(self.classes().items())},
         }
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Grid13):
             return NotImplemented
         return bool(np.allclose(self.values, other.values))
+
+    # Explicitly unhashable: the grid wraps a mutable numpy array, so Python's default
+    # "eq without hash" suppression is the correct behaviour and stating it here says so.
+    __hash__ = None  # type: ignore[assignment]
 
     def __repr__(self) -> str:
         return f"Grid13(combos={self.combos():.3f}, classes={len(self.classes())})"

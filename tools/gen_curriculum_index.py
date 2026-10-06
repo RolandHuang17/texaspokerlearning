@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+
 from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
 
 bootstrap_path()
@@ -28,7 +29,9 @@ from pokergto.registry import CurriculumRegistry, load_registry  # noqa: E402
 MAX_UNAUTHORED_LISTING = 20
 
 
-def build_index(registry: CurriculumRegistry, locale: str, *, extra_counts: dict[str, int]) -> dict[str, Any]:
+def build_index(
+    registry: CurriculumRegistry, locale: str, *, extra_counts: dict[str, int]
+) -> dict[str, Any]:
     chapters = []
     for chapter in registry.chapters:
         lessons = []
@@ -56,9 +59,7 @@ def build_index(registry: CurriculumRegistry, locale: str, *, extra_counts: dict
                 "slug": chapter.slug,
                 "title": dict(chapter.title),
                 "summary": dict(chapter.summary),
-                "scenario": [
-                    tag for lesson in chapter.lessons for tag in lesson.scenario
-                ],
+                "scenario": [tag for lesson in chapter.lessons for tag in lesson.scenario],
                 "lessons": lessons,
             }
         )
@@ -78,7 +79,8 @@ def build_nav(registry: CurriculumRegistry, locale: str) -> list[dict[str, Any]]
     for chapter in registry.chapters:
         entry: dict[str, Any] = {}
         entry[f"{chapter.id} {chapter.title[locale]}"] = [
-            {lesson.title[locale]: f"{locale}/{chapter.slug}/{lesson.slug}.md"} for lesson in chapter.lessons
+            {lesson.title[locale]: f"{locale}/{chapter.slug}/{lesson.slug}.md"}
+            for lesson in chapter.lessons
         ]
         nav.append(entry)
     nav.append({"Development": f"{locale}/development/index.md"})
@@ -91,10 +93,16 @@ def report_unauthored(registry: CurriculumRegistry, docs_root: Path) -> list[str
     for key, values in sorted(orphans.items()):
         if values:
             shown = ", ".join(values[:MAX_UNAUTHORED_LISTING])
-            more = f" (+{len(values) - MAX_UNAUTHORED_LISTING} more)" if len(values) > MAX_UNAUTHORED_LISTING else ""
+            more = (
+                f" (+{len(values) - MAX_UNAUTHORED_LISTING} more)"
+                if len(values) > MAX_UNAUTHORED_LISTING
+                else ""
+            )
             lines.append(f"{key}: {shown}{more}")
     for lesson_id, prereq in registry.unresolved_prerequisites():
-        lines.append(f"dangling prereq: lesson {lesson_id} requires {prereq}, which is not registered")
+        lines.append(
+            f"dangling prereq: lesson {lesson_id} requires {prereq}, which is not registered"
+        )
     for clash in registry.duplicate_paths():
         lines.append(f"path clash: {clash}")
     return lines
@@ -132,7 +140,11 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     for locale in ("en", "zh"):
-        write_artifact(args.out / f"index.{locale}.json", build_index(registry, locale, extra_counts=counts), schema="index")
+        write_artifact(
+            args.out / f"index.{locale}.json",
+            build_index(registry, locale, extra_counts=counts),
+            schema="index",
+        )
         nav_path = args.out / f"nav.{locale}.yml"
         nav_path.parent.mkdir(parents=True, exist_ok=True)
         nav_path.write_text(

@@ -21,6 +21,11 @@
       "kind": "game_value_closed_form",
       "pass": true,
       "threshold": 0.005
+    },
+    {
+      "detail": "every cited solver run passed its own assertions in solver/proofs.py",
+      "kind": "frequency_bounds",
+      "pass": true
     }
   ],
   "columns": [
@@ -93,25 +98,11 @@
   },
   "rows": [
     {
-      "algebra_bluff_share": 0.2,
-      "algebra_mdf": 0.75,
-      "algebra_value": 0.125,
-      "all_gates_passed": true,
-      "artifact": "data/gen/solver/toy_1street_0p333333333333.json",
-      "bluff_gap": 3.008e-05,
-      "defense_gap": 0.000122,
-      "exploitability": 1.409e-05,
-      "size_label": "0.3333x pot",
-      "solved_bluff_share": 0.20003,
-      "solved_defense": 0.750122,
-      "solved_value": 0.125
-    },
-    {
       "algebra_bluff_share": 0.25,
       "algebra_mdf": 0.666667,
       "algebra_value": 0.166667,
       "all_gates_passed": true,
-      "artifact": "data/gen/solver/toy_1street_0p5.json",
+      "artifact": "data/gen/solver/toy_1street_half_pot.json",
       "bluff_gap": 3.19e-06,
       "defense_gap": 1.33e-06,
       "exploitability": 9.3e-07,
@@ -121,11 +112,25 @@
       "solved_value": 0.166667
     },
     {
+      "algebra_bluff_share": 0.2,
+      "algebra_mdf": 0.75,
+      "algebra_value": 0.125,
+      "all_gates_passed": true,
+      "artifact": "data/gen/solver/toy_1street_one_third.json",
+      "bluff_gap": 3.008e-05,
+      "defense_gap": 0.000122,
+      "exploitability": 1.409e-05,
+      "size_label": "0.3333x pot",
+      "solved_bluff_share": 0.20003,
+      "solved_defense": 0.750122,
+      "solved_value": 0.125
+    },
+    {
       "algebra_bluff_share": 0.333333,
       "algebra_mdf": 0.5,
       "algebra_value": 0.25,
       "all_gates_passed": true,
-      "artifact": "data/gen/solver/toy_1street_1.json",
+      "artifact": "data/gen/solver/toy_1street_pot.json",
       "bluff_gap": 3.244e-05,
       "defense_gap": 0.0001,
       "exploitability": 4.332e-05,

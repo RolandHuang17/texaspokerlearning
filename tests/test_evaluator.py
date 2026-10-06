@@ -173,7 +173,9 @@ def test_all_five_card_hands_match_reference() -> None:
                             mismatches += 1
     assert mismatches == 0
     for category, expected in EXPECTED_COUNTS.items():
-        assert counts[int(category)] == expected, f"{category.name}: {counts[int(category)]} != {expected}"
+        assert counts[int(category)] == expected, (
+            f"{category.name}: {counts[int(category)]} != {expected}"
+        )
 
 
 @pytest.mark.slow
@@ -203,7 +205,9 @@ def test_class_key_is_symmetric_and_suit_neutral() -> None:
 
 
 def test_combos_enumeration_covers_the_deck_exactly() -> None:
-    keys = Counter(class_key(Card.from_index(a), Card.from_index(b)) for a, b in combinations(range(52), 2))
+    keys = Counter(
+        class_key(Card.from_index(a), Card.from_index(b)) for a, b in combinations(range(52), 2)
+    )
     assert sum(keys.values()) == 1326
     assert len(keys) == 169
     assert keys["AA"] == 6 and keys["AKs"] == 4 and keys["AKo"] == 12

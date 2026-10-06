@@ -21,10 +21,9 @@ most persuasive arithmetic in tournament poker.
 
 from __future__ import annotations
 
-import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from functools import lru_cache
-from typing import Sequence
+from functools import cache
 
 from .errors import InputError
 
@@ -42,7 +41,8 @@ class IcmResult:
     @property
     def icm_gap(self) -> tuple[float, ...]:
         """``expected_value / prize_pool - chip_share``. Negative for short stacks and positive for
-        big ones: this *is* the bubble, expressed as a number. Chapter 12-04 builds from it."""
+        big ones: this *is* the bubble, expressed as a number. Chapter 12-04 builds from it.
+        """
         if self.prize_pool <= 0:
             return tuple(0.0 for _ in self.expected_value)
         return tuple(
@@ -51,7 +51,9 @@ class IcmResult:
         )
 
 
-def _validate(chips: Sequence[int], payouts: Sequence[float]) -> tuple[tuple[int, ...], tuple[float, ...]]:
+def _validate(
+    chips: Sequence[int], payouts: Sequence[float]
+) -> tuple[tuple[int, ...], tuple[float, ...]]:
     stack = tuple(int(c) for c in chips)
     money = tuple(float(p) for p in payouts)
     if len(stack) < 2:
@@ -74,7 +76,7 @@ def icm_expected_value(chips: Sequence[int], payouts: Sequence[float]) -> tuple[
     # Pad the prize list with zeros so the recursion has one shape to handle.
     prizes = money + (0.0,) * (n - len(money))
 
-    @lru_cache(maxsize=None)
+    @cache
     def solve(remaining: tuple[int, ...], prize_index: int) -> tuple[float, ...]:
         if not remaining:
             return tuple(0.0 for _ in range(n))
@@ -115,7 +117,8 @@ def icm(chips: Sequence[int], payouts: Sequence[float]) -> IcmResult:
 
 def icm_equity(chips: Sequence[int], payouts: Sequence[float], index: int) -> float:
     """One player's expected share of the prize pool. The quantity a call or fold is compared
-    against, and the reason "I have 40% of chips but 32% of money" is a tournament lesson."""
+    against, and the reason "I have 40% of chips but 32% of money" is a tournament lesson.
+    """
     result = icm(chips, payouts)
     if result.prize_pool <= 0:
         raise InputError("an empty prize pool has no equity to compute")
@@ -212,7 +215,8 @@ def fold_or_shove_icm_cost(
 
 def bubble_factor(chip_share: float, money_share: float) -> float:
     """How much *less* a chip stack is worth in money terms. ``money_share / chip_share``; below 1 for
-    short stacks, above 1 for big ones, and the whole of bubble-play psychology in one ratio."""
+    short stacks, above 1 for big ones, and the whole of bubble-play psychology in one ratio.
+    """
     if chip_share <= 0:
         raise InputError("chip share must be positive")
     return money_share / chip_share
@@ -220,7 +224,8 @@ def bubble_factor(chip_share: float, money_share: float) -> float:
 
 def independent_chip_share(chips: Sequence[int], index: int) -> float:
     """The chip-proportion baseline ICM is measured against. Exposed as a function so a lesson can
-    plot the two curves against each other instead of describing the difference in words."""
+    plot the two curves against each other instead of describing the difference in words.
+    """
     total = sum(int(c) for c in chips)
     if total <= 0:
         raise InputError("no chips in play")

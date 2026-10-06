@@ -52,8 +52,12 @@
     }
   ],
   "config": {
-    "game": "toy_1street_0p5",
+    "game": "toy_1street_half_pot",
     "measure_every": 160,
+    "parameters": {
+      "bet_size": 0.5,
+      "pot": 1.0
+    },
     "tree": {
       "deals": 2,
       "decision_nodes": 2,
@@ -198,17 +202,17 @@
     "zh": "单街诈唬-捕手博弈：均衡频率就是 pot/(pot+bet) 与 bet/(pot+2bet)。"
   },
   "game_value_bb_per_hand": 0.1666666562,
-  "id": "solver.toy_1street_0p5",
+  "id": "solver.toy_1street_half_pot",
   "iterations": 4000,
   "peak_memory_mb": null,
-  "proof_entry": "toy_1street_0p5",
+  "proof_entry": "toy_1street_half_pot",
   "provenance": {
     "assumptions": [],
     "confidence": "high",
-    "derivation_ref": "src/pokergto/solver/proofs.py#toy_1street_0p5",
+    "derivation_ref": "src/pokergto/solver/proofs.py#toy_1street_half_pot",
     "kind": "derived",
     "license": "CC-BY-SA-4.0",
-    "solver_run": "data/gen/solver/toy_1street_0p5.json",
+    "solver_run": "data/gen/solver/toy_1street_half_pot.json",
     "upstream": null,
     "verified": true
   },

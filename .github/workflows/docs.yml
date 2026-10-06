@@ -1,0 +1,44 @@
+name: Docs build
+
+# Separate from ci.yml's docs job on purpose: this one runs on documentation-only branches so a
+# lesson edit gets a fast, targeted signal, while ci.yml's docs job keeps the full matrix honest.
+
+on:
+  pull_request:
+    paths:
+      - docs/**
+      - data/src/**
+      - data/gen/**
+      - mkdocs.yml
+      - tools/inject_doc_tables.py
+      - tools/gen_curriculum_index.py
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: mkdocs build --strict
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-env
+      - name: Generate nav the mkdocs config expects
+        run: python tools/gen_all.py --only index --skip solver
+      - name: Build
+        run: python -m mkdocs build --strict
+      - name: Internal links
+        run: python tools/check_docs_links.py
+      - name: Upload site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
+          retention-days: 7

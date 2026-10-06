@@ -18,10 +18,10 @@ Design notes that matter for teaching, not just for speed:
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Sequence
 from enum import IntEnum
 from functools import lru_cache
 from itertools import combinations
-from typing import Sequence
 
 from .cards import Card, Suit
 
@@ -144,7 +144,8 @@ def evaluate7(cards: Sequence[Card]) -> int:
 
 def evaluate7_reference(cards: Sequence[Card]) -> int:
     """The definition of the game, executed literally: the max over all C(7,5) sub-hands. Slow, and
-    the oracle the fast path is tested against."""
+    the oracle the fast path is tested against.
+    """
     if len(cards) == 5:
         return evaluate5(cards)
     if len(cards) == 6:
@@ -236,11 +237,10 @@ def category_of(score: int) -> Category:
     return Category(score >> 20)
 
 
-def showdown(
-    hand_a: Sequence[Card], hand_b: Sequence[Card], board: Sequence[Card]
-) -> int:
+def showdown(hand_a: Sequence[Card], hand_b: Sequence[Card], board: Sequence[Card]) -> int:
     """``-1`` if hand_a wins, ``1`` if hand_b wins, ``0`` if they split. Signature follows the
-    comparison convention (like ``sorted``) so that ``showdown(a,b) == -showdown(b,a)``."""
+    comparison convention (like ``sorted``) so that ``showdown(a,b) == -showdown(b,a)``.
+    """
     sa = best_score(hand_a, board)
     sb = best_score(hand_b, board)
     if sa == sb:
@@ -263,7 +263,8 @@ def split_pot(
 
 def describe(score: int, *, lang: str = "en") -> str:
     """Human-readable hand, e.g. ``two pair, AA77`` / ``两对 A7``. Used by CLI reports, never by
-    comparisons — those use the integer."""
+    comparisons — those use the integer.
+    """
     category = category_of(score)
     slots = [(score >> shift) & 0xF for shift in (16, 12, 8, 4, 0)]
     zh = lang == "zh"

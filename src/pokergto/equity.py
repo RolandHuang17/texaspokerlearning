@@ -23,9 +23,10 @@ Cost is the other half of the design:
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from itertools import combinations
-from typing import Literal, Sequence
+from typing import Literal
 
 import numpy as np
 
@@ -50,7 +51,8 @@ _Z95 = 1.959963984540054
 @dataclass(frozen=True, slots=True)
 class EquityResult:
     """Share-of-pot equity, decomposed. ``equity == wins + ties/2`` is asserted, not assumed:
-    split pots are exactly where hand strength and equity part company."""
+    split pots are exactly where hand strength and equity part company.
+    """
 
     equity: float
     wins: float
@@ -75,7 +77,8 @@ class EquityResult:
     @property
     def error_bar_95(self) -> tuple[float, float]:
         """``equity ± 1.96·stderr``. For an exact result the interval is the point itself, and
-        returning it that way is better than returning a misleading zero."""
+        returning it that way is better than returning a misleading zero.
+        """
         if self.exact:
             return (self.equity, self.equity)
         margin = _Z95 * self.stderr
@@ -84,7 +87,7 @@ class EquityResult:
     def __str__(self) -> str:
         mode = "exact" if self.exact else f"mc(n={self.iterations},seed={self.seed})"
         error = "" if self.exact else f" +/-{100 * _Z95 * self.stderr:.2f}%"
-        return f"{100 * self.equity:.2f}% [W{100*self.wins:.1f}/T{100*self.ties:.1f}] ({mode}){error}"
+        return f"{100 * self.equity:.2f}% [W{100 * self.wins:.1f}/T{100 * self.ties:.1f}] ({mode}){error}"
 
 
 def _remaining_cards(used: Sequence[Card]) -> list[Card]:
@@ -117,11 +120,14 @@ def _combo_arrays(rng_positions: list[int], weights: np.ndarray) -> tuple[np.nda
 
 def _conflict_mask(hero_combos: np.ndarray, villain_combos: np.ndarray) -> np.ndarray:
     """Vectorised 'these two hands share a physical card'. Written as four equality tests rather
-    than a Python set loop because real ranges make that loop 1.7M iterations."""
+    than a Python set loop because real ranges make that loop 1.7M iterations.
+    """
     conflicts = np.zeros((len(hero_combos), len(villain_combos)), dtype=bool)
     for hero_slot in range(2):
         for villain_slot in range(2):
-            conflicts |= hero_combos[:, hero_slot][:, None] == villain_combos[:, villain_slot][None, :]
+            conflicts |= (
+                hero_combos[:, hero_slot][:, None] == villain_combos[:, villain_slot][None, :]
+            )
     return conflicts
 
 
@@ -152,7 +158,9 @@ def range_equity(
     hero_positions = [i for i, w in enumerate(hero.weights) if w > 0]
     villain_positions = [j for j, w in enumerate(villain.weights) if w > 0]
     hero_combos, hero_weights = _combo_arrays(hero_positions, hero.weights[hero_positions])
-    villain_combos, villain_weights = _combo_arrays(villain_positions, villain.weights[villain_positions])
+    villain_combos, villain_weights = _combo_arrays(
+        villain_positions, villain.weights[villain_positions]
+    )
 
     allowed = ~_conflict_mask(hero_combos, villain_combos)
     joint = hero_weights[:, None] * villain_weights[None, :]
@@ -168,7 +176,10 @@ def range_equity(
         # the boards that cannot contain them: C(48,5) = 1,712,304 preflop instead of C(52,5) =
         # 2,598,960. That exclusion is the difference between an affordable exact answer and one that
         # silently becomes Monte Carlo, which is why it is worth the special case.
-        hero_cards = (Card.from_index(int(hero_combos[0][0])), Card.from_index(int(hero_combos[0][1])))
+        hero_cards = (
+            Card.from_index(int(hero_combos[0][0])),
+            Card.from_index(int(hero_combos[0][1])),
+        )
         villain_cards = (
             Card.from_index(int(villain_combos[0][0])),
             Card.from_index(int(villain_combos[0][1])),
@@ -242,9 +253,13 @@ def range_equity(
         runout = rng.choice(pool, size=need, replace=False)
         full_board = tuple(board) + tuple(Card.from_index(int(c)) for c in runout)
         difference = best_score(
-            (Card.from_index(int(hero_combos[i][0])), Card.from_index(int(hero_combos[i][1]))), full_board
+            (Card.from_index(int(hero_combos[i][0])), Card.from_index(int(hero_combos[i][1]))),
+            full_board,
         ) - best_score(
-            (Card.from_index(int(villain_combos[j][0])), Card.from_index(int(villain_combos[j][1]))),
+            (
+                Card.from_index(int(villain_combos[j][0])),
+                Card.from_index(int(villain_combos[j][1])),
+            ),
             full_board,
         )
         if difference > 0:
@@ -278,7 +293,8 @@ def hand_equity(
     seed: int = 0,
 ) -> EquityResult:
     """Two specific hands. With a flop this is 1,081 runouts and exact is cheap, so exact is what
-    you get; preflop it is 2.6M and ``auto`` falls back to Monte Carlo and *says so* on the result."""
+    you get; preflop it is 2.6M and ``auto`` falls back to Monte Carlo and *says so* on the result.
+    """
     return range_equity(
         _single_combo_range(hero),
         _single_combo_range(villain),
@@ -304,9 +320,12 @@ def _single_combo_range(cards: Sequence[Card]) -> Range:
     raise InputError(f"{cards[0]}{cards[1]} is not a valid combo")  # pragma: no cover
 
 
-def vs_random(range_: Range, board: Board = (), *, iterations: int = 20_000, seed: int = 0) -> EquityResult:
+def vs_random(
+    range_: Range, board: Board = (), *, iterations: int = 20_000, seed: int = 0
+) -> EquityResult:
     """Equity against one *random* hand. This is the primitive behind "range advantage": the number
-    that says whether a board favours one distribution over another, computed rather than asserted."""
+    that says whether a board favours one distribution over another, computed rather than asserted.
+    """
     return range_equity(range_, Range.full(), board, mode="mc", iterations=iterations, seed=seed)
 
 

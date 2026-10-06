@@ -42,6 +42,16 @@ from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
 bootstrap_path()
 
 DATA_SRC = REPO_ROOT / "data" / "src"
+
+#: Files in ``data/src`` that are structure, not strategy claims: a term or a lesson id states no
+#: numerical poker claim, so requiring a provenance block on them would teach contributors to paste
+#: boilerplate instead of thinking about origins.
+NON_STRATEGY_FILES = {
+    "glossary.yaml",
+    "curriculum.yaml",
+    "licensing_manifest.yaml",
+    "board_taxonomy.yaml",
+}
 DATA_GEN = REPO_ROOT / "data" / "gen"
 DOCS = REPO_ROOT / "docs"
 MANIFEST = DATA_SRC / "licensing_manifest.yaml"
@@ -66,7 +76,14 @@ PROPRIETARY_MARKERS = (
 
 PROVENANCE_KEYS = {"kind", "verified", "confidence", "license", "upstream"}
 KINDS = {"derived", "reference", "external"}
-ACCEPTED_LICENSES = {"CC0-1.0", "CC-BY-4.0", "CC-BY-SA-4.0", "MIT", "public-domain-math", "fair-use-commentary"}
+ACCEPTED_LICENSES = {
+    "CC0-1.0",
+    "CC-BY-4.0",
+    "CC-BY-SA-4.0",
+    "MIT",
+    "public-domain-math",
+    "fair-use-commentary",
+}
 
 ARTIFACT_MARKER = re.compile(r"<!--\s*provenance:\s*kind=(\w+)\s+verified=(true|false)\s*-->")
 
@@ -185,9 +202,17 @@ def main(argv: list[str] | None = None) -> int:
 
     if DATA_SRC.exists():
         for file, payload in _iter_yaml(DATA_SRC):
-            if file.name == "licensing_manifest.yaml" or file.name == "curriculum.yaml":
+            if file.name in NON_STRATEGY_FILES:
                 continue
             records = payload if isinstance(payload, list) else [payload]
+            if isinstance(payload, dict) and not any(
+                "provenance" in item for item in records if isinstance(item, dict)
+            ):
+                # A top-level mapping whose records live under a key ("terms:", "spots:") is a
+                # container, not a claim: descend into the list rather than demanding provenance of
+                # the file as a whole.
+                nested = [value for value in payload.values() if isinstance(value, list)]
+                records = nested[0] if len(nested) == 1 else records
             for record in records:
                 if not isinstance(record, dict):
                     continue
@@ -212,7 +237,10 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             checked += 1
             _check_provenance_block(provenance, str(file.relative_to(REPO_ROOT)), problems)
-            if provenance.get("kind") == "external" and str(provenance.get("upstream")) not in upstreams:
+            if (
+                provenance.get("kind") == "external"
+                and str(provenance.get("upstream")) not in upstreams
+            ):
                 problems.append(
                     f"{file.relative_to(REPO_ROOT)}: external upstream "
                     f"{provenance.get('upstream')!r} is not recorded in licensing_manifest.yaml"
@@ -245,7 +273,10 @@ def main(argv: list[str] | None = None) -> int:
         if DATA_GEN.exists():
             for file in DATA_GEN.rglob("*.json"):
                 payload = json.loads(file.read_text(encoding="utf-8"))
-                if isinstance(payload, dict) and payload.get("provenance", {}).get("verified") is False:
+                if (
+                    isinstance(payload, dict)
+                    and payload.get("provenance", {}).get("verified") is False
+                ):
                     unverified += 1
         if unverified:
             fail(f"--strict: {unverified} artifacts are still unverified")

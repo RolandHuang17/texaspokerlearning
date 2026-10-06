@@ -1,4 +1,4 @@
-"""Artifact I/O: the only place that decides how a number is written down.
+r"""Artifact I/O: the only place that decides how a number is written down.
 
 Determinism is a contract, not a preference (ADR-0001). Two runs on two machines must produce
 byte-identical JSON, otherwise ``tools/gen_all.py --check`` is noise and every solver tweak looks
@@ -19,11 +19,13 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 from jsonschema import Draft202012Validator
+from referencing import Registry
 
 from .errors import ProvenanceError, SchemaDriftError
 
@@ -55,7 +57,10 @@ def _prepare(payload: Any, *, digits: int = FLOAT_DIGITS) -> Any:
 
 def dumps(payload: Any, *, digits: int = FLOAT_DIGITS) -> str:
     """Canonical JSON text. The single serialisation path every generator must use."""
-    return json.dumps(_prepare(payload, digits=digits), ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    return (
+        json.dumps(_prepare(payload, digits=digits), ensure_ascii=False, indent=2, sort_keys=True)
+        + "\n"
+    )
 
 
 def dump_bytes(payload: Any) -> bytes:
@@ -82,7 +87,7 @@ def write_artifact(path: Path, payload: Mapping[str, Any], *, schema: str | None
 
 
 def read_artifact(path: Path, *, schema: str | None = None) -> dict[str, Any]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data: dict[str, Any] = json.loads(path.read_text(encoding="utf-8"))
     if schema is not None:
         validate_artifact(data, schema)
     return data
@@ -98,7 +103,7 @@ def load_schema(name: str) -> dict[str, Any]:
     return _SCHEMA_CACHE[key]
 
 
-def _registry():
+def _registry() -> Registry:
     """Local registry over ``data/schema`` so cross-file ``$ref`` resolves without network access.
 
     ``$ref: "common.schema.json#/$defs/provenance"`` is resolved relative to the referring schema's
@@ -106,7 +111,6 @@ def _registry():
     a docs build with no network must still validate, and a validator that phoned home would be both
     slow and a privacy problem (see SECURITY.md).
     """
-    from referencing import Registry
     from referencing.jsonschema import DRAFT202012
 
     resources = []
@@ -169,8 +173,14 @@ class Provenance:
 
     @classmethod
     def derived(
-        cls, derivation_ref: str, *, solver_run: str | None = None, verified: bool = True,
-        confidence: str = "high", assumptions: Sequence[str] = (), note: dict[str, str] | None = None,
+        cls,
+        derivation_ref: str,
+        *,
+        solver_run: str | None = None,
+        verified: bool = True,
+        confidence: str = "high",
+        assumptions: Sequence[str] = (),
+        note: dict[str, str] | None = None,
     ) -> Provenance:
         return cls(
             kind="derived",
@@ -184,7 +194,10 @@ class Provenance:
 
     @classmethod
     def reference(
-        cls, note: dict[str, str], *, confidence: str = "medium",
+        cls,
+        note: dict[str, str],
+        *,
+        confidence: str = "medium",
         assumptions: Sequence[str] = (),
     ) -> Provenance:
         return cls(
@@ -196,14 +209,22 @@ class Provenance:
         )
 
     @classmethod
-    def external(cls, upstream: str, license: str, note: dict[str, str], *, confidence: str = "medium") -> Provenance:
+    def external(
+        cls, upstream: str, license: str, note: dict[str, str], *, confidence: str = "medium"
+    ) -> Provenance:
         return cls(
-            kind="external", upstream=upstream, license=license, note=note,
-            confidence=confidence, verified=False,
+            kind="external",
+            upstream=upstream,
+            license=license,
+            note=note,
+            confidence=confidence,
+            verified=False,
         )
 
 
-def unverified_claim(zh: str, en: str, why_zh: str, why_en: str, path_zh: str, path_en: str) -> dict[str, Any]:
+def unverified_claim(
+    zh: str, en: str, why_zh: str, why_en: str, path_zh: str, path_en: str
+) -> dict[str, Any]:
     """A claim that is honest about not being proven yet. Rendered as a badge in both languages."""
     return {
         "claim": {"zh": zh, "en": en},
@@ -213,7 +234,9 @@ def unverified_claim(zh: str, en: str, why_zh: str, why_en: str, path_zh: str, p
     }
 
 
-def manifest_entry(kind: str, path: Path, relative_to: Path | None = None, *, schema: str | None = None) -> dict[str, Any]:
+def manifest_entry(
+    kind: str, path: Path, relative_to: Path | None = None, *, schema: str | None = None
+) -> dict[str, Any]:
     target = path.relative_to(relative_to or GEN_DIR).as_posix()
     payload = {
         "kind": kind,
@@ -267,7 +290,6 @@ def write_manifest(
 def _numpy_version() -> str | None:
     try:
         import numpy
-
-        return numpy.__version__
     except Exception:  # pragma: no cover - numpy is a hard dependency
         return None
+    return numpy.__version__

@@ -118,7 +118,9 @@ def _expand(token: str) -> list[tuple[str, float]]:
     if run_target is not None:
         end_key = f"{high}{_run_target_rank(run_target)}{suffix}"
         if end_key not in candidates:
-            raise NotationError(f"{token!r}: cannot run from {low} to {_run_target_rank(run_target)}")
+            raise NotationError(
+                f"{token!r}: cannot run from {low} to {_run_target_rank(run_target)}"
+            )
         end_position = candidates.index(end_key)
         # Both directions are accepted ("A9s-A5s" and "A5s-A9s" mean the same run) because tools in
         # the wild disagree. A notation that silently produced a different range would be worse.
@@ -160,7 +162,8 @@ def parse(spec: str) -> Range:
 
 def expand(spec: str) -> list[tuple[str, int]]:
     """Class keys with their combo counts, in canonical 169 order. The quantity a lesson calls
-    'how many combos do I have for this line'."""
+    'how many combos do I have for this line'.
+    """
     rng = parse(spec)
     return sorted(
         ((key, combos_for_class(key)) for key in rng.frequency_map()),
@@ -219,7 +222,9 @@ def to_spec(rng: Range, *, lossy: bool = False) -> str:
         # dialect here would break the one job a notation has: round-tripping.
         if frequency != 1.0:
             if shape == "pair":
-                parts.extend(f"{p}{p}:{frequency:g}" for p in sorted(partners, key=_RANK_INDEX.__getitem__))
+                parts.extend(
+                    f"{p}{p}:{frequency:g}" for p in sorted(partners, key=_RANK_INDEX.__getitem__)
+                )
             else:
                 parts.extend(
                     f"{high}{p}{shape}:{frequency:g}"

@@ -15,7 +15,8 @@ Three hazards live here, and each has a deliberate answer:
 from __future__ import annotations
 
 import unicodedata
-from typing import Any, Mapping, Sequence
+from collections.abc import Mapping, Sequence
+from typing import Any, cast
 
 from .matrix13 import AXIS, ORIENTATION, Grid13
 
@@ -63,16 +64,26 @@ def markdown_table(
     columns = len(headers)
     align = list(align or ["left"] * columns)
     grid = [list(headers)] + [list(row) for row in rows]
-    widths = [max(display_width(str(cell)) for cell in column) for column in zip(*grid, strict=False)]
+    widths = [
+        max(display_width(str(cell)) for cell in column) for column in zip(*grid, strict=False)
+    ]
     lines = [
-        "| " + " | ".join(pad(str(headers[i]), widths[i], align=align[i]) for i in range(columns)) + " |",
-        "|" + "|".join(
+        "| "
+        + " | ".join(pad(str(headers[i]), widths[i], align=align[i]) for i in range(columns))
+        + " |",
+        "|"
+        + "|".join(
             ("---:" if align[i] == "right" else ":---:" if align[i] == "center" else "---")
             for i in range(columns)
-        ) + "|",
+        )
+        + "|",
     ]
     for row in rows:
-        lines.append("| " + " | ".join(pad(str(row[i]), widths[i], align=align[i]) for i in range(columns)) + " |")
+        lines.append(
+            "| "
+            + " | ".join(pad(str(row[i]), widths[i], align=align[i]) for i in range(columns))
+            + " |"
+        )
     return "\n".join(lines)
 
 
@@ -96,39 +107,47 @@ def table_from_artifact(artifact: Mapping[str, Any], *, locale: str = "en") -> s
 
 
 def _format_cell(cell: Any, column: Mapping[str, Any], *, locale: str) -> str:
-    """Apply the *column's* unit to a bare number as well as to a ``{value, unit}`` object.
+    """Render one table cell.
 
-    Generated tables carry plain floats for compactness; the unit lives on the column. Formatting
-    lives here so a percentage cannot be printed as ``0.666667`` in one language and ``66.7%`` in the
-    other.
+    The column carries the unit when the row carries a bare number, because generated tables store
+    plain floats for compactness and the unit lives in the column definition. Handling a string cell
+    *before* the numeric path matters: without that order, a text column like ``size_label`` reaches
+    the float formatting and silently renders as ``0``.
     """
-    if isinstance(cell, bool):
-        return ("yes" if cell else "no") if locale == "en" else ("是" if cell else "否")
     if isinstance(cell, Mapping) and "value" in cell:
         unit = str(cell.get("unit", column.get("unit", "dimensionless")))
-        value = float(cell["value"])
-    elif isinstance(cell, (int, float)):
-        unit = str(column.get("unit", "dimensionless"))
-        value = float(cell)
-    else:
-        unit = ""
-        value = 0.0
-    digits = int(column.get("digits", 2))
+        value = float(cast(float, cell["value"]))
+        return _format_number(value, unit, int(column.get("digits", 2)))
+    if isinstance(cell, bool):
+        return ("yes" if cell else "no") if locale == "en" else ("是" if cell else "否")
+    if cell is None:
+        return "-"
+    if isinstance(cell, str):
+        return cell
+    if isinstance(cell, (int, float)):
+        return _format_number(
+            float(cell), str(column.get("unit", "dimensionless")), int(column.get("digits", 2))
+        )
+    return str(cell)
+
+
+def _format_number(value: float, unit: str, digits: int) -> str:
     if unit == "probability":
         return f"{100 * value:.{digits}f}%"
     if unit == "percent":
         return f"{value:.{digits}f}%"
     if unit == "ratio":
         return f"{value:.{digits}g} : 1"
-    suffix = {"bb": " bb", "bb_per_100": " bb/100", "combos": " combos", "hands": " hands", "chips_per_hand": " chips"}.get(unit, "")
-    if unit or suffix:
-        return f"{value:.{digits}f}{suffix}"
-    if isinstance(cell, str):
-        return cell
-    return f"{value:.{digits}g}"
-    if cell is None:
-        return "-"
-    return str(cell)
+    suffix = {
+        "bb": " bb",
+        "bb_per_100": " bb/100",
+        "combos": " combos",
+        "hands": " hands",
+        "chips_per_hand": " chips",
+    }.get(unit, "")
+    if unit in ("dimensionless", "") and not suffix:
+        return f"{value:g}"
+    return f"{value:.{digits}f}{suffix}"
 
 
 def grid_to_text(grid: Grid13, *, locale: str = "en") -> str:
@@ -165,9 +184,7 @@ def grid_to_svg(grid: Grid13, *, cell: int = 34, gap: int = 2, locale: str = "en
             shade = _shade(frequency)
             x = 40 + col * (cell + gap)
             y = 40 + row * (cell + gap)
-            parts.append(
-                f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" fill="{shade}"/>'
-            )
+            parts.append(f'<rect x="{x}" y="{y}" width="{cell}" height="{cell}" fill="{shade}"/>')
             if frequency >= 0.01:
                 parts.append(
                     f'<text x="{x + cell / 2:.1f}" y="{y + cell / 2 + 4:.1f}" fill="#0d0d0c" '
@@ -197,6 +214,41 @@ def _shade(frequency: float) -> str:
     return _SHADES[min(len(_SHADES) - 1, int(frequency * (len(_SHADES) - 1)) + 1)]
 
 
+def chart_to_markdown(artifact: Mapping[str, Any], *, locale: str = "en") -> str:
+    """A 13x13 chart as a markdown table of frequency bands.
+
+    A table rather than an image because it must be diffable in a pull request, readable in a
+    terminal, and identical in both languages. The bands are :data:`FILL_BANDS`, and the legend line
+    states their thresholds, so a printed page explains itself.
+    """
+    from .matrix13 import AXIS, Grid13
+
+    grid = Grid13.from_chart(artifact)
+    headers = [""] + list(AXIS)
+    rows: list[list[str]] = []
+    for row, label in enumerate(AXIS):
+        cells = [label]
+        for col in range(13):
+            frequency = float(grid.values[row, col])
+            cells.append(
+                fill_for(frequency) * 2 if frequency >= 0.01 else "··" if locale == "zh" else ".."
+            )
+        rows.append(cells)
+    legend = (
+        "图例：`··` <1% · `::` 1-34% · `++` 34-67% · `##` 67-90% · `@@` >90%；"
+        "对角线为对子，上三角同花，下三角不同花。"
+        if locale == "zh"
+        else "Legend: `··` <1% · `::` 1-34% · `++` 34-67% · `##` 67-90% · `@@` >90%; "
+        "the diagonal is pairs, the upper triangle suited, the lower offsuit."
+    )
+    width = float(artifact.get("range_percentage", grid.range_percentage()))
+    if locale == "zh":
+        stat = f"覆盖 {grid.combos():.1f} 组合 = 全 1326 的 {width:.2f}%"
+    else:
+        stat = f"{grid.combos():.1f} combos = {width:.2f}% of all 1,326"
+    return "\n\n".join([markdown_table(headers, rows, align=["center"] * 14), stat, legend])
+
+
 def provenance_block(provenance: Mapping[str, Any], *, locale: str = "en") -> str:
     """The honesty footer under every chart and table, generated from metadata.
 
@@ -208,26 +260,42 @@ def provenance_block(provenance: Mapping[str, Any], *, locale: str = "en") -> st
     verified = bool(provenance.get("verified", False))
     confidence = str(provenance.get("confidence", "medium"))
     if locale == "zh":
-        label = {"derived": "本仓库推导", "reference": "作者自建的参考范围", "external": "外部来源"}[kind]
+        label = {
+            "derived": "本仓库推导",
+            "reference": "作者自建的参考范围",
+            "external": "外部来源",
+        }[kind]
         state = "已核验" if verified else "未核验"
         note = provenance.get("note") or {}
         extra = f"：{note.get('zh')}" if note.get("zh") else ""
         return f'!!! unverified "来源：{label} · {state} · 置信度 {confidence}{extra}"\n    推导位置：`{provenance.get("derivation_ref") or provenance.get("solver_run") or provenance.get("upstream") or "未给出"}`'
-    label = {"derived": "derived in this repository", "reference": "author reference chart", "external": "external source"}[kind]
+    label = {
+        "derived": "derived in this repository",
+        "reference": "author reference chart",
+        "external": "external source",
+    }[kind]
     state = "verified" if verified else "UNVERIFIED"
     note = provenance.get("note") or {}
     extra = f": {note.get('en')}" if note.get("en") else ""
     return (
         f'!!! unverified "Provenance: {label} · {state} · confidence {confidence}{extra}"\n'
-        f'    Derived at: `{provenance.get("derivation_ref") or provenance.get("solver_run") or provenance.get("upstream") or "not stated"}`'
+        f"    Derived at: `{provenance.get('derivation_ref') or provenance.get('solver_run') or provenance.get('upstream') or 'not stated'}`"
     )
 
 
 def render_chart_artifact(
-    *, artifact_id: str, title: Mapping[str, str], grid: Grid13, provenance: Mapping[str, Any], spot: str | None = None, player: str | None = None, street: str = "n-a"
+    *,
+    artifact_id: str,
+    title: Mapping[str, str],
+    grid: Grid13,
+    provenance: Mapping[str, Any],
+    spot: str | None = None,
+    player: str | None = None,
+    street: str = "n-a",
 ) -> dict[str, Any]:
     """Assemble a ``range_chart`` payload from a Grid13, with combo counts taken from module
-    constants rather than trusting any caller."""
+    constants rather than trusting any caller.
+    """
     if grid.to_numpy().shape != (13, 13):  # pragma: no cover - Grid13 enforces this
         raise ValueError("grid must be 13x13")
     payload = grid.to_chart()

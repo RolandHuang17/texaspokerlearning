@@ -1,0 +1,11 @@
+# Every path has an owner. Two paths have a *human* owner requirement that is more than formality:
+#
+# - data/src/** carries provenance declarations, which are judgements about origin and licence.
+#   A provenance block is exactly the kind of thing an automated merge would make unsound.
+# - data/schema/** is the public contract the version number promises to keep.
+
+* @RolandHuang17
+/data/src/** @RolandHuang17
+/data/schema/** @RolandHuang17
+/docs/zh/** @RolandHuang17
+/docs/en/** @RolandHuang17

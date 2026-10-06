@@ -1,19 +1,33 @@
-"""The derivable principles, one module per idea the curriculum cites.
+"""The derivable principles the curriculum cites, one module per idea.
 
-Every function here answers a question a lesson asks in prose, and each lesson's ``derivation_ref``
-points back at the symbol that produced its numbers. That is the mechanism behind the repository's
-central claim: nothing in the docs is asserted, because anything assertable can be recomputed.
+Every function here answers a question a lesson asks in prose, and a lesson's ``derivation_ref``
+points at the symbol that produced its numbers. That is the mechanism behind the repository's
+central claim: nothing in ``docs/`` is asserted, because anything assertable can be recomputed.
 
-The modules are deliberately *not* a strategy engine. There is no function here that says what to do
-with a hand. They compute the quantities that make a decision checkable -- whose range is ahead, what
-a board favours, which bet sizes can be justified, whether a frequency pair is balanced -- and then
-the learner, or a solver, decides. A repository that shipped "the answer" without the arithmetic would
-be a worse version of the paid tools it replaces.
+Three modules ship. They are the ones whose quantities can be computed *exactly* from the cards and
+the algebra -- combos, the evaluator, pot odds:
+
+* :mod:`pokergto.theory.frequencies` -- the two indifference conditions a mixed strategy must meet,
+  and the signed gap when it does not. This is what
+  :mod:`pokergto.solver.proofs` requires the solver to drive to zero.
+* :mod:`pokergto.theory.multiway` -- the ``1/N`` defense law, plus the assumption-free counting that
+  explains why bluffing collapses as players are added.
+* :mod:`pokergto.theory.range_advantage` -- equity advantage and nut advantage as two separate
+  numbers, because collapsing them is how "I'm ahead, so I bet big" goes wrong.
+
+Deliberately absent, and that absence is a decision rather than an omission: bet-size *governance*,
+polarisation tests, blocker EV and protection-versus-value. Each needs a solver-style answer about a
+range's future behaviour -- what the opponent folds, which tail the next card favours -- and this
+repository has no validated model of that for full hold'em (see ``adr/0002``: an unverifiable model
+would teach wrong things with the authority of code). Those ideas are taught in chapters 03 and 04 by
+derivation from the quantities that *are* computable here, and any number in those chapters that comes
+from judgement rather than arithmetic carries a ``reference`` provenance and an UNVERIFIED badge.
 """
 
 from __future__ import annotations
 
 from .frequencies import (
+    BalanceReport,
     balance_bluff_and_value,
     bluff_indifference_gap,
     defense_indifference_gap,
@@ -21,37 +35,35 @@ from .frequencies import (
     value_bluff_split,
 )
 from .multiway import (
-    bluff_value_ratio_multiway,
+    MultiwayReport,
+    bluff_value_ratio,
     continuation_fold_requirement,
+    describe,
     joint_defense,
+    per_player_defense,
+    value_and_air_combos,
     who_can_win,
 )
-from .polarization import classify_betting_range, is_polarised, polarised_vs_merged_ev
-from .protection import protection_gain, realization_penalty
-from .range_advantage import Advantage, advantage, nut_advantage, range_advantage
-from .sizing import legal_sizes, sizing_rationale
-from .blockers import blocker_report, removal_weight_delta
+from .range_advantage import Advantage, advantage, equity_advantage, is_capped, nut_advantage
 
 __all__ = [
     "Advantage",
+    "BalanceReport",
+    "MultiwayReport",
+    "advantage",
     "balance_bluff_and_value",
-    "blocker_report",
     "bluff_indifference_gap",
-    "bluff_value_ratio_multiway",
-    "classify_betting_range",
+    "bluff_value_ratio",
     "continuation_fold_requirement",
     "defense_indifference_gap",
+    "describe",
+    "equity_advantage",
+    "is_capped",
     "is_frequency_balanced",
-    "is_polarised",
     "joint_defense",
-    "legal_sizes",
     "nut_advantage",
-    "polarised_vs_merged_ev",
-    "protection_gain",
-    "range_advantage",
-    "realization_penalty",
-    "removal_weight_delta",
-    "sizing_rationale",
+    "per_player_defense",
+    "value_and_air_combos",
     "value_bluff_split",
     "who_can_win",
 ]

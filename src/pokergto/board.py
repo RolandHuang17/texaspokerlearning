@@ -19,8 +19,8 @@ declares the same predicates so the docs can render the rule next to the label.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 from .cards import Card
 from .errors import InputError
@@ -90,7 +90,8 @@ def has_flush_draw_possible(board: Sequence[Card]) -> bool:
 
 def straight_draw_possible(board: Sequence[Card]) -> bool:
     """Whether the board's ranks sit inside a five-wide window, i.e. a hand can already hold a
-    straight draw (open or gutshot)."""
+    straight draw (open or gutshot).
+    """
     values = set(rank_values(board))
     if 14 in values:
         values.add(1)
@@ -141,9 +142,16 @@ def classify(board: Sequence[Card]) -> BoardTexture:
     broadway = is_broadway(board)
     low = is_low(board)
     gap = max_gap(board)
-    dynamic = connected or (has_flush_draw_possible(board) and not monochrome) or straight_draw_possible(board)
+    dynamic = (
+        connected
+        or (has_flush_draw_possible(board) and not monochrome)
+        or straight_draw_possible(board)
+    )
 
-    parts = ["dynamic" if dynamic else "static", "monochrome" if monochrome else ("two-tone" if two_tone else "rainbow")]
+    parts = [
+        "dynamic" if dynamic else "static",
+        "monochrome" if monochrome else ("two-tone" if two_tone else "rainbow"),
+    ]
     if paired:
         parts.append("paired")
     if connected and not paired:
@@ -181,5 +189,6 @@ def rank_label(board: Sequence[Card]) -> str:
 def rank_alphabet(board: Sequence[Card]) -> str:
     """Rank-only signature, e.g. ``K73``. Groups boards sharing a rank structure across every suit
     permutation, which is how a chapter can discuss "a K-7-3 two-tone" as one object instead of a
-    thousand separate ones."""
+    thousand separate ones.
+    """
     return "".join(c.rank.char for c in board)

@@ -12,9 +12,10 @@ mirror breaks the site build, and an unregistered file is content nobody can nav
 
 from __future__ import annotations
 
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator, Mapping, Sequence
+from typing import Any
 
 import yaml
 
@@ -73,7 +74,7 @@ class Chapter:
 class CurriculumRegistry:
     """In-memory view of the spine, plus the consistency questions CI asks."""
 
-    def __init__(self, payload: Mapping[str, Any], *, default_chapter_dirs: Mapping[str, str] | None = None):
+    def __init__(self, payload: Mapping[str, Any]) -> None:
         self.schema_version: str = payload["schema_version"]
         self.engine_version: str = payload["engine_version"]
         self.lesson_template: tuple[str, ...] = tuple(payload["lesson_template"])
@@ -118,7 +119,8 @@ class CurriculumRegistry:
 
     def unresolved_prerequisites(self) -> list[tuple[str, str]]:
         """``(lesson, missing prereq)`` pairs. A dangling prerequisite is a broken learning path,
-        which for a curriculum is a correctness bug, not a style one."""
+        which for a curriculum is a correctness bug, not a style one.
+        """
         return [
             (lesson.id, prereq)
             for lesson in self.ordered_lessons()

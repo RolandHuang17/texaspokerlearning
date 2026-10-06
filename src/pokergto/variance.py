@@ -18,8 +18,8 @@ Risk of ruin for such a walk is the classical
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
 
 @dataclass(frozen=True, slots=True)
@@ -53,13 +53,16 @@ def std_per_100(stats: HandStats) -> float:
 
 def standard_error(stats: HandStats, hands: int) -> float:
     """Standard error of the *mean* after ``hands`` hands, in bb. A winrate reported without this is
-    a story, not a measurement."""
+    a story, not a measurement.
+    """
     if hands <= 0:
         raise ValueError("hands must be positive")
     return stats.std_bb / math.sqrt(hands)
 
 
-def confidence_interval_bb_per_100(stats: HandStats, hands: int, z: float = 1.959963984540054) -> tuple[float, float]:
+def confidence_interval_bb_per_100(
+    stats: HandStats, hands: int, z: float = 1.959963984540054
+) -> tuple[float, float]:
     se = standard_error(stats, hands)
     centre = bb_per_100(stats)
     margin = z * se * 100.0
@@ -111,7 +114,8 @@ def required_bankroll_bb(stats: HandStats, max_ruin_probability: float) -> float
 def kelly_fraction(stats: HandStats) -> float:
     """Continuous Kelly for a random walk: ``mean / variance``. Read it as "the fraction of the roll
     whose growth is maximal", and the reason a full-Kelly player accepts ruin probabilities that a
-    quarter-Kelly player would not."""
+    quarter-Kelly player would not.
+    """
     if stats.variance_bb == 0:
         return 0.0
     return stats.mean_bb / stats.variance_bb
@@ -142,10 +146,13 @@ def rake_adjustment(gross_bb_per_100: float, rake_pct_of_pot: float, avg_pot_bb:
     return gross_bb_per_100 - 100.0 * rake_pct_of_pot * avg_pot_bb
 
 
-def hands_for_significance(stats: HandStats, effect_bb_per_100: float, z: float = 1.959963984540054) -> int:
+def hands_for_significance(
+    stats: HandStats, effect_bb_per_100: float, z: float = 1.959963984540054
+) -> int:
     """Sample size needed to detect a difference of this size at the given confidence. Answers the
     question "how many hands before I am allowed to have an opinion", which is a frequency question
-    a learner should be able to answer for themselves."""
+    a learner should be able to answer for themselves.
+    """
     if effect_bb_per_100 == 0:
         raise ValueError("effect size must be non-zero")
     se_needed = abs(effect_bb_per_100) / (z * 100.0)

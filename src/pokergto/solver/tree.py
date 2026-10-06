@@ -22,8 +22,8 @@ and nothing more.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 import numpy as np
 
@@ -86,9 +86,12 @@ class GameTree:
 
     def validate(self) -> None:
         """Structural checks. Cheap to run, and every one of them has a failure mode that would
-        otherwise show up as a solver converging to a wrong answer."""
+        otherwise show up as a solver converging to a wrong answer.
+        """
         if abs(float(self.deal_prob.sum()) - 1.0) > 1e-9:
-            raise InvariantError(f"{self.name}: deal probabilities sum to {self.deal_prob.sum()}, not 1")
+            raise InvariantError(
+                f"{self.name}: deal probabilities sum to {self.deal_prob.sum()}, not 1"
+            )
         if np.any(self.deal_prob < 0):
             raise InvariantError(f"{self.name}: negative deal probability")
         for node in self.nodes:
@@ -105,7 +108,9 @@ class GameTree:
             if len(node.children) != len(node.actions):
                 raise InvariantError(f"{self.name}: node {node.node_id} actions/children mismatch")
             if np.any(node.infosets < 0) or np.any(node.infosets >= self.n_infosets):
-                raise InvariantError(f"{self.name}: node {node.node_id} has an out-of-range infoset id")
+                raise InvariantError(
+                    f"{self.name}: node {node.node_id} has an out-of-range infoset id"
+                )
             acting = self.infoset_player[node.infosets]
             if not np.all(acting == node.player):
                 raise InvariantError(
@@ -115,7 +120,9 @@ class GameTree:
                 )
         for infoset, count in enumerate(self.infoset_actions):
             if count < 2:
-                raise InvariantError(f"infoset {infoset} has {count} actions; a decision needs at least two")
+                raise InvariantError(
+                    f"infoset {infoset} has {count} actions; a decision needs at least two"
+                )
         self._check_reachability()
 
     def _check_reachability(self) -> None:
@@ -187,7 +194,7 @@ class TreeBuilder:
         self.nodes.append(None)  # type: ignore[arg-type]
         return len(self.nodes) - 1
 
-    def add_terminal(self, node_id: int, payoff: Sequence[float]) -> None:
+    def add_terminal(self, node_id: int, payoff: Sequence[float] | np.ndarray) -> None:
         self.nodes[node_id] = TerminalNode(
             node_id=node_id, actions=(), payoff=np.asarray(payoff, dtype=np.float64)
         )
@@ -201,7 +208,8 @@ class TreeBuilder:
         private_key: Sequence[str],
     ) -> DecisionNode:
         """Register a decision node. ``private_key[d]`` is the acting player's own information for
-        deal ``d`` -- never the opponent's, never anything public."""
+        deal ``d`` -- never the opponent's, never anything public.
+        """
         if len(actions) != len(children):
             raise InvariantError("one child per action")
         infosets = np.zeros(self.n_deals, dtype=np.int64)

@@ -12,8 +12,8 @@ chapter 03.
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from fractions import Fraction
-from typing import Sequence
 
 from .odds import Number, as_fraction
 
@@ -46,7 +46,8 @@ def all_in_equity_needed_from_spr(spr_value: Number, *, exact: bool = False) -> 
 
 def commit_threshold_equity(spr_value: Number, *, exact: bool = False) -> float | Fraction:
     """Alias of :func:`all_in_equity_needed_from_spr` under the name chapter 03 uses. Kept as a
-    deliberate synonym, not a second implementation."""
+    deliberate synonym, not a second implementation.
+    """
     return all_in_equity_needed_from_spr(spr_value, exact=exact)
 
 
@@ -55,8 +56,12 @@ def spr_commitment_table(spr_values: Sequence[Number] | None = None) -> list[dic
 
     ``digits`` is fixed here so docs, trainer and CLI show identical values.
     """
-    values = list(spr_values) if spr_values is not None else [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 13.0, 20.0]
-    rows = []
+    values = (
+        list(spr_values)
+        if spr_values is not None
+        else [0.25, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 13.0, 20.0]
+    )
+    rows: list[dict[str, object]] = []
     for value in values:
         x = as_fraction(value)
         needed = all_in_equity_needed_from_spr(x, exact=True)
@@ -95,7 +100,8 @@ def reverse_implied_odds_penalty(
     pot: Number, bet: Number, expected_future_losses: Number, *, exact: bool = False
 ) -> float | Fraction:
     """The mirror case: equity needed rises when you expect to pay off. Same algebra, opposite sign,
-    which is why "dominated draws exit fast" is arithmetic rather than temperament."""
+    which is why "dominated draws exit fast" is arithmetic rather than temperament.
+    """
     p, b, f = (as_fraction(x) for x in (pot, bet, expected_future_losses))
     value = (b + f) / (p + 2 * b)
     return value if exact else float(value)

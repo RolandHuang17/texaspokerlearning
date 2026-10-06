@@ -12,8 +12,8 @@ on the oracle.
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Sequence
 from itertools import combinations
-from typing import Sequence
 
 from pokergto.cards import Card
 
@@ -75,6 +75,5 @@ def naive_evaluate7(cards: Sequence[Card]) -> tuple[int, tuple[int, ...]]:
     if len(cards) not in (5, 6, 7):
         raise ValueError("expected 5, 6 or 7 cards")
     return max(
-        classify([cards[index] for index in split])
-        for split in combinations(range(len(cards)), 5)
+        classify([cards[index] for index in split]) for split in combinations(range(len(cards)), 5)
     )

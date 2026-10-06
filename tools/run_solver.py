@@ -24,15 +24,13 @@ The solve itself samples nothing, so the same iteration count produces the same 
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 
-from _bootstrap import REPO_ROOT, bootstrap_path, fail, ok
+from _bootstrap import bootstrap_path, fail, ok
 
 bootstrap_path()
 
-from pokergto import __version__  # noqa: E402
 from pokergto.artifacts import GEN_DIR, Provenance, dumps, sha256_of, write_artifact  # noqa: E402
 from pokergto.solver.cfr import CFRSolver  # noqa: E402
 from pokergto.solver.proofs import PUBLISHED_PROOFS, ProofEntry, verify  # noqa: E402
@@ -40,7 +38,9 @@ from pokergto.solver.proofs import PUBLISHED_PROOFS, ProofEntry, verify  # noqa:
 SCHEMA_VERSION = "1.0.0"
 
 
-def run_entry(entry: ProofEntry, *, quick: bool = False) -> tuple[dict[str, object], list[tuple[int, float]], float]:
+def run_entry(
+    entry: ProofEntry, *, quick: bool = False
+) -> tuple[dict[str, object], list[tuple[int, float]], float]:
     tree = entry.build()
     iterations = max(50, entry.iterations // 20) if quick else entry.iterations
     solver = CFRSolver(tree, plus=entry.algorithm == "cfr_plus")
@@ -56,6 +56,7 @@ def run_entry(entry: ProofEntry, *, quick: bool = False) -> tuple[dict[str, obje
         "seed": 0,
         "config": {
             "game": entry.game,
+            "parameters": dict(entry.parameters or {}),
             "tree": tree.summary(),
             "measure_every": entry.measure_every or max(1, iterations // 25),
         },
@@ -63,7 +64,11 @@ def run_entry(entry: ProofEntry, *, quick: bool = False) -> tuple[dict[str, obje
         "exploitability_threshold": entry.exploitability_threshold,
         "game_value_bb_per_hand": round(result.game_value, 10),
         "curve": [
-            {"iteration": int(iteration), "exploitability": round(float(value), 10), "elapsed_seconds": None}
+            {
+                "iteration": int(iteration),
+                "exploitability": round(float(value), 10),
+                "elapsed_seconds": None,
+            }
             for iteration, value in result.curve
         ],
         "average_strategy": result.strategy_report(),
@@ -121,13 +126,15 @@ def main(argv: list[str] | None = None) -> int:
         entry = PUBLISHED_PROOFS[name]
         try:
             artifact, curve, elapsed = run_entry(entry, quick=args.quick)
-        except Exception as error:  # noqa: BLE001 - reported, not swallowed
+        except Exception as error:
             problems.append(f"{name}: solve raised {type(error).__name__}: {error}")
             continue
         bad = failing(artifact)
         if bad:
             if args.quick:
-                print(f"WARN {name}: gates not met in --quick mode (ignored): {bad}", file=sys.stderr)
+                print(
+                    f"WARN {name}: gates not met in --quick mode (ignored): {bad}", file=sys.stderr
+                )
             else:
                 problems.extend(f"{name}: {detail}" for detail in bad)
                 continue

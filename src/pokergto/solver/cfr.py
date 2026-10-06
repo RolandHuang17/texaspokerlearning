@@ -64,7 +64,9 @@ class SolveResult:
         for index, label in enumerate(self.infoset_labels):
             actions = self.infoset_actions[index]
             row = self.average_strategy[index]
-            report[label] = {action: round(float(value), 6) for action, value in zip(actions, row, strict=True)}
+            report[label] = {
+                action: round(float(value), 6) for action, value in zip(actions, row, strict=True)
+            }
         return report
 
 
@@ -82,7 +84,9 @@ class CFRSolver:
             raise InvariantError("game has no information sets")
         self.tree = tree
         self.plus = plus
-        self.weighting: Literal["uniform", "linear"] = weighting or ("linear" if plus else "uniform")
+        self.weighting: Literal["uniform", "linear"] = weighting or (
+            "linear" if plus else "uniform"
+        )
         self.regrets = [np.zeros(int(count)) for count in tree.infoset_actions]
         self.strategy_sum = [np.zeros(int(count)) for count in tree.infoset_actions]
         self.iteration = 0
@@ -135,11 +139,21 @@ class CFRSolver:
         for action, child in enumerate(node.children):
             if node.player == player:
                 utilities[action] = self._cfr(
-                    child, deal, reach_self * float(sigma[action]), reach_opp, player, sigma_by_infoset
+                    child,
+                    deal,
+                    reach_self * float(sigma[action]),
+                    reach_opp,
+                    player,
+                    sigma_by_infoset,
                 )
             else:
                 utilities[action] = self._cfr(
-                    child, deal, reach_self, reach_opp * float(sigma[action]), player, sigma_by_infoset
+                    child,
+                    deal,
+                    reach_self,
+                    reach_opp * float(sigma[action]),
+                    player,
+                    sigma_by_infoset,
                 )
         node_utility = float(np.dot(sigma[:count], utilities))
         if node.player == player:
@@ -216,6 +230,8 @@ def _actions_per_infoset(tree: GameTree) -> list[list[str]]:
     return labels
 
 
-def solve(tree: GameTree, iterations: int = 10_000, *, plus: bool = False, measure_every: int = 0) -> SolveResult:
+def solve(
+    tree: GameTree, iterations: int = 10_000, *, plus: bool = False, measure_every: int = 0
+) -> SolveResult:
     """Functional entry point used by lessons, tests and ``tools/run_solver.py``."""
     return CFRSolver(tree, plus=plus).run(iterations, measure_every=measure_every)
