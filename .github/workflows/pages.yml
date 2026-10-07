@@ -24,11 +24,30 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
     steps:
       - uses: actions/checkout@v5
       - uses: ./.github/actions/setup-env
         with:
           with-node: 'true'
+
+      # Pages is a repository setting, not a file in the tree, and until it is switched on the deployment job
+      # below has nowhere to publish to. A gate that fails because of a settings toggle nobody has flipped is a
+      # gate people learn to ignore, which is the mistake ci.yml avoids for trainer/ by probing instead of
+      # assuming. So ask, publish the answer as a notice, and keep the run green.
+      - name: Probe whether Pages is enabled
+        id: pages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" --jq '.build_type' >/dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::GitHub Pages is not enabled for this repository, so nothing is deployed. To turn it on: gh api repos/${{ github.repository }}/pages -X POST -f build_type=workflow"
+          fi
       # Write mode, unfiltered, and deliberately without `--include-slow`: the eight-minute preflop matrix is not
       # re-derived here (adr/0008), so the deploy keeps the committed artifact's bytes -- which are the ones the
       # `data` job in `ci.yml` just verified, and the ones the trainer bundle ships. Pages pays seconds, not
@@ -64,6 +83,9 @@ jobs:
 
   deploy:
     needs: build
+    # Skipped, not failed, while Pages is off -- see the probe in the build job. The artifact of this run is
+    # still uploaded; enabling Pages is the only missing step, and the notice says how.
+    if: needs.build.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -71,3 +93,13 @@ jobs:
     steps:
       - id: out
         uses: actions/deploy-pages@v4
+
+  notice:
+    needs: build
+    if: needs.build.outputs.pages_enabled != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pages not enabled yet
+        shell: bash
+        run: |
+          echo "::notice::GitHub Pages is not enabled for ${{ github.repository }} -- the site was built and uploaded, nothing was deployed. Enable it once CI is green: gh api repos/${{ github.repository }}/pages -X POST -f build_type=workflow"
