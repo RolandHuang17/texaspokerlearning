@@ -108,8 +108,10 @@ three orders of magnitude faster. The full exact 169x169 matrix prices out at ab
 machine this project is developed on. So preflop is not claimed as solved exactly: adr/0007 chose the
 sampled-payoff route and measured it (20,000 boards is the whole 169x169 grid in 7.3 minutes at a 0.0030
 mean standard error, agreeing with three exactly-enumerated cells within 0.5 to 1.9 of its own sigmas).
-Chapters 05, 10, 11 and 12 still stay unauthored, because one gate in that record is not passed yet: whether a
-range boundary flips its call/fold verdict between two independent seeds.
+Its boundary gate is measured and passed -- at 20,000 boards and two seeds, no class changes call/fold verdict
+at the 0.5 line or at the big blind's MDF line facing a 2.5x open (closest class QQ, 9.6 sigmas away). What
+still keeps chapters 05, 10, 11 and 12 unauthored is the artifact: `data/gen/preflop/**` has to exist, with
+its sampling fields in the schema, before a lesson can cite it.
 
 Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
 inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two

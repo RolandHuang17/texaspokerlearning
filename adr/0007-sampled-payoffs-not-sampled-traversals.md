@@ -63,31 +63,53 @@ that single pass serves all 14,365 unordered cells.
    The first version of the validation test made exactly that mistake and flagged a real 1.6-sigma deviation
    as "6.2 sigma"; the closed-form hypergeometric standard deviation is now asserted against the empirical
    one in the same test.
-3. **Being sampled is not the same as being usable, and that is a separate measurement.** A 0.0030 mean
-   stderr is small next to a hand's equity, but a range boundary is set by comparing an equity to a
-   threshold, so what matters is whether the *decision* flips. Before chapters 05, 10, 11 and 12 print an
-   opening or defence range, the number of classes whose call/fold verdict changes between two independent
-   seeds has to be measured and recorded in the artifact. If the count is not near zero at the chosen board
-   budget, the budget goes up or the range is not published. No lesson is authored on top of an unmeasured
-   boundary.
+3. **Being sampled is not the same as being usable, and that is a separate measurement -- it has now been
+   made.** A 0.0030 mean stderr is small next to a hand's equity, but a range boundary compares an equity to a
+   threshold, so what matters is whether the *decision* flips. Measured at the committed budget of 20,000
+   boards, two independent seeds, all 169 classes, comparing each class's all-in equity against an opponent
+   distribution weighted by combos:
+
+   | line | classes that change verdict between seeds | within 2 sigma of the line | closest class, in sigma |
+   |---|---|---|---|
+   | 0.5 against a random hand | **0** | 5 | 0.21 (the quartiles of the margin are 13.2 / 28.1 / 46.0) |
+   | MDF 0.7273, big blind facing a 2.5x open | **0** | 0 | QQ at 9.6, then JJ 11.6, AKs 22.0 |
+
+   Zero flips, and no class is anywhere near the noise at the line that actually matters. The budget is
+   therefore 20,000 boards (8.3 min measured) rather than the 150,000 that the error bar alone would have
+   suggested paying for. This is a property of *this* spot and *this* threshold, so a chapter that needs a
+   tighter boundary -- a 3-bet shove, where two classes sit closer in equity -- re-runs the measurement rather
+   than borrowing this one. `tests/test_preflop.py` guards the mechanism at a tenth of the budget; the numbers
+   above are the artifact's claim.
 4. **Exact remains the default where it is payable.** Single preflop matchups (141-180 s per class cell) and
    every flop or turn range enumeration stay exact, and a lesson that can cite an exact cell cites the exact
    cell. The matrix is what is sampled, not the arithmetic around it.
 
 ## Consequences
 
-- `src/pokergto/preflop.py` is engine code with nine tests: the identities that hold at any sample size
-  (a class against itself is exactly 0.5, `equity[i, j] + equity[j, i] == 1` to the last bit, all 28,561
-  ordered cells populated including the diagonal), determinism under a fixed seed, refusal of sample sizes
-  too small to disperse, the closed-form check of the legality filter, and the two agreements with exact
-  equity marked `slow`.
+- `src/pokergto/preflop.py` is engine code with eleven tests: the identities that hold at any sample size (a
+  class against itself is exactly 0.5 with zero dispersion, `equity[i, j] + equity[j, i] == 1` to the last
+  bit, all 28,561 ordered cells populated including the diagonal), determinism under a fixed seed and movement
+  under a different one, refusal of sample sizes too small to disperse, the closed-form check of the legality
+  filter, the `1 / sqrt(boards)` behaviour of the error bar, and the agreements with exact equity marked
+  `slow`.
 - The fast suite grows by about 26 s and the slow suite by about 5 min. That is the price of validating a
   sampled estimator against exact arithmetic in CI rather than in conversation.
-- `tools/cost_probe.py` gains a board-matrix budget alongside the solver and enumeration budgets, because
-  this is a cost a future refactor can silently multiply.
-- The matrix artifact does not exist yet. This record fixes the mechanism, the boundary and the gate;
-  generating `data/gen/preflop/**`, extending the schema for the sampling fields, and measuring boundary
-  stability are the next pieces of work, and 05/10/11/12 stay unauthored until all three are done.
+- `tools/cost_probe.py` gains a board-matrix budget alongside the solver and enumeration budgets (25 ms per
+  board measured against an 80 ms ceiling), because this is a cost a future refactor can silently multiply.
+- **The error bar of a derived quantity is a separate calculation, and getting it wrong is not
+  conservative.** `equity_against` initially scaled a ratio by `sqrt(batches)` -- the correct scaling for the
+  pair *count*, which is a sum -- and printed twenty-times-too-wide sigmas. The test that existed at the time
+  asserted only that a range sigma is *wider* than the independent-cells formula, which an inflated value
+  satisfies, so it passed. It now asserts both ends: a one-hot weight reproduces the stored column's sigma
+  exactly, and the aggregate sits strictly between the naive quadrature and a single cell's sigma, under the
+  `sqrt(168)` ceiling that perfect board correlation allows. Measured at 600 boards: aggregate/naive 6.15
+  mean and 9.92 worst, aggregate sigma 0.0098 against 0.0167 mean per-cell sigma. The corresponding
+  `adr/0002` lesson -- an optimisation must be proved, not read -- turns out to apply to error propagation
+  too: a number that is only ever checked to be "not too small" will drift upward unnoticed.
+- What is left is the artifact itself: `data/gen/preflop/**`, with `seed`, `boards`, `batches`, per-cell
+  `stderr` and per-cell pair counts in the schema, generated at the 20,000-board budget this record settled
+  on. Chapters 05, 10, 11 and 12 may be authored once it exists; the boundary question that gated them is
+  answered above, and a chapter needing a tighter line re-runs that measurement rather than citing this one.
 - A reader can now see, in one place, which numbers in this repository were enumerated and which were
   sampled -- and the second category is smaller and better labelled than the genre it replaces.
 

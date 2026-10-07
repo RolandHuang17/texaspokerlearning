@@ -133,8 +133,11 @@ version of the validation test made that mistake and called a real 1.6-sigma dev
 test now checks the empirical error bar against a closed-form hypergeometric one. And being sampled is not
 the same as being usable: a range boundary compares an equity to a threshold, so before chapters 05, 10, 11
 and 12 print a range, the number of classes whose verdict changes between two independent seeds has to be
-measured and stored with the artifact. That measurement is outstanding, and the matrix artifact itself is not
-yet generated; both are prerequisites, not follow-ups.
+measured. It has been: at 20,000 boards, two seeds, all 169 classes, **zero classes change verdict** at the
+0.5 line against a random hand and zero at the big blind's MDF line (0.7273) facing a 2.5x open, where the
+closest class -- QQ -- sits 9.6 standard errors from the line. So the committed budget is 20,000 boards and
+the open piece is the artifact itself, not the statistics behind it. A chapter needing a tighter spot (a
+3-bet shove, say) re-runs that measurement instead of borrowing this one.
 
 ## Where each decision is enforced
 

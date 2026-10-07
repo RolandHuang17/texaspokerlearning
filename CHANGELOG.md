@@ -35,8 +35,14 @@ Le résumé est en chinois sous chaque entrée.
   mistake and called a real 1.6-sigma deviation "6.2 sigma", so the test now checks the empirical sigma against
   a closed-form hypergeometric one. And "sampled" is not "usable": a range boundary compares an equity to a
   threshold, so the number of classes whose verdict flips between two independent seeds has to be measured
-  before chapters 05, 10, 11 and 12 print a range. That measurement, and the `data/gen/preflop/**` artifact
-  itself, are outstanding, and both are prerequisites rather than follow-ups.
+  before chapters 05, 10, 11 and 12 print a range. Measured: two seeds at 20,000 boards change **zero** of 169
+  verdicts, both at the 0.5 line against a random hand and at the big blind's MDF line facing a 2.5x open, where
+  the closest class (QQ) sits 9.6 standard errors from the line -- so 20,000 boards is the committed budget
+  rather than the 150,000 the bare error bar suggested. What is still outstanding is the artifact itself
+  (`data/gen/preflop/**` with its sampling fields in the schema), which is a prerequisite, not a follow-up.
+  该门槛已量过：两个种子、20,000 个牌面，169 个类别的判定一个都没有翻转（0.5 线与大盲面对 2.5 倍 open 的 MDF 线
+  都是），离线下最近的 QQ 也有 9.6 个 sigma——所以定稿预算是 20,000 个牌面，而不是只看误差棒时以为要付的 150,000。
+  仍未做的是生成物本身（`data/gen/preflop/**` 及其 schema 采样字段），那是前置条件而不是收尾工作。
   `adr/0007` 把 `adr/0006` 的开放问题按 A 关闭，并钉住这个选择逼出来的边界：ADR-0002 当年禁止"CFR 内循环里采样私有牌"，
   但没说翻前求解依赖的支付表怎么办。现在的规则是：全下的终结效用可以来自声明过的牌面样本；遗憾和、策略和与可剥削度仍须在拿到手
   的表上精确计算。两条告诫写进正文：牌面共享的比较相关，按二项式算误差会小约 3.2 倍（校验测试第一版就犯了这错，把真实的 1.6

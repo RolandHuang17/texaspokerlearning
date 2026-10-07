@@ -91,10 +91,13 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
       therefore **not** planned. The route is chosen by `adr/0007`: a payoff table sampled over **boards**
       and enumerated over every dealable combo pair (`src/pokergto/preflop.py` — 20,000 boards is the whole
       169x169 grid in 7.3 min at a 0.0030 mean standard error, agreeing with three exactly computed cells
-      within 0.5 to 1.9 of its own sigmas). Before chapters 05, 10, 11 and 12 can be authored: write
-      `data/gen/preflop/**` with its seed, boards, batches and per-cell stderr in the schema, and measure
-      whether a range boundary flips its call/fold verdict between two independent seeds.
-      `solver/pushfold.py` Nash follows those.
+      within 0.5 to 1.9 of its own sigmas). Its boundary gate is measured: two seeds at 20,000 boards change
+      **zero** of 169 call/fold verdicts, at 0.5 against a random hand and at the big blind's MDF line facing
+      a 2.5x open (closest class QQ, 9.6 sigmas from the line). What is left before chapters 05, 10, 11 and 12
+      can be authored is the artifact: `data/gen/preflop/**` with seed, boards, batches and per-cell stderr in
+      the schema. `solver/pushfold.py` Nash and the ICM matrices follow it.
+- [x] `pokergto.preflop` and its boundary measurement (`adr/0007`): board-sampled matrix, exact cells agreed,
+      zero verdict flips between seeds. 板面采样的翻前矩阵与边界稳定性测量已完成。
 - [ ] `theory/range_advantage`, `sizing`, `polarization`, `blockers`, `protection`, `frequencies`
 - [ ] Chapters **03 Range Advantage**, **04 Bet Sizing**, **05 Preflop (Cash)**,
       **10 Heads-Up / BvB** bilingual (27 lessons)
