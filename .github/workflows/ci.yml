@@ -32,7 +32,7 @@ jobs:
     name: lint (ruff, mypy, dependency lists)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
 
       # requirements-dev.txt exists so a contributor can get the toolchain without an editable
@@ -125,7 +125,7 @@ jobs:
           - os: macos-latest
             python: '3.12'
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
         with:
           python-version: ${{ matrix.python }}
@@ -154,7 +154,7 @@ jobs:
     name: solver proof gates
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
 
       # Re-solves every game in src/pokergto/solver/proofs.py and compares bytes against the committed
@@ -187,7 +187,7 @@ jobs:
     name: generated data contract
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
 
       - name: Every artifact validates against data/schema
@@ -241,7 +241,7 @@ jobs:
     name: docs build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
 
       # --strict turns mkdocs warnings (broken relative links, a nav entry pointing at a missing file,
@@ -255,7 +255,7 @@ jobs:
     name: bilingual parity
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
 
       - name: en/zh mirror, template shape, AUTO ids, registered terms
@@ -270,7 +270,7 @@ jobs:
     name: trainer build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       # Guarded by existence, not by a date: a workflow that fails because a directory has not been
       # written is a workflow nobody trusts, so a fork without a trainer reports "skipped, by design"
