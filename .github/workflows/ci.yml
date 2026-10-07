@@ -60,7 +60,6 @@ jobs:
 
           left = {canonical(entry): entry for entry in declared}
           right = {canonical(entry): entry for entry in mirrored}
-          problems = [f"missing from requirements-dev.txt: {name}" for name, _ in left if (name, _ not in 0)]
           problems = []
           for key, text in left.items():
               if key not in right:

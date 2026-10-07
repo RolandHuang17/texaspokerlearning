@@ -83,8 +83,16 @@ jobs:
           if [ '${{ steps.trainer.outputs.built }}' = 'true' ]; then
             mkdir -p _site/trainer && cp -r trainer/dist/. _site/trainer/
           fi
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      # Both of these talk to the Pages API, so both need a site to exist: configure-pages fails outright with
+      # "Get Pages site failed... verify that the repository has Pages enabled" when it does not. The probe above
+      # already knows the answer, so the publication half of this job is what gets skipped -- docs and trainer are
+      # still built and the site is still assembled, which is the part that can break on a normal commit.
+      - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
+      - name: Upload the built site
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
