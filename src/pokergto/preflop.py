@@ -80,6 +80,41 @@ class PreflopMatrix:
     boards: int
     batches: int
     seed: int
+    #: ``(batches, 3, 169, 169)`` wins / ties / pair counts per batch, kept so that a *derived* quantity --
+    #: an equity against a range rather than against one class -- gets its error bar from the same
+    #: independent batches. Averaging a row and quoting sqrt(sum of squared sigmas) would be decorative:
+    #: every cell in a row shares the same boards, so they are strongly correlated and the true spread is
+    #: wider than that formula claims.
+    panels: np.ndarray
+
+    def equity_against(self, weights: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        """Each class's equity against an opponent distribution, with a batch-derived error bar.
+
+        ``weights`` is over the 169 classes and need not be normalised -- the ratio of sums normalises
+        itself, the way ``range_equity`` weights by combos rather than by cells. The result is what a preflop
+        threshold decision compares against, and the second array is its honest standard error: computed by
+        re-deriving the whole weighted quantity inside each independent batch, not by combining the per-cell
+        sigmas as if the cells were independent draws.
+        """
+        if weights.shape != (N_CLASSES,):
+            raise InputError(f"expected {N_CLASSES} class weights, got shape {weights.shape}")
+        total = self._contract(self.panels.sum(axis=0), weights)
+        per_batch = np.stack([self._contract(batch, weights) for batch in self.panels])
+        # `_contract` returns a ratio, so the reported quantity is the batches' mean and its error is
+        # std / sqrt(batches). `pairs_stderr` multiplies by sqrt(batches) instead, because a total is a sum:
+        # copying one scaling into the other inflates an equity error bar by exactly the batch count, which is
+        # what this line got wrong the first time and what the one-hot identity in tests/test_preflop.py now
+        # pins from both directions.
+        spread = per_batch.std(axis=0, ddof=1) / np.sqrt(self.panels.shape[0])
+        return total, spread
+
+    @staticmethod
+    def _contract(panel: np.ndarray, weights: np.ndarray) -> np.ndarray:
+        """Ratio of weighted sums for one batch (or for all of them): hero equity per hero class."""
+        wins, ties, totals = panel[0], panel[1], panel[2]
+        numerator = (wins + 0.5 * ties) @ weights
+        denominator = totals @ weights
+        return np.where(denominator > 0, numerator / np.maximum(denominator, 1.0), np.nan)
 
     def cell(self, hero_class: str, villain_class: str) -> tuple[float, float]:
         """``(equity, standard error)`` for one ordered class pair."""
@@ -172,4 +207,5 @@ def all_in_matrix(
         boards=per_batch * batches,
         batches=batches,
         seed=seed,
+        panels=panels,
     )

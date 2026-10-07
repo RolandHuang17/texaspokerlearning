@@ -187,6 +187,23 @@ Le résumé est en chinois sous chaque entrée.
   （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- `PreflopMatrix.equity_against` reported its error bar twenty times too wide. It derived the spread of a
+  weighted row by multiplying the batch-to-batch standard deviation by `sqrt(batches)` -- the right scaling
+  for `pairs_stderr`, which estimates a **sum** -- on a quantity that is a **ratio**, where the estimate is
+  the batches' mean and the scaling is `1 / sqrt(batches)`. The first boundary-stability measurement
+  surfaced it, not the test suite: the check that existed asserted only that a range error bar is *wider*
+  than the independent-cells formula (true here, and the reason it was written), so an inflation passed
+  through it. Two assertions now close both directions: a one-hot weight must reproduce the stored column's
+  sigma exactly, and the aggregate must stay under `sqrt(168)` times the naive quadrature -- the ceiling
+  board correlation allows -- while remaining below a single cell's sigma. This is the same class of mistake
+  as the vector-CFR floor that was applied to the whole matrix: the arithmetic was right and the scaling
+  belonged to a different quantity.
+  `PreflopMatrix.equity_against` 把误差棒放大了二十倍：它对加权行用的是"批间标准差乘 `sqrt(batches)`"——那是
+  `pairs_stderr`（估计的是**和**）的缩放，而这一行的估计量是**比值**，应当除以 `sqrt(batches)`。发现它的是第一次边界稳定性
+  测量，而不是测试：原有检查只断言"加权误差棒比独立格子的公式更宽"（这条在本例中确实成立，也正是当初写它的原因），所以放大能
+  蒙混过关。现在两个方向都堵上：one-hot 权重必须精确复现矩阵里那一列的 sigma；加权 sigma 既不能超过牌面相关性允许的上限
+  `sqrt(168)` 倍朴素 quadrature，也必须低于单个格子的 sigma。这和向量化 CFR 里"给整个矩阵做下限截断"是同一类错误：算术没错，
+  但缩放属于另一个量。
 - `range_advantage.board_ceiling()` (new, and now shared with the table generator) takes its maximum over
   the combos that **can still be dealt** on the board. Before this, a combo holding a card the board already
   shows was counted, and the evaluator reads such a hand as containing that rank twice: on `5cKh3sTh4h` the

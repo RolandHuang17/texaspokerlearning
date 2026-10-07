@@ -23,7 +23,7 @@ import math
 import numpy as np
 import pytest
 
-from pokergto.cards import HAND_CLASSES_169
+from pokergto.cards import HAND_CLASSES_169, combos_for_class
 from pokergto.errors import InputError
 from pokergto.preflop import COMBO_CLASS, N_CLASSES, NONDEALABLE, all_in_matrix
 
@@ -95,6 +95,53 @@ def test_the_engine_refuses_a_sample_too_small_to_disperse() -> None:
         all_in_matrix(1_000, seed=1, batches=1)
     with pytest.raises(InputError, match="batches must be"):
         all_in_matrix(1_000, seed=1, batches=500)
+
+
+def test_weighting_the_matrix_by_one_class_reproduces_that_column_exactly(matrix) -> None:
+    """``equity_against`` is the same arithmetic as the matrix, so a one-hot weight must return it bit for bit.
+
+    The function exists to answer "what is this class worth against a *range*", which is what a threshold
+    decision compares. If it drifted from the stored cells even slightly, a lesson could quote an equity
+    that no cell in the artifact supports -- so this is an exact equality, not an approximation.
+    """
+    for column in (0, 1, 100, 168):
+        weights = np.zeros(N_CLASSES)
+        weights[column] = 1.0
+        equity, stderr = matrix.equity_against(weights)
+        assert np.array_equal(np.nan_to_num(equity), np.nan_to_num(matrix.equity[:, column]))
+        # The error bar has to match too, not just the estimate. This assertion is what caught an
+        # `sqrt(batches)` scaling copied from the pair-count formula into a ratio: it inflated every range
+        # error bar twentyfold and still passed the weaker "sigma is non-negative" check it replaced.
+        assert np.array_equal(np.nan_to_num(stderr), np.nan_to_num(matrix.stderr[:, column]))
+
+
+def test_the_range_error_bar_sits_between_the_naive_formula_and_a_single_cell(matrix) -> None:
+    """A weighted row is neither "independent cells" nor "one cell" -- both ends are asserted.
+
+    Every cell in a row is computed against the same boards, so they are correlated and the aggregate spread
+    is **wider** than quadrature of the per-cell sigmas. Averaging over 168 opponents still helps, so it stays
+    **narrower** than a single cell's sigma. The upper bound is the one that paid for itself: an
+    ``sqrt(batches)`` scaling copied from the pair-count formula into a ratio made every aggregate twenty
+    times too wide, which passed the one-sided check it replaced and is impossible under this one.
+
+    Measured at 600 boards in 6 batches: aggregate / naive ratio 6.15 mean and 9.92 worst, against the
+    perfectly-correlated ceiling of ``sqrt(168) = 12.96``; aggregate sigma 0.0098 versus a 0.0167 mean cell
+    sigma.
+    """
+    weights = np.array([combos_for_class(key) for key in HAND_CLASSES_169], dtype=float)
+    weights /= weights.sum()
+    _, aggregate = matrix.equity_against(weights)
+    naive = np.sqrt((matrix.stderr**2) @ (weights**2))
+    ratio = aggregate / np.maximum(naive, 1e-12)
+    assert float(np.nanmax(ratio)) > 1.2, (
+        "the aggregate collapsed onto the independent-cells formula"
+    )
+    assert float(np.nanmax(ratio)) <= np.sqrt(N_CLASSES), (
+        f"aggregate error bar beyond what board correlation can explain: {np.nanmax(ratio):.1f}"
+    )
+    assert float(np.nanmean(aggregate)) < float(np.nanmean(matrix.stderr)), (
+        "averaging over opponents has to help, or the aggregation is not averaging"
+    )
 
 
 def test_cell_lookup_and_its_failure(matrix) -> None:
