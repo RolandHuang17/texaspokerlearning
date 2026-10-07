@@ -160,6 +160,9 @@ omit = ["src/pokergto/cli.py", "src/pokergto/render.py"]
 
 [tool.coverage.report]
 show_missing = true
-# engine + theory carry the 90% gate (enforced in CI); cli/render are omitted above because
-# they are presentation, and coverage there would be theatre.
+# The number CI enforces lives in .github/workflows/ci.yml, next to the measurement it came from: a
+# floor set where a target is wanted is how a repository ends up red on a commit that broke nothing.
+# Measured 2026-10-07 at 74.32% (CI enforces 74); 90% is the 1.0 target, and the gap is board.py and
+# variance.py at 0%, icm.py 16%, spr.py 26%, theory/multiway.py 41%, theory/frequencies.py 54%.
+# cli/render are omitted above because they are presentation, and coverage there would be theatre.
 fail_under = 0
