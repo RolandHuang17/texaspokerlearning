@@ -31,7 +31,14 @@ from _bootstrap import bootstrap_path, fail, ok
 
 bootstrap_path()
 
-from pokergto.artifacts import GEN_DIR, Provenance, dumps, sha256_of, write_artifact  # noqa: E402
+from pokergto.artifacts import (  # noqa: E402
+    GEN_DIR,
+    Provenance,
+    dumps,
+    quantize,
+    sha256_of,
+    write_artifact,
+)
 from pokergto.solver.cfr import CFRSolver  # noqa: E402
 from pokergto.solver.proofs import PUBLISHED_PROOFS, ProofEntry, verify  # noqa: E402
 from pokergto.solver.vector import VectorCFRSolver  # noqa: E402
@@ -104,8 +111,17 @@ def run_entry(
 
 
 def curve_csv(curve: list[tuple[int, float]]) -> str:
+    """The exploitability curve as CSV, carrying exactly the numbers the JSON artifact carries.
+
+    Not the raw double. An earlier version wrote `:.10g`, ten significant digits of a value the JSON path
+    quantises to twelve *decimal places* -- and the extra digits are not reproducible: the same engine on the
+      same numpy under Linux and Windows differs in the ninth or tenth significant digit, because that is where
+    compiler and BLAS last-bits live. `data/gen/solver/kuhn.csv` and one toy-game CSV were the only artifacts
+    that failed CI's byte comparison on the first public run, and they failed for no other reason. A committed
+    file should print digits it can defend on any machine, so both renderings now go through `quantize`.
+    """
     lines = ["iteration,exploitability_chips_per_hand"]
-    lines.extend(f"{iteration},{value:.10g}" for iteration, value in curve)
+    lines.extend(f"{iteration},{quantize(value)}" for iteration, value in curve)
     return "\n".join(lines) + "\n"
 
 

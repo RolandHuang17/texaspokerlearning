@@ -299,6 +299,32 @@ Le résumé est en chinois sous chaque entrée.
   （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- `data/gen/solver/*.csv` were the only artifacts that could not survive a different machine, and the first
+  public CI run found it: `tools/run_solver.py`'s `curve_csv` wrote each exploitability with `:.10g` -- ten
+  significant digits of the raw double -- while the JSON artifact for the same curve quantises to twelve
+  *decimal places*. Those extra digits are compiler and BLAS last-bits, so Linux printed `7.4274071e-05` where
+  Windows agreed with the committed file. `curve_csv` now runs every value through `pokergto.artifacts.quantize`,
+  which makes the CSV and the JSON carry identical numbers by construction. Evidence that this was the whole
+  difference and not a symptom: regenerating all seven solver artifacts on this machine changed only the CSVs,
+  every `.json` stayed byte-for-byte identical, and `run_solver.py --check` plus `gen_all.py --check` pass
+  afterwards.
+- `gen_all.py --check` named the offending file but not the offending difference, which is fine on your own
+  machine and useless in a red job you cannot reproduce. It now prints the first differing line with both sides
+  quoted (`line 3: committed \`1500,7.4274071e-15\` against fresh \`1500,7.4274071e-05\``), and
+  `tests/test_gates.py::test_a_tampered_csv_line_is_named_and_not_just_its_file` pins both halves: identical
+  trees report nothing, a one-character tamper is quoted. Note what that test also exposes: a filtered
+  `--check --only solver` compares only what its step returned, and `_step_solver` returns `*.json`, so CSV
+  drift is invisible there -- it is the unfiltered run, which is what CI executes, that sees them.
+- `solver/*.csv` 是唯一活不过换机器的产物，第一次公开 CI 就把它抓出来了：`tools/run_solver.py` 的 `curve_csv` 用
+  `:.10g` 写每个可剥削度——也就是原始双精度数的十位有效数字——而同一曲线的 JSON 产物刻意量化到十二位*小数*。多出来的那几位是
+  编译器与 BLAS 的末位，于是 Linux 打印出 `7.4274071e-05`，而提交出去的文件是按 Windows 那次生成的。`curve_csv` 现在把每个数都过
+  一遍 `pokergto.artifacts.quantize`，让 CSV 与 JSON 从构造上就是同一个数。能证明这就是全部差异、而不只是症状的证据是：本机重新生成
+  七份求解产物后只有 CSV 变了，每个 `.json` 都逐字节不变，`run_solver.py --check` 与 `gen_all.py --check` 随后都通过。
+- `gen_all.py --check` 以前只点名出事文件、不点名出事的那一处，在自己机器上无所谓，在复现不了的红色 job 里就等于没用。现在它会打印第一处
+  不同的行并把两边都引出来（`line 3: committed \`1500,7.4274071e-15\` against fresh \`1500,7.4274071e-05\``），
+  `tests/test_gates.py::test_a_tampered_csv_line_is_named_and_not_just_its_file` 把两半都钉住：相同的树什么都不断言，
+  改一个字符就必须被引用。那个测试顺带也暴露了一件事：过滤过的 `--check --only solver` 只比较该步骤返回的文件，而 `_step_solver` 返回的是
+  `*.json`，所以 CSV 漂移在那条路径上看不见——看得见它的是 CI 实际跑的那次不过滤的比较。
 - The trainer could not be built from a clean checkout, and the first public CI run is what proved it:
   `vue-tsc` failed with `src/lib/data.ts(9,26): error TS2307: Cannot find module '../generated/manifest'`.
   `trainer/src/generated/manifest.ts` and `trainer/public/data/**` are gitignored on purpose (ADR-0001 keeps the

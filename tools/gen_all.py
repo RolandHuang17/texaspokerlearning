@@ -362,6 +362,25 @@ def generate(
     return written
 
 
+def _first_difference(left: Path, right: Path, *, limit: int = 90) -> str:
+    """The first line where two artifacts stop agreeing, bounded so a build log stays readable.
+
+    A FAIL that only names a file is useless to anyone who cannot run the generator themselves -- which is
+    exactly the situation of a contributor reading a red CI job, and of whoever debugged the first public run
+    here. The difference itself is the diagnosis, so print it.
+    """
+    left_lines = left.read_text(encoding="utf-8").splitlines()
+    right_lines = right.read_text(encoding="utf-8").splitlines()
+    for index, (a, b) in enumerate(zip(left_lines, right_lines, strict=False)):
+        if a != b:
+            shown_a = a.strip()[:limit]
+            shown_b = b.strip()[:limit]
+            return f"line {index + 1}: committed `{shown_a}` against fresh `{shown_b}`"
+    if len(left_lines) != len(right_lines):
+        return f"line count {len(left_lines)} against {len(right_lines)}"
+    return "bytes differ after the last shared line (encoding or trailing newline)"
+
+
 def compare(committed: Path, rebuilt: Path) -> list[str]:
     problems: list[str] = []
     if not committed.exists():
@@ -385,7 +404,8 @@ def compare(committed: Path, rebuilt: Path) -> list[str]:
     for relative in sorted(set(rebuilt_files) & set(committed_files)):
         if not filecmp.cmp(committed_files[relative], rebuilt_files[relative], shallow=False):
             problems.append(
-                f"data/gen/{relative.as_posix()} differs from what the engine produces now: "
+                f"data/gen/{relative.as_posix()} differs from what the engine produces now "
+                f"({_first_difference(committed_files[relative], rebuilt_files[relative])}); "
                 "run `python tools/gen_all.py` and commit the result"
             )
     return problems

@@ -408,6 +408,44 @@ def test_a_mutated_committed_artifact_is_detected() -> None:
         shutil.move(backup, target)
 
 
+def test_a_tampered_csv_line_is_named_and_not_just_its_file(tmp_path: Path) -> None:
+    """A red data job has to be readable by someone who cannot re-run the generator.
+
+    The solver CSVs are what broke the first public CI run: `curve_csv` used to write ten significant digits of
+    a raw double while the JSON artifact quantises to twelve decimal places, so the CSVs were the only files that
+    could disagree across platforms -- and the failure line named the file, not the difference, which left the
+    diagnosis to whoever could reproduce it locally. `compare()` now prints the first differing line on both
+    sides, so this asserts both halves: an identical tree passes, and a one-character tamper is *quoted*.
+    """
+    gen_all = _tool("gen_all")
+    committed = tmp_path / "committed"
+    rebuilt = tmp_path / "rebuilt"
+    for tree in (committed, rebuilt):
+        (tree / "solver").mkdir(parents=True)
+        (tree / "solver" / "kuhn.csv").write_text(
+            "iteration,exploitability_chips_per_hand\n500,0.000245049901\n1500,7.4274071e-05\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+
+    assert gen_all.compare(committed, rebuilt) == [], "identical trees must not report drift"
+
+    target = rebuilt / "solver" / "kuhn.csv"
+    target.write_text(
+        target.read_text(encoding="utf-8").replace("7.4274071e-05", "7.4274071e-15"),
+        encoding="utf-8",
+        newline="\n",
+    )
+    problems = gen_all.compare(committed, rebuilt)
+    assert len(problems) == 1, problems
+    message = problems[0]
+    assert "solver/kuhn.csv" in message, message
+    assert "line 3" in message, f"the failure must name the line: {message}"
+    assert "7.4274071e-05" in message and "7.4274071e-15" in message, (
+        f"the failure must quote both sides: {message}"
+    )
+
+
 # --- the hand-count gate, and the renderer's locale contract --------------------------------
 
 
