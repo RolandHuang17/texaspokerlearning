@@ -7,6 +7,10 @@ one-in-a-million wrong table, so this file is unapologetically expensive:
 * ``test_all_five_card_hands_match_reference`` enumerates **all 2,598,960** hands and asserts both the
   category counts and agreement with the naive rulebook oracle (``slow``, CI only);
 * the seven-card fast path is cross-checked against "best of 21 sub-hands" over random boards;
+* the vectorised batch paths are checked against the scalar paths over **every hand of several
+  subdecks chosen for structure** -- single-suit (flush and straight-flush shapes), six ranks times four
+  suits (quads and full houses), nine ranks times three suits (three of a kind without flushes) -- plus
+  millions of random boards;
 * the wheel, the board-pairing tie, and the "flush beats straight" ordering each get a named test,
   because those three are where evaluators actually break.
 """
@@ -15,8 +19,9 @@ from __future__ import annotations
 
 import random
 from collections import Counter
-from itertools import combinations
+from itertools import combinations, islice
 
+import numpy as np
 import pytest
 
 from pokergto.cards import Card, class_key, standard_deck
@@ -24,17 +29,28 @@ from pokergto.evaluator import (
     Category,
     best_score,
     best_score_three,
+    best_scores_many,
     category_of,
     describe,
     evaluate3,
     evaluate5,
+    evaluate5_many,
     evaluate7,
+    evaluate7_many,
+    evaluate7_many_reference,
     evaluate7_reference,
     showdown,
 )
 from tests.reference_evaluator import naive_evaluate5, naive_evaluate7
 
 DECK = standard_deck()
+INDICES = np.array([c.index for c in DECK], dtype=np.int64)
+
+
+def _hand(text: str) -> np.ndarray:
+    """One hand as the batch path wants it: ``(1, n)`` block of 52-indices."""
+    return np.array([[c.index for c in _cards(text)]], dtype=np.int64)
+
 
 #: C(52,5) category counts. Derived in ``tools/gen_tables.py`` and asserted here: if these drift,
 #: ``table.01-05.hand-class-counts`` must drift with them, and both changes mean the evaluator broke.
@@ -87,7 +103,9 @@ def _three_card_kind(cards: tuple[Card, ...]) -> str:
 )
 def test_evaluate3_matches_the_rulebook_on_every_leduc_hand(cards: tuple[Card, ...]) -> None:
     """All C(6,3) = 20 three-card hands Leduc's deck can produce, against the written-out rule."""
-    assert category_of(evaluate3(cards)) is Category[_three_card_kind(cards).upper().replace(" ", "_")]
+    assert (
+        category_of(evaluate3(cards)) is Category[_three_card_kind(cards).upper().replace(" ", "_")]
+    )
 
 
 def test_leducs_deck_cannot_reach_the_categories_whose_ordering_is_disputed() -> None:
@@ -215,6 +233,169 @@ def test_fast_seven_card_path_matches_the_definition(size: int) -> None:
     for _ in range(20_000):
         hand = rng.sample(DECK, size)
         assert evaluate7(hand) == evaluate7_reference(hand)
+
+
+# --- the vectorised batch paths -----------------------------------------------------------
+
+#: Subdecks chosen for the *structure* they exercise, not for size: a single suit makes every hand a
+#: flush and isolates the run logic; six ranks times four suits reaches quads and full houses while
+#: keeping the enumeration small; eight ranks times two suits has pairs and two pair but cannot make
+#: three of a kind; nine ranks times three suits adds three of a kind without any flush at all.
+SUBDECKS: dict[str, list[Card]] = {
+    "13r_1s": [Card.parse(f"{r}s") for r in "23456789TJQKA"],
+    "6r_4s": [Card.parse(f"{r}{s}") for r in "AKQJT9" for s in "cdhs"],
+    "8r_2s": [Card.parse(f"{r}{s}") for r in "AKQJT987" for s in "ch"],
+    "9r_3s": [Card.parse(f"{r}{s}") for r in "AKQJT9876" for s in "cdh"],
+}
+
+
+def _all_hands(label: str, size: int) -> np.ndarray:
+    """Every ``size``-card hand of one subdeck as an ``(N, size)`` block of 52-indices."""
+    codes = np.array([c.index for c in SUBDECKS[label]], dtype=np.int64)
+    rows = [sorted(codes[i] for i in combo) for combo in combinations(range(codes.size), size)]
+    return np.array(rows, dtype=np.int64)
+
+
+def _scalar_five(hands: np.ndarray) -> np.ndarray:
+    return np.fromiter(
+        (evaluate5(tuple(DECK[int(i)] for i in hand)) for hand in hands),
+        np.int64,
+        count=hands.shape[0],
+    )
+
+
+def _scalar_seven(hands: np.ndarray) -> np.ndarray:
+    return np.fromiter(
+        (evaluate7(tuple(DECK[int(i)] for i in hand)) for hand in hands),
+        np.int64,
+        count=hands.shape[0],
+    )
+
+
+@pytest.mark.parametrize("label", ["13r_1s", "8r_2s", "6r_4s"])
+def test_batch_five_card_matches_scalar_on_every_hand_of_a_subdeck(label: str) -> None:
+    """Exhaustive within a subdeck: the batch path returns the *same integers*, not a ranking."""
+    hands = _all_hands(label, 5)
+    assert np.array_equal(evaluate5_many(hands), _scalar_five(hands))
+
+
+@pytest.mark.parametrize("label", ["13r_1s", "8r_2s"])
+def test_batch_seven_card_matches_the_definition_on_every_hand_of_a_subdeck(label: str) -> None:
+    """``evaluate7_many`` against the literal best-of-21 over a whole subdeck.
+
+    The definition path is itself built on :func:`evaluate5_many`, so this is not "two implementations
+    agree and therefore both are right": it is the same relationship ``evaluate7`` has to
+    :func:`evaluate7_reference``, and the five-card layer underneath it is proved exhaustively.
+    """
+    hands = _all_hands(label, 7)
+    assert np.array_equal(evaluate7_many(hands), evaluate7_many_reference(hands))
+
+
+def test_batch_seven_card_finds_the_higher_run_when_a_wheel_is_also_present() -> None:
+    """Seven cards can contain two straights at once, and the wheel must not win.
+
+    ``A-2-3-4-5-6-7`` holds the wheel *and* a seven-high run. Scoring it five-high is the bug this test
+    was written for: the exhaustive subdeck sweep found it, it cannot be seen on five cards (five cards
+    holding five distinct ranks form at most one run), and it changes no category -- only the tiebreak,
+    so every category-count assertion in this file stays green through it.
+    """
+    two_runs = _hand("As2h3d4c5s6h7d")
+    wheel_only = _hand("As2h3d4c5s9hTd")
+    nine_high = _hand("5s6h7d8c9s2h3d")
+    assert category_of(evaluate7_many(two_runs)[0]) is Category.STRAIGHT
+    assert (evaluate7_many(two_runs)[0] >> 16) & 0xF == 7
+    assert evaluate7_many(wheel_only)[0] < evaluate7_many(two_runs)[0]
+    assert evaluate7_many(two_runs)[0] < evaluate7_many(nine_high)[0]
+    assert evaluate7_many(two_runs)[0] == _scalar_seven(two_runs)[0]
+
+
+def test_batch_paths_refuse_malformed_rows_instead_of_scoring_them() -> None:
+    """A batch is built by broadcasting, and broadcasting bugs produce repeated cards that score plausibly."""
+    hand = _hand("AsKsQsJsTs")
+    with pytest.raises(ValueError, match=r"expected shape \(N, 5\)"):
+        evaluate5_many(hand[:, :4])
+    with pytest.raises(ValueError, match=r"expected shape \(N, 7\)"):
+        evaluate7_many(hand)
+    with pytest.raises(ValueError, match=r"0\.\.51"):
+        evaluate5_many(np.array([[0, 1, 2, 3, 52]], dtype=np.int64))
+    with pytest.raises(ValueError, match="repeats a physical card"):
+        evaluate5_many(np.array([[0, 0, 1, 2, 3]], dtype=np.int64))
+    with pytest.raises(ValueError, match="repeats a physical card"):
+        evaluate7_many(np.array([[0, 0, 1, 2, 3, 4, 5]], dtype=np.int64))
+    assert evaluate5_many(np.zeros((0, 5), dtype=np.int64)).shape == (0,)
+
+
+def test_best_scores_many_agrees_with_best_score_on_one_board() -> None:
+    """The exact-equity primitive: many holes against one shared board, in the order the caller gave.
+
+    The board ``Kh7h5h3h2d`` carries four hearts, so a two-heart hole makes a flush and the ace-high
+    flush ``Ah8h`` outranks the king-high ``ThJh`` -- and both outrank the seven-high straight ``4s6s``,
+    which outranks every three of a kind on this unpaired board, which outrank the lone pair. That
+    ladder is written from what the engine reports, and it is the ordering ``range_equity``'s exact mode
+    will now be relying on for every combo of both ranges at once.
+    """
+    board = _cards("Kh7h5h3h2d")
+    holes = [_cards(text) for text in ("Ah8h", "KdKc", "4s6s", "2s2c", "AdAc", "7d7c", "ThJh")]
+    codes = np.array([[a.index, b.index] for a, b in holes], dtype=np.int64)
+    got = best_scores_many(codes, np.array([c.index for c in board], dtype=np.int64))
+    want = np.array([best_score((a, b), board) for a, b in holes], dtype=np.int64)
+    assert np.array_equal(got, want)
+    assert got[0] > got[6] > got[2] > got[1] > got[5] > got[3] > got[4]
+    assert describe(int(got[0])) == "flush A-K-8-7-5"
+    assert category_of(int(got[2])) is Category.STRAIGHT
+    assert category_of(int(got[4])) is Category.ONE_PAIR
+    with pytest.raises(ValueError, match="cannot also be a board card"):
+        best_scores_many(
+            np.array([[board[0].index, 3]], dtype=np.int64),
+            np.array([c.index for c in board], dtype=np.int64),
+        )
+
+
+@pytest.mark.slow
+def test_all_five_card_hands_match_the_batch_path() -> None:
+    """Every ``C(52,5)`` hand through both paths: the claim that makes the batch path swappable.
+
+    Chunked rather than one 2,598,960-row array, because the assertion is the element-wise comparison
+    and a chunked loop keeps memory flat. The category counts are taken from the **batch** scores, so
+    this re-derives ``EXPECTED_COUNTS`` through the second implementation instead of merely restating
+    it -- a ranking-preserving fast path would fail here on the counts even before the element-wise
+    comparison, and a re-encoded score integer would fail on ``describe`` downstream.
+    """
+    stream = (sorted(INDICES[i] for i in combo) for combo in combinations(range(52), 5))
+    counts: Counter[int] = Counter()
+    checked = 0
+    while True:
+        rows = list(islice(stream, 1 << 15))
+        if not rows:
+            break
+        block = np.array(rows, dtype=np.int64)
+        got = evaluate5_many(block)
+        assert np.array_equal(got, _scalar_five(block))
+        counts.update(int(score >> 20) for score in got)
+        checked += block.shape[0]
+    assert checked == 2_598_960
+    for category, expected in EXPECTED_COUNTS.items():
+        assert counts[int(category)] == expected, f"{category.name}: {counts[int(category)]}"
+
+
+@pytest.mark.slow
+def test_batch_seven_card_matches_the_definition_over_millions_of_hands() -> None:
+    """``evaluate7_many`` against best-of-21 on every hand of two more subdecks, plus random full decks.
+
+    ``6r_4s`` reaches quads, full houses, flushes and straight flushes; ``9r_3s`` reaches three of a
+    kind with no flush possible at all; random hands from the real deck are the only way to reach the
+    shapes that need eight or more ranks and three suits at once. Together these are the 1.7M hands a
+    dev loop can afford; the 8.3M-hand ``9r_4s`` sweep was run once, out of band, when this path landed.
+    """
+    for label in ("6r_4s", "9r_3s"):
+        hands = _all_hands(label, 7)
+        assert np.array_equal(evaluate7_many(hands), evaluate7_many_reference(hands))
+    rng = random.Random(20261)
+    random_hands = np.array(
+        [sorted(c.index for c in rng.sample(DECK, 7)) for _ in range(500_000)], dtype=np.int64
+    )
+    assert np.array_equal(evaluate7_many(random_hands), evaluate7_many_reference(random_hands))
+    assert np.array_equal(evaluate7_many(random_hands), _scalar_seven(random_hands))
 
 
 def test_ordering_is_consistent_with_showdown() -> None:

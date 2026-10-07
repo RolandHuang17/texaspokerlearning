@@ -62,13 +62,15 @@ In `pokergto.equity.EquityResult` the identity `equity == wins + ties/2` is an *
 
 ## 直觉 / Intuition
 
-Enumeration is not brute force, it is **laying every future board on the table and counting**. 990 river futures compared hand by hand costs a couple of thousand evaluations -- trivial. The problem is ranges: replace 990 by 1176 and 2 hands by 1326 combos and you are instantly in the millions.
+Enumeration is not brute force, it is **laying every future board on the table and counting**. 990 river futures compared hand by hand costs a couple of thousand evaluations -- the vectorised evaluator measured 313,984 seven-card hands per second, about 3.2 microseconds each -- trivial. The problem is ranges: replace 990 by 1176 and 2 hands by 1326 combos and you are instantly in the millions.
 
-Three anchors to carry around:
+Three anchors to carry around. The times are measured on the author's laptop (py3.12, Windows, 2026-10-07)
+with the vectorised evaluator in `pokergto.evaluator`, and `tools/cost_probe.py` fails the build if the
+throughput that produced them regresses:
 
-- flop, one hand vs one hand: **990** runouts -- sub-second, always use exact.
-- preflop, one hand vs one hand: **1,712,304** runouts -- minutes, worth paying once for a textbook number (that is how the 88.19% below was produced).
-- preflop, range vs range: tens of millions of evaluations and up; the engine refuses. That refusal is `01-04`'s reason for existing.
+- flop, one hand vs one hand: **990** runouts -- milliseconds, always use exact.
+- preflop, one hand vs one hand: **1,712,304** runouts -- 17.3 s, worth paying once for a textbook number (that is how the 88.19% below was produced).
+- preflop, range vs range: tens of millions of evaluations and up; the engine refuses. That refusal is `01-04`'s reason for existing. Vectorising the evaluator made the same enumeration 4.8x to 20.4x faster and did **not** change this third row: the full exact 169x169 class matrix is `2,598,960 x 225,780 = 5.87e11` evaluations, about 740 hours at the measured rate, which is why `adr/0006` retracted the promise that preflop could be enumerated exactly.
 
 ## 算例 / Worked examples
 
@@ -216,7 +218,7 @@ defense range vs fold range, board Kh7h2d, mode=exact
 equity 55.92% (wins 55.2%, ties 1.5%), 1176 runouts x 1326 combos ~= 1.56M evaluations
 ```
 
-That run took about 41 seconds on this machine. **Note it used `1176`, not `990`**: in a range matchup the engine does not know which four hole cards will be dealt, so it enumerates every 2-card completion of the 49 non-board cards and masks the illegal combos -- precisely the third row of the derivation table. With that number, `02-03`'s floor line acquires a meaning in equity: the two thirds of the space filled in strength order hold 55.92% of the pot against the third it discards, on a two-heart flop.
+That run took 7.84 seconds on this machine when measured on 2026-10-07; the same call cost 37.9 seconds before the evaluator was vectorised. **Note it used `1176`, not `990`**: in a range matchup the engine does not know which four hole cards will be dealt, so it enumerates every 2-card completion of the 49 non-board cards and masks the illegal combos -- precisely the third row of the derivation table. With that number, `02-03`'s floor line acquires a meaning in equity: the two thirds of the space filled in strength order hold 55.92% of the pot against the third it discards, on a two-heart flop.
 
 ## 为何成立、何时失效 / Why it works, when it breaks
 
@@ -265,7 +267,7 @@ Every equity here was computed in this repository. No commercial solver, paid co
 | Runout counts (1176 / 1081 / 990 / 44 / 1,712,304 / 2,598,960) | `derived` | measured lengths from `src/pokergto/equity.py#runout_boards`, cross-checked against `math.comb` |
 | Exact preflop equities (88.1937 / 13.6519 / 66.6408 / 38.7187) | `derived` | `equity <hero> <villain> --mode exact --json`, four runs, 1,712,304 runouts each |
 | Exact flop equity (39.4949%) | `derived` | `equity JhTh AcKc --board "Kh7h2d" --mode exact`; independently re-enumerated the 990 runouts with a separate script and got the same number |
-| Defense range vs fold range (55.92%) | `derived` | `range_equity(from_chart, complement, "Kh7h2d", mode="exact")`, 1176 x 1326 evaluations, ~41 s |
+| Defense range vs fold range (55.92%) | `derived` | `range_equity(from_chart, complement, "Kh7h2d", mode="exact")`, 1176 x 1326 evaluations, 7.84 s measured 2026-10-07 (37.9 s on the scalar evaluator) |
 | Draw probabilities and rule-of-2/4 errors | `derived` | `data/gen/tables/table.01-03.draw-probability-exact-vs-rule.json` |
 | Five-card category counts | `derived` | `data/gen/tables/table.01-05.hand-class-counts.json` (`evaluate5` over `C(52,5)`) |
 | Outs sets (9 and 15 cards) | `derived` | `src/pokergto/equity.py#outs_from_enumeration` |

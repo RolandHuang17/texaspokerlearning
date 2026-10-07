@@ -4,17 +4,22 @@
 silent mis-parse does not raise, it just draws a different range in both languages and both prose
 paragraphs. So the round-trip and the class-arithmetic below are the load-bearing tests, and the
 ``exclude`` case exists because a flop range that still contains board cards is not a slightly wrong
-range -- it is a range describing hands that cannot be dealt.
+range -- it is a range describing hands that cannot be dealt. The last section guards the other boundary:
+the committed 13x13 chart artifact is the only way a lesson's range reaches the engine, so the unit
+conversion at that edge (cell frequency in, per-combo probability out) is tested against the real file.
 """
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from pokergto.cards import Card, combos_for_class, parse_cards
-from pokergto.errors import NotationError
+from pokergto.errors import InputError, NotationError
 from pokergto.notation import expand, parse, to_spec
-from pokergto.ranges import Range
+from pokergto.ranges import Range, from_chart, to_chart_payload
 
 KHEPT3D = ("Kh", "7s", "3d")
 
@@ -154,3 +159,48 @@ def test_expansion_reports_class_keys_without_removal() -> None:
     assert dict(expand("AKo"))["AKo"] == 12
     assert combos_for_class("AA") == 6
     assert combos_for_class("AKs") == 4
+
+
+# --- the chart artifact boundary --------------------------------------------------------
+
+
+CHART = (
+    Path(__file__).resolve().parents[1]
+    / "data"
+    / "gen"
+    / "ranges"
+    / "range.02-03.mdf-floor-vs-half-pot.json"
+)
+
+
+def test_chart_round_trip_keeps_per_combo_weights_probabilities() -> None:
+    """``from_chart`` reads a cell as a frequency and ``Range`` stores one probability per combo.
+
+    Those are the same number, which is exactly what makes the conversion easy to get wrong: multiplying
+    a cell's frequency by its combo count -- the arithmetic ``combos()`` performs on the way *out* --
+    yields a per-combo weight of up to twelve, which is not a probability, and ``Range`` refuses it. The
+    committed chart is the fixture on purpose: lesson 01-04 and the chapter 03 lessons cite equities
+    computed from a range built out of this file, and a range that cannot be constructed makes every one
+    of those reproduce commands a fiction that no test notices.
+    """
+    artifact = json.loads(CHART.read_text(encoding="utf-8"))
+    rng = from_chart(artifact)
+    assert rng.weights.max() <= 1.0
+    assert rng.total_combos() == pytest.approx(artifact["total_combos"])
+    assert to_chart_payload(rng) == artifact["weights"]
+    # Two thirds of the dealing space is the point of a half-pot MDF floor, in combos not cells.
+    assert rng.total_combos() == pytest.approx(1326 * 2 / 3, abs=1e-3)
+    assert rng.complement().total_combos() == pytest.approx(1326 / 3, abs=1e-3)
+    assert rng.combos("84o") == pytest.approx(12 * 0.333333)
+
+
+def test_a_chart_with_the_wrong_declared_combo_count_is_refused() -> None:
+    """``cell_combos`` is checked against the deck, so a chart cannot quietly redefine what ``AKo`` means.
+
+    This is the same guard ``from_chart`` has always had, stated as a test because the failure it prevents
+    -- a hand-typed combo table -- is the failure mode ADR-0001 exists to remove.
+    """
+    artifact = json.loads(CHART.read_text(encoding="utf-8"))
+    artifact["cell_combos"]["AKo"] = 4
+    with pytest.raises(InputError, match="declares 4 combos for AKo"):
+        from_chart(artifact)

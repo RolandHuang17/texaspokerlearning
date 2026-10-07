@@ -14,7 +14,11 @@ Cost is the other half of the design:
   once both hands are known (44 on a known turn). The evaluation count is
   ``runouts x (hero_combos + villain_combos)``, so exact is cheap for a few combos and absurd for a
   real range. :func:`range_equity` raises :class:`~pokergto.errors.BudgetExceeded` with the number
-  and the alternative rather than hanging or quietly degrading.
+  and the alternative rather than hanging or quietly degrading. That number counts *evaluations* only:
+  each runout then compares the two surviving score vectors, which for a full range against a full range
+  on a flop is ``1081 x 1081 = 1,168,561`` pairwise comparisons against ``1081 + 1081`` evaluations. The
+  guard is therefore a statement about evaluation work, not a wall-clock promise, and the measured
+  ``tools/cost_probe.py`` numbers are the ones to quote for time.
 * **Monte Carlo** samples a *(combo pair, runout)* from the correct joint distribution in one shot,
   so cost is ``O(iterations)`` regardless of how wide the ranges are. Conflicting combos (both
   players holding the same physical card) are excluded from the sampling distribution, which is the
@@ -33,7 +37,7 @@ import numpy as np
 
 from .cards import ALL_COMBOS, Card, standard_deck
 from .errors import BudgetExceeded, InputError
-from .evaluator import best_score
+from .evaluator import best_score, evaluate7_many
 from .ranges import Range
 
 #: Evaluations ``mode="auto"`` will spend. Deliberately far below ``EXACT_EVAL_BUDGET``: preflop
@@ -44,6 +48,13 @@ AUTO_EXACT_BUDGET = 250_000
 #: Evaluations allowed before exact enumeration refuses to run. Sized so exact tests stay inside the
 #: <60s dev loop; tools/cost_probe.py is the solver-side equivalent.
 EXACT_EVAL_BUDGET = 4_000_000
+
+#: Seven-card rows handed to the vectorised evaluator per call. The exact path scores every legal
+#: (board, combo) pair in blocks this size, which is what makes the batch path worth its fixed per-call
+#: cost even for a two-combo matchup over 1,712,304 boards: at one call per board the fixed cost made
+#: hand-vs-hand exact equity eight times *slower*, and hand-vs-hand is the most common exact call in the
+#: curriculum. One megabyte-scale block per call keeps the setup amortised and the working set bounded.
+EVAL_BLOCK_ROWS = 1 << 20
 
 Board = tuple[Card, ...]
 _Z95 = 1.959963984540054
@@ -134,6 +145,32 @@ def _conflict_mask(hero_combos: np.ndarray, villain_combos: np.ndarray) -> np.nd
     return conflicts
 
 
+def _score_matrix(combos: np.ndarray, boards: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Scores and legality for every ``(board, combo)`` pair, in as few vector calls as the block allows.
+
+    Returns ``(scores, legal)``, both shaped ``(n_boards, n_combos)``. A combo that uses a card the board
+    already shows is *illegal*: it cannot be dealt, and its seven-card row would repeat a physical card,
+    which the evaluator rightly refuses. Those entries are left at zero in ``scores`` and reported by
+    ``legal``, so a caller that forgets to mask reads a zero as "worst possible hand" rather than
+    crashing -- which is why the mask is returned instead of applied here.
+
+    The dense ``(n_boards, n_combos)`` temporary is affordable because :data:`EXACT_EVAL_BUDGET` caps
+    ``n_boards x (hero_combos + villain_combos)``, and so bounds this shape by the same number; the
+    broadcast intermediate that builds it is ten times wider (two hole cards against five board cards per
+    pair), which the same cap keeps at a few tens of megabytes.
+    """
+    conflict = (combos[:, None, :, None] == boards[None, :, None, :]).any(axis=(2, 3))
+
+    legal = ~conflict.T
+    flat_board, flat_combo = np.nonzero(legal)
+    scores = np.zeros(legal.shape, dtype=np.int64)
+    for start in range(0, flat_board.size, EVAL_BLOCK_ROWS):
+        rows = slice(start, min(start + EVAL_BLOCK_ROWS, flat_board.size))
+        cards = np.concatenate([combos[flat_combo[rows]], boards[flat_board[rows]]], axis=1)
+        scores[flat_board[rows], flat_combo[rows]] = evaluate7_many(cards)
+    return scores, legal
+
+
 def range_equity(
     hero: Range,
     villain: Range,
@@ -205,29 +242,36 @@ def range_equity(
                 " mode='auto' and read .exact on the result."
             )
         wins = ties = losses = 0.0
-        for full_board in completions:
-            board_set = {c.index for c in full_board}
-            h_mask = np.array([not (set(hc) & board_set) for hc in hero_combos], dtype=bool)
-            v_mask = np.array([not (set(vc) & board_set) for vc in villain_combos], dtype=bool)
-            if not h_mask.any() or not v_mask.any():
-                continue
-            hero_scores = np.array(
-                [
-                    best_score((Card.from_index(int(a)), Card.from_index(int(b))), full_board)
-                    for a, b in hero_combos[h_mask]
-                ]
-            )
-            villain_scores = np.array(
-                [
-                    best_score((Card.from_index(int(a)), Card.from_index(int(b))), full_board)
-                    for a, b in villain_combos[v_mask]
-                ]
-            )
-            weights = joint[np.ix_(h_mask, v_mask)]
-            diff = hero_scores[:, None] - villain_scores[None, :]
-            wins += float(weights[diff > 0].sum())
-            ties += float(weights[diff == 0].sum())
-            losses += float(weights[diff < 0].sum())
+        board_codes = np.fromiter(
+            (card.index for board_ in completions for card in board_),
+            dtype=np.int64,
+            count=5 * len(completions),
+        ).reshape(len(completions), 5)
+        hero_scores, hero_legal = _score_matrix(hero_combos, board_codes)
+        villain_scores, villain_legal = _score_matrix(villain_combos, board_codes)
+        if single_pair and hero_legal.all() and villain_legal.all():
+            # Both hands are on the table, so the runout space was already built from the deck minus
+            # those four cards and no combo can ever be illegal. That makes the comparison one
+            # whole-array operation rather than a per-runout Python loop. Measured over the same
+            # 1,712,304 runouts and 3,424,608 evaluations of ``AhAs`` versus ``7d2s`` preflop: 353.8s
+            # with the old per-hand scalar evaluator, 50.8s with vectorised scoring behind the loop,
+            # 17.3s with the loop gone. Same 0.8819368523 every time.
+            weight = float(joint[0, 0])
+            difference = hero_scores[:, 0] - villain_scores[:, 0]
+            wins = weight * float((difference > 0).sum())
+            ties = weight * float((difference == 0).sum())
+            losses = weight * float((difference < 0).sum())
+        else:
+            for index in range(board_codes.shape[0]):
+                h_live = hero_legal[index]
+                v_live = villain_legal[index]
+                if not h_live.any() or not v_live.any():
+                    continue
+                weights = joint[np.ix_(h_live, v_live)]
+                diff = hero_scores[index][h_live][:, None] - villain_scores[index][v_live][None, :]
+                wins += float(weights[diff > 0].sum())
+                ties += float(weights[diff == 0].sum())
+                losses += float(weights[diff < 0].sum())
         denominator = wins + ties + losses
         if denominator <= 0:
             raise InputError("exact enumeration found no legal combination")

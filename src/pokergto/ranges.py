@@ -223,6 +223,13 @@ class Range:
 def from_chart(artifact: Mapping[str, Any]) -> Range:
     """``data/gen/ranges/*.json`` -> Range. Generated charts carry combo-weighted entries plus the
     ``cell_combos`` table so this function never has to trust a hand-typed count.
+
+    A chart cell holds a **frequency relative to that cell's own combos** -- ``0.333333`` in ``84o``
+    means a third of its twelve combos, four of them -- and :class:`Range` stores one probability per
+    *combo*. The two are the same number, which is the trap: multiplying a cell's frequency by its
+    combo count produces a per-combo weight of up to twelve, which is not a probability and which
+    ``Range`` refuses. ``combos()`` sums the vector afterwards, so the combo count arrives by itself:
+    ``12 x 0.333333 = 3.999996`` is the artifact's own arithmetic, not something to pre-apply here.
     """
     weights = np.zeros(1326, dtype=np.float64)
     orientation = artifact.get("orientation")
@@ -237,7 +244,7 @@ def from_chart(artifact: Mapping[str, Any]) -> Range:
             raise InputError(
                 f"chart {artifact.get('id')} declares {declared} combos for {key}, expected {expected}"
             )
-        weights[_CLASS_POSITIONS[key]] = float(frequency) * expected
+        weights[_CLASS_POSITIONS[key]] = float(frequency)
     return Range(weights)
 
 

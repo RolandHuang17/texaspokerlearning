@@ -78,13 +78,12 @@ jobs:
           print(f"ok   {len(left)} requirement declarations agree")
           PY
 
-      # NON-BLOCKING AT M0, verified: `ruff check` currently reports 335 findings across src/ and
-      # tools/ (pydocstyle D102/D103/D105/D205/D209 dominant, plus UP035 and RUF001/RUF002 for the
-      # fullwidth Chinese punctuation that a bilingual codebase deliberately contains), and
-      # `ruff format --check` would reformat 24 of 48 files. Blocking on either would mean nothing can
-      # be merged until the baseline is swept, so the findings land as inline annotations instead.
-      # TODO(m1): drop continue-on-error once src/pokergto and tools/ are clean, then decide whether
-      # RUF001/RUF002 need `lint.allowed-confusables` or a targeted per-file ignore.
+      # Measured 2026-10-07, ruff 0.16.10: `ruff check .` reports **zero** findings across src/, tools/
+      # and tests/, and `ruff format --check .` would reformat 14 of 161 files. Both steps stay
+      # continue-on-error for one reason that is not laziness: `ruff>=0.4` in pyproject.toml is a floor,
+      # so CI resolves whatever ruff ships tomorrow, and a blocking gate on an unpinned linter turns every
+      # future release into a red build for every open pull request. The fix is to pin ruff (and mypy) in
+      # the dev extra, then block -- tracked as a 1.0-hardening item, not a standing ambiguity.
       - name: ruff check
         shell: bash
         continue-on-error: true
@@ -95,10 +94,11 @@ jobs:
         continue-on-error: true
         run: python -m ruff format --check .
 
-      # NON-BLOCKING AT M0, verified: 59 errors in 14 files, concentrated in the solver modules being
-      # written right now (numpy `ndarray` generics) plus two real ones in cli.py:244. mypy is strict
-      # over src/pokergto by configuration, and strict mode is not going anywhere.
-      # TODO(m2): make this gate when the solver modules land.
+      # Measured 2026-10-07, mypy 1.10.0, strict over src/pokergto: **zero** errors in 30 files. The M0
+      # note here claimed 59 in 14 files; that backlog is gone, including the numpy `ndarray` generic
+      # noise, which is why the package casts at the few array boundaries where it pays instead of
+      # parameterising every signature (see pyproject's disallow_any_generics = false). Same unpinned-tool
+      # caveat as above, so this stays report-only until mypy is pinned.
       - name: mypy
         shell: bash
         continue-on-error: true

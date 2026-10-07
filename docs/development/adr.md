@@ -3,7 +3,7 @@
 > **Single-language by design:** these are contributor-facing engineering docs, and the
 > bilingual-same-PR rule applies to curriculum content only (see adr/0005).
 
-The canonical records are `adr/0001`…`adr/0005` at the repository root:
+The canonical records are `adr/0001`…`adr/0006` at the repository root:
 <https://github.com/RolandHuang17/texaspokerlearning/tree/main/adr>. They live there, and not under
 `docs/`, because an ADR is part of the engineering contract alongside `pyproject.toml`, `NOTICE` and
 `LICENSE` — it must be readable by someone who has only cloned the code and never built the site, and
@@ -43,6 +43,13 @@ anything, and multiway postflop has no tractable exact solution; GPU/C extension
 sampling in the CFR inner loop, external solver formats, abstraction ladders and browser-side WASM CFR
 are cut on the same reasoning. See [solver proof policy](./solver-proof-policy.md) for the authoring
 rules that fall out of this.
+
+**Correction, 2026-10-07:** Rule B's preflop row was justified by "no future streets, so it is tractable
+exactly", and that premise was priced after the record was written. A preflop all-in still enumerates
+`C(52,5) = 2,598,960` boards per cell, the vectorised evaluator speeds the enumeration 4.8-20.4x, and the
+full exact 169x169 matrix still measures out at about **740 hours** on the development laptop. The row's
+game remains; its exactness does not, and what replaces it is an open question. See `adr/0006` (the
+canonical record) and its summary below.
 
 ## ADR-0003 — Two licences: MIT for code, CC BY-SA 4.0 for curriculum and data
 
@@ -85,6 +92,26 @@ failures of free poker education — retyped commercial solver charts, and confi
 integrity failures, and prose that says "please cite your sources" is not a control. See
 [data provenance](./data-provenance.md) for the mechanics and the ban list.
 
+## ADR-0006 — Exactness is bounded by measured cost, not by ambition
+
+Supersedes part of ADR-0002 on one point: a claim that a computation is "tractable exactly" has to survive
+being priced. The preflop all-in matrix was written into Rule B on the reasoning that no future streets
+means a tractable enumeration, and the reasoning was sound about the tree and wrong about the deal: every
+cell still runs the board out to five cards. Priced after the vectorised evaluator landed, on the
+development laptop (py3.12, Windows, numpy 2.x, 2026-10-07): `evaluate5_many` 1,028,474 hands/s against
+62,118 scalar (16.6x), `evaluate7_many` 313,984 against 46,296 (6.8x), the widest exact flop enumeration
+37.9 s to 7.84 s, exact preflop hand-versus-hand 353.8 s to 17.3 s — and the full 169x169 exact matrix
+5.87x10^11 evaluations, **~740 hours**. Three findings are part of the record because they changed the
+code: vectorising the *definition* (best-of-21 in one array) is slower than the scalar algorithm;
+batching one board at a time made the most common exact call eight times *slower*; and the fix was to
+batch across boards, which is what produced the 20x. So affordability is declared and re-measured in
+`tools/cost_probe.py` (a throughput floor, a wall-clock ceiling on the widest cited enumeration, and that
+enumeration's committed number re-derived on every run), `EXACT_EVAL_BUDGET` stays at 4,000,000
+evaluations because a 740-hour artifact is not reproducible by a reviewer, and no lesson may cite a
+preflop matrix as `derived` until a later record chooses what replaces it — the three costed options
+(exact marquee cells plus a declared Monte-Carlo matrix, a reduced preflop game solved exactly, or no
+preflop solve at all) are written out in `adr/0006` and the decision is open.
+
 ## Where each decision is enforced
 
 | Record | Enforcing artefacts |
@@ -94,3 +121,5 @@ integrity failures, and prose that says "please cite your sources" is not a cont
 | 0003 | `LICENSE`, `LICENSE-docs.md`, `NOTICE`, `CITATION.cff`, `.github/PULL_REQUEST_TEMPLATE.md` |
 | 0004 | `trainer/src/lib/data.ts`, `tools/sync_trainer_data.py`, `workflows/trainer` job in `ci.yml`, `workflows/pages.yml` |
 | 0005 | `data/schema/common.schema.json#/$defs/provenance`, `tools/check_provenance.py`, `CODEOWNERS` on `data/src/**` |
+| 0006 | `tools/cost_probe.py` (evaluator throughput floor, exact-enumeration ceiling, re-derived equity), `EXACT_EVAL_BUDGET` in `src/pokergto/equity.py`, `tests/test_evaluator.py` |
+

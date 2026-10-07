@@ -77,8 +77,106 @@ Le résumé est en chinois sous chaque entrée.
   from `data/src/curriculum.yaml`, so a lesson registered is a lesson reachable.
   新增 `tools/cost_probe.py`（按博弈族设定运行时与内存预算，进 CI，预算旁边写着实测基线）与
   `mkdocs_nav.py`（站点导航由课程骨架生成，登记即到达）。
+- `evaluate5_many`, `evaluate7_many`, `evaluate7_many_reference` and `best_scores_many` in
+  `pokergto.evaluator`: the same rules as the scalar evaluator over blocks of 52-card indices, returning
+  the **identical integers** rather than an order-equivalent re-encoding. Measured on the author's laptop
+  (py3.12, Windows, 2026-10-07): 1,028,474 five-card hands/s against 62,118 scalar (16.6x) and 313,984
+  seven-card hands/s against 46,296 (6.8x). The proof is the same shape the module already used: all
+  2,598,960 five-card hands compared element-wise against `evaluate5` (`slow`), plus every hand of five
+  structurally chosen subdecks -- single-suit, 6 ranks x 4 suits, 8 x 2, 9 x 3, 9 x 4 -- and 9.6 million
+  seven-card hands checked against the literal best-of-21 definition. That sweep found a real bug: on
+  seven cards `A-2-3-4-5-6-7` contains a wheel *and* a seven-high run, and the first version scored it
+  five-high. No category changes, so every category-count assertion in the repository stays green through
+  it; it is invisible on five cards, which is why five-card-only testing is not a proof.
+  `pokergto.evaluator` 新增 `evaluate5_many` / `evaluate7_many` / `evaluate7_many_reference` /
+  `best_scores_many`：对 52 张牌索引的整块牌做与标量版本同样的规则，且返回**完全相同的整数**，不是"顺序
+  等价"的另一种编码。作者本机实测（py3.12、Windows、2026-10-07）：五张牌 1,028,474 手/秒对比标量 62,118
+  （16.6 倍），七张牌 313,984 手/秒对比 46,296（6.8 倍）。证明沿用本模块已有的口径：全部 2,598,960 个五张
+  牌牌型逐元素对比 `evaluate5`（`slow`），外加五个按结构挑选的子牌堆的**每一个**牌型，以及 960 万个七张牌
+  牌型对比字面定义（21 选最优）。正是这个全枚举扫出一个真 bug：七张牌时 `A-2-3-4-5-6-7` 同时含轮子和
+  七高顺，第一版把它算成五高。类别不变，所以仓库里所有类别计数的断言都发现不了它；五张牌上也不可能看见——
+  这就是只用五张牌测试不算证明。
+
+### Changed / 变更
+- Lesson `01-05`'s cost paragraph is now a four-way table measured in one process (definition, direct
+  algorithm, and both vectorised: 3,212 / 51,507 / 40,325 / 331,714 seven-card hands per second), its
+  "what proves this" list gained the vectorised layer as a fifth route, and its closing claim moved: the
+  wall between exact and Monte Carlo is no longer one preflop matchup (that is 17.3 s now) but the matrix
+  `adr/0006` priced. Both languages, same numbers, same table shape. 课文 `01-05` 的成本段落改成一次进程内
+  四路实测表（定义、直接算法、以及两者的向量化版本：3,212 / 51,507 / 40,325 / 331,714 手七张牌每秒），
+  "用什么证明"一栏新增向量化路径作为第五条路，结论也换了：把精确枚举推回蒙特卡洛的那堵墙不再是一手翻前对位
+  （现在那是 17.3 秒），而是 `adr/0006` 量过的那张矩阵。中英同数、同表形。
+- `range_equity`'s exact path enumerates in blocks now: every legal (board, combo) pair is scored in one
+  vector call, and the runout loop no longer carries the evaluation. Measured on the same machine: the
+  widest exact enumeration any lesson cites (884 combos against 442 on `Kh7h2d`) 37.9 s -> 7.84 s, and
+  exact preflop `AhAs` versus `7d2s` over 1,712,304 runouts 353.8 s -> 17.3 s. Every equity in the
+  committed artifacts is unchanged to the last stored digit -- which is the assertion, not an aside: a
+  speed-only difference must not be observable in `data/gen`.
+  `range_equity` 的精确路径改为分块枚举：每个合法的（牌面，组合）对一次向量评估，遍历里不再顺手算牌。
+  同一台机器实测：课文引用最宽的那次精确枚举（`Kh7h2d` 上 884 组合对 442 组合）从 37.9 秒到 7.84 秒；翻前
+  `AhAs` 对 `7d2s` 的 1,712,304 个摊面从 353.8 秒到 17.3 秒。已提交生成物里的每一个胜率末位不变——这句是
+  断言而不是旁白：只关速度的差异不该在 `data/gen` 里留痕。
+- **`adr/0006` supersedes part of `adr/0002`: preflop is not "tractable exactly".** The premise was that
+  removing future *decisions* removes the cost, but a preflop all-in still runs five cards to the board,
+  so the full exact 169x169 class matrix is `2,598,960 x 225,780 = 5.87e11` evaluations, about 740 hours at
+  the measured throughput. Vectorising the evaluator bought 4.8x to 20.4x where three orders of magnitude
+  were needed, and the honest output of this change is a measured negative result: `EXACT_EVAL_BUDGET`
+  stays where it is, `tools/cost_probe.py` now guards the evaluator's throughput floor and the exact
+  enumeration's wall-clock ceiling, and chapters 05/10/11/12 stay unauthored until the open question in
+  `adr/0006` (three costed options) is decided. Two findings shaped the code and are recorded because they
+  were not obvious: batching the *definition* (best-of-21 in one vector call, 39,305 hands/s) is slower
+  than the scalar seven-card algorithm (46,296), and batching one board at a time made hand-vs-hand exact
+  equity eight times **slower** (0.81 s against 0.11 s) than the loop it replaced.
+  **`adr/0006` 部分取代 `adr/0002`：翻前并不"可以精确求解"。** 当初的前提是"没有后续决策所以可精确处理"，
+  但翻前全下仍然要把五张公共牌摊完：完整的精确 169×169 类别矩阵是 `2,598,960 × 225,780 = 5.87e11` 次评估，
+  按实测吞吐约 740 小时。向量化评估器带来的是 4.8 到 20.4 倍，而这里需要的是三到四个数量级。于是这次变更的
+  诚实产出是一个实测的否定结论：`EXACT_EVAL_BUDGET` 保持不变，`tools/cost_probe.py` 开始守评估器吞吐下限与
+  精确枚举的运行时上限，第 05/10/11/12 章在 `adr/0006` 里那个开放问题（三条已标价的路）定下来之前不写。有
+  两个发现改变了写法，因为它们在事前都不显然：把"定义"向量化（一次算 21 个五张牌子牌型，39,305 手/秒）比
+  标量的七张牌直接算法（46,296）还慢；而"一张牌面一次批量"让一手对一手的精确胜率比它替换掉的循环**慢了八倍**
+  （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- `range_advantage.board_ceiling()` (new, and now shared with the table generator) takes its maximum over
+  the combos that **can still be dealt** on the board. Before this, a combo holding a card the board already
+  shows was counted, and the evaluator reads such a hand as containing that rank twice: on `5cKh3sTh4h` the
+  undealable `Kh Ah` scores `flush A-K-K-T-4`, which beats the real ceiling `flush A-K-Q-T-4`, so an
+  unfiltered ceiling can call a range capped that owns the board's best dealable hand. Measured over 4,000
+  random boards of three to five cards, 100 have a strictly higher unfiltered ceiling; none of the three
+  boards in `table.03-02` is one of them, which is why the fix is a named function with a test rather than
+  a changed number. `table.03-02`'s caption states the new universe in both languages and
+  `tests/test_range_advantage.py` pins the phantom case.
+  `range_advantage.board_ceiling()`（新增，并与表格生成器共用同一个函数）现在只在**这张牌面上还发得出来**的组合里取
+  最大值。此前，用到牌面已有牌的组合也被算进去，而评估器会把那张点数读成两张：`5cKh3sTh4h` 上发不出来的 `Kh Ah` 得
+  `同花 A-K-K-T-4`，比真正的上限 `同花 A-K-Q-T-4` 还高——于是"没坚果"的判定能判错。4,000 个随机牌面实测有 100 个出现这
+  种幻影压过真上限；`table.03-02` 的三个点面都不在其中，所以这次改动的产物是一个带测试的具名函数，而不是被改动的数字。
+  `table.03-02` 的说明文字已用两种语言写明新的取值范围，幻影牌型由 `tests/test_range_advantage.py` 钉住。
+- Chapter 03's theory module had **no test file at all**: `nut_advantage`, `is_capped` and `advantage` were
+  executed only indirectly, through the generator that writes the tables, which is how a ceiling definition,
+  a per-combo weight convention and a scoring rewrite could each live in that module unexamined.
+  `tests/test_range_advantage.py` adds seven: batched scores equal the scalar definition combo by combo,
+  nut shares equal a hand-recomputed share including the `near_nuts` knob, the phantom ceiling case, ceiling
+  and verdict computed from one function, the board-narrowing refusal, `tolerance`'s direction (raising it
+  makes "capped" harder to claim, with the margin measured rather than assumed), and `advantage()`'s
+  identities. 第 03 章的理论模块此前**一个测试文件都没有**：`nut_advantage`、`is_capped`、`advantage` 只是被写表格的生成器
+  间接跑过——上限的定义、每组合权重的口径、评分改写的等价，全都可以在没人检查的情况下待在那个模块里。新增七个测试：批量评分逐
+  组合等于标量定义、坚果占比等于手算复核（含 `near_nuts` 旋钮）、幻影上限、上限与判定共用同一函数、未收缩范围的拒绝、
+  `tolerance` 的方向（调大只会让"封顶"更难成立，差值是量出来的）、以及 `advantage()` 的恒等关系。
+- `ranges.from_chart()` multiplied each chart cell's frequency by that class's combo count, producing
+
+  per-combo weights up to twelve against `Range`'s documented invariant that a weight is a probability in
+  `[0, 1]`. It therefore raised on **any** fully-included class, which is to say on every committed chart:
+  the reproduce command lesson `01-04` prints for its 55.92% range matchup could not have run as written.
+  The number itself was never wrong (re-derived after the fix: `0.5591717398`, and `tools/cost_probe.py`
+  now re-derives it in CI), and no artifact was affected because no generator called this function -- which
+  is exactly the gap this fixes: `from_chart` had no test. Two now cover it, a round-trip against the
+  committed chart and a refusal check on a mis-declared `cell_combos` table.
+  `ranges.from_chart()` 把表格里每格的频率又乘了一遍该类的组合数，于是每组合权重最高到 12，直接违反 `Range`
+  写明的"权重是 [0,1] 的概率"。结果是它对**任何**整格包含的类都会抛错——也就是对所有已提交的图表：`01-04`
+  为 55.92% 那个范围对局印出来的复现命令按原文根本跑不起来。数字本身没错（修好后重新算出 `0.5591717398`，
+  现在 `tools/cost_probe.py` 每次构建都会重算它），也没有任何生成物被牵连，因为没有生成器调用这个函数——而这
+  正是要补的洞：`from_chart` 一个测试都没有。现在有两个：一个拿已提交图表做往返校验，一个检查 `cell_combos`
+  被写错时必须拒绝。
 - `solver/vector.py` floored *every* regret row after touching a few, which also erases the opponent's
   negative regrets during our own traversal: a different CFR+ trajectory from `solver/cfr.py`, and one no
   gate detected. Every registered gate passed with the wrong scope -- the two forms still agreed on each

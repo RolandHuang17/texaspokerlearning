@@ -39,14 +39,45 @@ No tuple comparison, no special case at the call site. Two measured integers: th
 
 **Step one: the definition is one sentence.** From seven cards choose five, which is `C(7,5) = 21` choices, and take the best five-card score. That code exists in this repository: `evaluate7_reference`. It is slow, and it is the rulebook.
 
-**Step two: an optimisation has to be proved, not read.** `evaluate7` takes another route: find a suit holding at least five cards (a straight flush can only come from there), then quads, then a full house, then flush, then straight, then the pairs and finally high card. Faster, and therefore more dangerous: a bug that only misses double trips, or a wheel straight flush, does not fail anywhere an eye can see. The cost being saved is real: one preflop matchup has `C(48,5) = 1,712,304` boards (the four known hole cards are removed from the runout pool), two evaluations per board, so 3,424,608 evaluations; done by the definition that is `3,424,608 × 21 = 71,916,768` five-card evaluations. Measured on the author's machine: `evaluate7` handled 20,000 random seven-card boards in 0.487 s (24.35 microseconds per call), `evaluate7_reference` handled 2,000 in 0.758 s (379 microseconds per call), a ratio of **15.57x**; extrapolating those per-call costs over the same enumeration gives roughly **1.4 minutes versus 21.6 minutes**. That 21.6 minutes is exactly the point at which exact enumeration quietly becomes Monte Carlo, which is why the comments in `equity.py` exist.
+**Step two: an optimisation has to be proved, not read.** `evaluate7` takes another route: find a suit holding at least five cards (a straight flush can only come from there), then quads, then a full house, then flush, then straight, then the pairs and finally high card. Faster, and therefore more dangerous: a bug that only misses double trips, or a wheel straight flush, does not fail anywhere an eye can see. The cost being saved is real: one preflop matchup has `C(48,5) = 1,712,304` boards (the four known hole cards are removed from the runout pool), two evaluations per board, so 3,424,608 evaluations; done by the definition that is `3,424,608 × 21 = 71,916,768` five-card evaluations. Measured in one process on the author's laptop (2026-10-07) over the same 20,000 random seven-card hands:
 
-**Step three: what this repository proves it with.** Four independent routes, all of them run in CI:
+| implementation | hands/s | microseconds per call | extrapolated over one preflop matchup |
+|---|---|---|---|
+| `evaluate7_reference` -- the definition, one hand at a time | 3,212 | 311.36 | 17.8 min |
+| `evaluate7` -- the direct algorithm, one hand at a time | 51,507 | 19.41 | 66 s |
+| `evaluate7_many_reference` -- the definition, in a vector | 40,325 | 24.80 | 85 s |
+| `evaluate7_many` -- the direct algorithm, in a vector | 331,714 | 3.01 | 10 s (17.3 s measured end to end) |
+
+Read the middle two rows together, because they are the lesson inside the lesson: **vectorising the
+definition lost to the scalar algorithm**, 24.80 microseconds against 19.41. Twenty-one sub-hands divided
+by a 17x batch speed-up is about a wash, so the only honest way to make seven-card evaluation fast in a
+vector is to duplicate the *algorithm* -- which is precisely the thing this step warns you not to trust.
+`evaluate7_many_reference` exists so that duplication has something to be measured against, in the same
+relationship `evaluate7` has to `evaluate7_reference`, and the duplicate must return the **same integers**,
+not merely the same ranking: committed tables store those integers.
+
+The duplicate did break, and only an exhaustive sweep saw it. On five cards a wheel cannot coexist with a
+higher run; on seven, `A-2-3-4-5-6-7` contains both, and the first version scored it five-high. No category
+changed, so every count-based assertion in the file stayed green. What caught it was comparing every hand of
+five structurally chosen subdecks -- 9.6 million seven-card hands -- against the definition, and
+`test_batch_seven_card_finds_the_higher_run_when_a_wheel_is_also_present` below is what keeps it caught.
+
+So the wall that pushes exact enumeration into Monte Carlo is no longer one preflop matchup: 17.3 s is a
+price worth paying once, and `EXACT_EVAL_BUDGET = 4,000,000` evaluations admits it. The wall is the
+*matrix*. 14,365 class pairs at these rates is hundreds of hours, which is what `adr/0006` measured when it
+retracted the promise that preflop could simply be enumerated exactly.
+
+**Step three: what this repository proves it with.** Five independent routes, all of them run in CI:
 
 1. A deliberately naive oracle, `tests/reference_evaluator.py` -- tuples, rulebook order, **no code shared with `src/pokergto/evaluator.py`**.
 2. Full enumeration: all `C(52,5) = 2,598,960` five-card hands, checked both for category counts and hand-by-hand agreement with the oracle (`pytest -m slow`).
 3. The fast seven-card path against the best-of-21 definition: 20,000 random boards at each of the arities 5, 6 and 7, with the seeds written as `20260 + size`.
 4. Random seven-card hands against the naive best-of-21: 4,000 hands, seed 4242.
+5. The vectorised paths against the scalar ones, element by element and as the *same integers*: all
+   `C(52,5) = 2,598,960` five-card hands (`pytest -m slow`), every hand of five structurally chosen
+   subdecks, 9.6 million seven-card hands against `evaluate7_many_reference`, and a throughput floor in
+   `tools/cost_probe.py` that runs on every build -- because a speed-up nobody guards is a speed-up that
+   quietly leaves.
 
 **Step four: a second independent route -- closed-form counts.** Each of the nine numbers the enumeration produces is pure combinatorics (verified in this repository against the enumeration; `math.comb` is enough to redo it by hand):
 
@@ -139,7 +170,7 @@ No grid is embedded in this lesson, and the reason is worth stating. The evaluat
 3. **Suits cannot break a tie.** That is the rule, not a defect -- but it means any game that needs a suit ordering (some lowball variants, odd-chip awards) cannot reuse this integer.
 4. **A wheel straight flush is not a royal flush.** `describe` says royal only for an ace-high straight flush; the five-high one is `straight flush 5`. Deliberate: do not "fix" it.
 5. **The closed forms stop at five cards.** They count five-card hands. Seven-card category counts need inclusion-exclusion redone from scratch; you cannot multiply by 21.
-6. **15.57x is a hardware number.** It is one measurement taken here, and it moves with the machine and the Python build. The engine constants worth citing are `AUTO_EXACT_BUDGET = 250_000` and `EXACT_EVAL_BUDGET = 4_000_000`, both in evaluations.
+6. **Every ratio in the table is a hardware number.** This run put the definition-to-algorithm ratio at 16.04x and vectorising the algorithm at 6.44x; an earlier run on the same machine read 15.57x and 6.8x, and another machine will differ again. The parts of this that are portable and therefore quotable are `AUTO_EXACT_BUDGET = 250_000`, `EXACT_EVAL_BUDGET = 4_000_000` (both in evaluations) and the 100,000-hands-per-second floor `tools/cost_probe.py` enforces.
 
 ## 陷阱 / Common mistakes
 
@@ -178,7 +209,7 @@ Every number here is computed in this repository. No range chart or strategy out
 | Nine category counts | `derived` | `data/gen/tables/table.01-05.hand-class-counts.json`; independent closed forms above |
 | The best-of-21 definition itself | `derived` | `src/pokergto/evaluator.py#evaluate7_reference` (oracle in `tests/reference_evaluator.py`, deliberately sharing no code with `src/`) |
 | Equity decompositions (98.13 / 13.64 / 72.73 / 97.09 ...) | `derived` | `python -m pokergto equity`, `exact=True`, `iterations` of 990 / 44 / 1,712,304 |
-| The 15.57x per-call ratio and the 1.4 vs 21.6 minute extrapolation | measured here, **UNVERIFIED** as a portable figure | it changes per machine; verify by rerunning the same timing script |
+| The per-call table (3,212 / 51,507 / 40,325 / 331,714 hands/s) and its extrapolations | measured here, **UNVERIFIED** as a portable figure | it changes per machine; rerun the same timing script. The portable part is the throughput floor in `tools/cost_probe.py` |
 | Side pots, suit tie-breaks | out of model | need a money model; `split_pot` only reports who shares the top score |
 
 ## 术语 / Terms

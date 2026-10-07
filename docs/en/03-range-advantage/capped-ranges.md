@@ -11,7 +11,7 @@
 
 ## 前置知识 / Prerequisites
 
-- `03-01` nut advantage: its reference is the best of the two ranges. This lesson's reference is the best of all 1,326 combos. They are not the same object.
+- `03-01` nut advantage: its reference is the best of the two ranges. This lesson's reference is the best of the 1,176 combos that can still be dealt on this board. They are not the same object.
 - `01-05` the seven-card evaluator: `is_capped` compares integers from that total order.
 - `01-01` combos: `KK` is 6 combos, and on `Kh7s3d` it is the only thing on the roof.
 - `02-04` the bluff-to-value ratio: a big size needs a value segment, and capacity is what fills it.
@@ -21,8 +21,8 @@
 A range is **capped** on a board exactly when its own best holding sits below what that board can produce:
 
 ```
-C(B)             = max over all 1,326 combos of best_score(hand, B)   -- the board's ceiling
-best(H, B)       = max over i in H of           best_score(i, B)      -- the range's strongest hand
+C(B)             = max over the 1,176 dealt combos of best_score(hand, B)  -- the board's ceiling
+best(H, B)       = max over i in H of             best_score(i, B)         -- the range's strongest hand
 is_capped(H, B)  <=>  best(H, B) < C(B) - tolerance
 ```
 
@@ -36,7 +36,9 @@ is_capped(H, B)  <=>  best(H, B) < C(B) - tolerance
 
 Three quantities have to be defined separately; conflating them is this lesson's only real error.
 
-**The board's ceiling `C(B)`.** Its universe is **all 1,326 starting combos**, not "what I hold" or "what he holds". The code is exactly `max(best_score((Card.from_index(a), Card.from_index(b)), board) for a, b in ALL_COMBOS)`.
+**The board's ceiling `C(B)`.** Its universe is **every combo that can still be dealt** -- 1,176 on a flop, 1,081 once the board shows four or five cards -- not "what I hold" or "what he holds", and not the 1,326 preflop combos either. The code is `pokergto.theory.range_advantage.board_ceiling(board)`, which the table generator calls too, so the printed ceiling and the verdict cannot drift apart.
+
+The exclusion is not hygiene, and this is where a definition that sounds obvious stops being one. A combo holding a card the board already shows adds a **phantom** copy of that rank, and the evaluator takes its cards as given, so the phantom counts twice -- and a repeated card can beat every real hand. On `5c Kh 3s Th 4h` the board shows three hearts, so the best dealable flush is `A-K-Q-T-4`, made by `Ah Qh`. The undealable `Kh Ah` is read as `A-K-K-T-4`, and a second king outranks a queen in the third slot. Scored over 4,000 random boards, 100 of them put such a phantom above the real ceiling. It changes no number in this lesson's table (all three spots agree, which is exactly why a rule has to be stated rather than inferred from a case that happens to be harmless), and it is pinned by `tests/test_range_advantage.py::test_the_board_ceiling_counts_only_hands_that_can_be_dealt`.
 
 **The range's best `best(H,B)`.** The same maximum, taken only over `H`.
 
@@ -44,7 +46,7 @@ Three quantities have to be defined separately; conflating them is this lesson's
 
 One detail has to be stated, because it is the trap in this section. `tolerance` is counted in **units of the evaluator's packed integer score**, not in hand types. Measured on the four three-card boards used here:
 
-- Each of them is covered by only **91** distinct final strengths across all 1,326 combos.
+- Each of them is covered by only **91** distinct final strengths, and the count is 91 on either universe (all 1,326 combos, or only the 1,176 that can be dealt) -- measured, not assumed.
 - On `AsKsQh` the smallest gap between two adjacent distinct strengths is **1** unit (high card `A-K-Q-4-2` versus `A-K-Q-4-3`), so a tolerance of 2 really can absorb two kicker-level differences.
 - But gaps with hand-type meaning are far larger: the smallest gap on `Kh7s3d` is **16**, trips sevens sit **368,640** units below trips kings, the capped `AsKsQh` row is **3,150,704** units below the ceiling, and the capped villain on `9h6d3c` is **184,320** units below.
 
@@ -208,7 +210,7 @@ This chart is the 33.33% a defender must keep facing a double-pot bet: 442.0 of 
 
 ## 为何成立、何时失效 / Why it works, when it breaks
 
-**What it requires**: that `C(B)` really is an upper bound for the board (it is, it scans all 1,326 combos); that the comparison is at combo level, not class level; and that the evaluator gives one total order to every combo.
+**What it requires**: that `C(B)` really is an upper bound for the board (it is, it scans every combo that can still be dealt, and it must not scan the ones that cannot); that the comparison is at combo level, not class level; and that the evaluator gives one total order to every combo.
 
 Where it stops meaning what you want:
 
@@ -240,7 +242,7 @@ Where it stops meaning what you want:
 
 ## 自测清单 / Self-check
 
-- [ ] I can name the two universes `is_capped` scans (1,326 versus the range) and say which verdict needs which.
+- [ ] I can name the two universes `is_capped` scans (the combos still dealable on this board, versus this range) and say which verdict needs which.
 - [ ] I can list the single ceiling-reaching class for each of the four boards and explain why that makes the ceiling a knife-edge.
 - [ ] I can separate "capped" from "behind" and produce the 61.2680% counterexample.
 - [ ] I can state the real unit of `tolerance` and quote 184,320.
@@ -273,7 +275,7 @@ Where it stops meaning what you want:
 | Abbrev | 中文 | English | Meaning in this lesson |
 |---|---|---|---|
 | — | 封顶范围 | capped range | `best(H,B) < C(B) - tolerance`; the subject is this range |
-| — | 牌面可达上限 | board ceiling | `C(B)`: the best score any of the 1,326 combos makes on this board |
+| — | 牌面可达上限 | board ceiling | `C(B)`: the best score any dealable combo makes on this board (1,176 of them on a flop) |
 | — | 坚果 | the nuts | here the **absolute** top; in `03-01` the top of the two ranges |
 | — | 牌型容量 | capacity | how many of a range's legal combos can place at `C(B)` |
 | — | 行动线 | line | where a real range would come from; this lesson can only inspect authored ones |

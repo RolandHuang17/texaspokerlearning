@@ -73,7 +73,7 @@ anchor. "It converged" is not an anchor.
 | 1-street bluff-catcher, bet sizes ⅓ / ½ / pot | the bridge between chapter 02's algebra and an equilibrium | mechanism 1 |
 | Leduc hold'em | canonical research benchmark, 2 streets, real card abstraction | exploitability → 0 |
 | 2-street "ruddy" toy | protection, and the no-bluff-on-earlier-street result | exploitability → 0 |
-| 1326-combo preflop model, fixed sizes | the real object cash and MTT preflop need; no future streets, so tractable exactly | exploitability → 0 |
+| 1326-combo preflop model, fixed sizes | the real object cash and MTT preflop need | exactness **retracted** by adr/0006 (~740 h measured-rate for the matrix); anchor to be chosen |
 | Push/fold Nash, 10–20bb, 2–6 seats, antes, optional ICM | highest rigour per unit complexity in the project | zero-sum identity + independent reference |
 
 As of this writing `games.py` ships **three** of them (`kuhn`, `one_street_bluff_catcher`, `leduc`) and
@@ -95,10 +95,19 @@ argues against and a copyright problem (`NOTICE`); and multiway postflop has no 
 solution, so "close enough" would be a claim with no evidence under it. An unverifiable solver is not
 a weaker version of a useful one, it is worse than none: it attaches the authority of code to a guess.
 
-What replaces it: preflop *is* solved exactly (the 1326-combo model and push/fold Nash), and postflop
-is taught in structured form — range-vs-range equity, MDF balance, indifference conditions, and
-`src/pokergto/theory/multiway.py` deriving how the algebra changes with player count from
-`d = 1 - (B/(P+B))^(1/N)`. A learner who understands that exponent needs no 6-max chart.
+What replaces it: postflop is taught in structured form — range-vs-range equity, MDF balance,
+indifference conditions, and `src/pokergto/theory/multiway.py` deriving how the algebra changes with
+player count from `d = 1 - (B/(P+B))^(1/N)`. A learner who understands that exponent needs no 6-max
+chart.
+
+Preflop was going to be the exception — "solved exactly, because there are no future streets" — and that
+is the one sentence in this policy that adr/0006 retracts. There are no future *decisions*, but there are
+still five future *cards*: every preflop all-in cell enumerates `C(52,5) = 2,598,960` boards, and the
+vectorised evaluator that was built to settle the question made the enumeration 4.8x to 20.4x faster, not
+three orders of magnitude faster. The full exact 169x169 matrix prices out at about 740 hours on the
+machine this project is developed on. So preflop is not claimed as solved exactly, what should be taught
+in its place is an open decision with three costed options in adr/0006, and chapters 05, 10, 11 and 12
+stay unauthored until that decision exists.
 
 Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
 inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two
@@ -141,9 +150,17 @@ What is *not* here yet, stated because the gap is where the next work is:
   public-tree form 0.003 s: 68x at 50 iterations, 77x at 200, and 35 s for the 10,000 that its gate
   registers against roughly 38 minutes. Kuhn and the one-street toys are still produced by `cfr.py`,
   because on six and twelve deals the vector form's advantage is fixed-overhead noise (3.1x and 1.1x).
-  The 1,326-combo preflop model is where any remaining doubt about the speedup belongs.
-- Push/fold Nash and the 1326-combo preflop model are unimplemented, which is why chapters 05, 10, 11 and
-  12 hold no range charts: an invented opening range would be the exact thing adr/0005 forbids.
+  The 1,326-combo preflop model was where the remaining doubt about that speedup belonged, and the doubt
+  is now settled in the other direction: adr/0006 prices the whole enumeration, not just the traversal.
+- The evaluator has the same two-implementation shape as the solver, and the same rule applies to it:
+  `evaluate5_many` / `evaluate7_many` are producers only because they return the *identical integers* the
+  scalar paths return, checked over every hand of five structurally chosen subdecks and millions of random
+  boards, with a throughput floor in `tools/cost_probe.py`. `evaluate7_many_reference` keeps the literal
+  best-of-21 definition beside the fast form as its oracle.
+- Push/fold Nash and the 1326-combo preflop model are unimplemented, and the second one now has a measured
+  reason as well as an unauthored-lessons reason: chapters 05, 10, 11 and 12 hold no range charts because
+  an invented opening range would be the exact thing adr/0005 forbids, and an exact preflop matrix would
+  take about 740 hours to produce.
 - Three-player and ICM payoffs are not representable today. `tree.TerminalNode` stores one number per deal
   -- player 0's, with player 1 taking the negative -- and `exploitability.py` averages two best responses.
   Both conventions are correct for zero-sum and wrong for a three-way pot or an ICM tournament, so those

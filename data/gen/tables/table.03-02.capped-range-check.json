@@ -1,7 +1,7 @@
 {
   "caption": {
-    "en": "The ranges are illustrative inputs (reference); each range's best holding, the board's reachable ceiling and the capped verdict are computed combo by combo (derived). The ceiling is the best of all 1,326 combos, so capped means not-in-my-range, not not-possible-on-this-board.",
-    "zh": "范围是示例输入（reference）；“范围最强手”“牌面可达上限”与 is_capped 由 evaluate5 逐组合现算（derived）。上限取全部 1326 个组合的最优，所以 capped 说的是“不在我这一份范围里”，不是“这张牌面上不可能出现”。"
+    "en": "The ranges are illustrative inputs (reference); each range's best holding, the board's reachable ceiling and the capped verdict are computed combo by combo (derived). The ceiling is the best over the combos that can still be dealt (1,176 on a flop, 1,081 once the board is full), so capped means not-in-my-range, not not-possible-on-this-board. A combo holding a card the board already shows cannot be dealt and is excluded -- on some boards counting it would score a phantom hand above the real ceiling.",
+    "zh": "范围是示例输入（reference）；“范围最强手”“牌面可达上限”与 is_capped 由评估器逐组合现算（derived）。上限取“还发得出来”的那些组合的最优（翻牌圈 1176 个，五张牌面后 1081 个），所以 capped 说的是“不在我这一份范围里”，不是“这张牌面上不可能出现”。用到牌面已有牌的组合发不出来，因此不计入——有些牌面上把它算进来会得到一个比真正上限更高的幻影牌型。"
   },
   "checks": [
     {

@@ -15,6 +15,7 @@ old text. Superseded records stay in the directory with `Status: superseded by A
 | [3](0003-licensing-split-mit-code-ccbysa-content.md) | MIT for code, CC BY-SA 4.0 for curriculum and data | `LICENSE`, `LICENSE-docs.md`, `NOTICE`, `CITATION.cff` |
 | [4](0004-static-trainer-consumes-artifacts-only.md) | The trainer is a static artifact consumer: no backend, no re-derived math, no live solving | `trainer/**`, `tools/sync_trainer_data.py` |
 | [5](0005-provenance-is-schema-required.md) | `provenance` is a required schema field, so an unattributed claim cannot validate | `data/schema/*`, `tools/check_provenance.py`, `NOTICE` |
+| [6](0006-exact-enumeration-is-bounded-by-measurement.md) | Exactness is bounded by measured wall clock, declared in `tools/cost_probe.py`; the exact 169x169 preflop matrix is out of budget | `src/pokergto/evaluator.py`, `src/pokergto/equity.py`, `tools/cost_probe.py`, chapters 05/10/11/12 |
 
 Decisions **D1–D7** referenced elsewhere in the documentation map to these records as:
 D1/D2 → ADR-0001, D3/D6 → ADR-0005 and ADR-0002, D4 → the bilingual rules in

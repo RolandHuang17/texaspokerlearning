@@ -1,6 +1,11 @@
 # 2. Solver correctness is gated by proof, not by plausibility
 
-Status: accepted (2026-10-06)
+Status: accepted (2026-10-06), **partially superseded by
+[ADR-0006](0006-exact-enumeration-is-bounded-by-measurement.md)** (2026-10-07). Rule A, the 6-max
+postflop cut and the other five games stand unchanged. What ADR-0006 retracts is one premise and one
+sentence: Rule B's justification for the preflop row ("no future streets, so it is tractable exactly")
+and the claim that "preflop **is** solved exactly". The row's game is still on the list; what it is
+solved *from* is an open question that ADR-0006 leaves to a later record.
 
 ## Context
 

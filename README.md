@@ -131,9 +131,11 @@ parity gate — so the statuses are machine-checked, not aspirational.
 Honesty about scope is part of the method, so:
 
 - **No 6-max postflop solver.** Real ones need C++ and GPUs; a Python one that could not be verified
-  would teach wrong things with the authority of code. Preflop is solved exactly where it is
-  tractable; postflop is taught by derivation — which is a better teacher than a chart you cannot
-  question. See `adr/0002`.
+  would teach wrong things with the authority of code. Preflop is enumerated exactly where the price is
+  payable — one hand against one hand preflop is 17.3 seconds, while the full exact 169x169 class matrix
+  measures out near 740 hours, so `adr/0006` retracted the promise that preflop would simply be solved
+  exactly. Postflop is taught by derivation — which is a better teacher than a chart you cannot
+  question. See `adr/0002` and `adr/0006`.
 - **No solver screenshots, no scraped charts, no course transcriptions.** See `NOTICE`.
 - **Multiway figures that folklore states with confidence** (continuation-bet frequencies collapsing
   from roughly 65% to single digits, bluff-to-value tightening to 1:6) are carried as `reference` +

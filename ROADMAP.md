@@ -85,7 +85,12 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 
 ## M4 — Preflop engine, cash theory, and graded drills
 
-- [ ] 1326-combo preflop model (HU and 6-max, fixed sizes); `solver/pushfold.py` Nash
+- [ ] Preflop payoff objects **inside the measured budget** (`adr/0006`): exact hand-vs-hand matchups
+      (17.3 s each) and flop-conditioned range enumerations (7.84 s at 884 v 442 combos) are payable and
+      stay `derived`; the full exact 169x169 class matrix is `5.87e11` evaluations, about 740 hours, and is
+      therefore **not** planned. Chapters 05, 10, 11 and 12 wait on `adr/0006`'s open question — exact
+      marquee cells plus a declared Monte-Carlo matrix, a reduced preflop game solved exactly, or no
+      preflop solve. `solver/pushfold.py` Nash follows whichever is chosen.
 - [ ] `theory/range_advantage`, `sizing`, `polarization`, `blockers`, `protection`, `frequencies`
 - [ ] Chapters **03 Range Advantage**, **04 Bet Sizing**, **05 Preflop (Cash)**,
       **10 Heads-Up / BvB** bilingual (27 lessons)
@@ -122,7 +127,9 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 ## M8 — Post-1.0 depth (only if each item clears its cost guard)
 
 - [ ] Equity realization vs SPR as a computed quantity rather than a rule of thumb
-- [ ] A 2-street 1326-combo toy, if `tools/cost_probe.py` still passes
+- [ ] A 2-street 1326-combo toy — re-scoped by `adr/0006`: the two-street *tree* was never the cost, the
+      five-card deal is, and a full preflop enumeration on that scale is ~740 hours. Only a deliberately
+      reduced hand space belongs here.
 - [ ] Balanced exploitation: how much to deviate when the read is 70% right
 
 ---

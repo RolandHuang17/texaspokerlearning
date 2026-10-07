@@ -20,6 +20,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from _bootstrap import REPO_ROOT, bootstrap_path, ok
 
 bootstrap_path()
@@ -786,14 +788,14 @@ def build_capped_ranges() -> dict[str, Any]:
     """Which range cannot hold the nuts on which board -- computed, not asserted.
 
     A capped range is a *sizing* fact: it removes the raise threat that licenses big bets, which is why
-    chapter 03 hands off to chapter 04. The ceiling is the best hand any two cards could make here, so
-    "capped" means "not in my range", not "not achievable in principle" -- the two are easy to confuse
-    and the table reports both numbers to keep them apart.
+    chapter 03 hands off to chapter 04. The ceiling is the best hand any two cards that can still be dealt
+    here can make, so "capped" means "not in my range", not "not achievable in principle" -- the two are
+    easy to confuse and the table reports both numbers to keep them apart.
     """
-    from pokergto.cards import ALL_COMBOS, Card, parse_cards
-    from pokergto.evaluator import best_score
+    from pokergto.cards import parse_cards
+    from pokergto.evaluator import best_scores_many
     from pokergto.notation import parse
-    from pokergto.theory.range_advantage import is_capped
+    from pokergto.theory.range_advantage import board_ceiling, is_capped
 
     rows: list[dict[str, Any]] = []
     for board_text, hero_spec, villain_spec in CAPPED_SPOTS:
@@ -802,21 +804,24 @@ def build_capped_ranges() -> dict[str, Any]:
         # can actually be dealt. ``is_capped`` refuses anything else, which is the point: the first
         # version of this table divided a nut share by six combos of "77" on a board showing a seven.
         narrowed = {spec: parse(spec, exclude=board) for spec in (hero_spec, villain_spec)}
-        ceiling = max(
-            best_score((Card.from_index(a), Card.from_index(b)), board) for a, b in ALL_COMBOS
-        )
+        board_codes = np.fromiter((card.index for card in board), dtype=np.int64, count=len(board))
+        # The ceiling comes from the same function ``is_capped`` compares against, not from a copy of its
+        # arithmetic: a "ceiling" column and a "capped" column that disagree is a table that argues with
+        # itself, and only one of them would have been updated.
+        ceiling = board_ceiling(board)
         for role, spec in (("hero", hero_spec), ("villain", villain_spec)):
             rng = narrowed[spec]
-            held = [
-                best_score((first, second), board) for first, second, weight in rng if weight > 0
-            ]
+            codes = np.array(
+                [(first.index, second.index) for first, second, _weight in rng], dtype=np.int64
+            )
+            held = best_scores_many(codes, board_codes)
             rows.append(
                 {
                     "board": board_text,
                     "role": role,
                     "spec": spec,
                     "combos": round(rng.total_combos(), 1),
-                    "range_best": _bilingual_hand(max(held)),
+                    "range_best": _bilingual_hand(int(held.max())),
                     "ceiling": _bilingual_hand(ceiling),
                     "is_capped": bool(is_capped(rng, board)),
                 }
@@ -828,11 +833,15 @@ def build_capped_ranges() -> dict[str, Any]:
             "en": "Capped-range check: does this line contain the nuts",
         },
         caption={
-            "zh": "范围是示例输入（reference）；“范围最强手”“牌面可达上限”与 is_capped 由 evaluate5 逐组合现算（derived）。"
-            "上限取全部 1326 个组合的最优，所以 capped 说的是“不在我这一份范围里”，不是“这张牌面上不可能出现”。",
+            "zh": "范围是示例输入（reference）；“范围最强手”“牌面可达上限”与 is_capped 由评估器逐组合现算（derived）。"
+            "上限取“还发得出来”的那些组合的最优（翻牌圈 1176 个，五张牌面后 1081 个），所以 capped 说的是"
+            "“不在我这一份范围里”，不是“这张牌面上不可能出现”。用到牌面已有牌的组合发不出来，因此不计入——"
+            "有些牌面上把它算进来会得到一个比真正上限更高的幻影牌型。",
             "en": "The ranges are illustrative inputs (reference); each range's best holding, the board's reachable "
-            "ceiling and the capped verdict are computed combo by combo (derived). The ceiling is the best of all "
-            "1,326 combos, so capped means not-in-my-range, not not-possible-on-this-board.",
+            "ceiling and the capped verdict are computed combo by combo (derived). The ceiling is the best over the "
+            "combos that can still be dealt (1,176 on a flop, 1,081 once the board is full), so capped means "
+            "not-in-my-range, not not-possible-on-this-board. A combo holding a card the board already shows cannot "
+            "be dealt and is excluded -- on some boards counting it would score a phantom hand above the real ceiling.",
         },
         lesson="03-02",
         columns=[
