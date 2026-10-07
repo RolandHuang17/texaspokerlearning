@@ -88,9 +88,13 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 - [ ] Preflop payoff objects **inside the measured budget** (`adr/0006`): exact hand-vs-hand matchups
       (17.3 s each) and flop-conditioned range enumerations (7.84 s at 884 v 442 combos) are payable and
       stay `derived`; the full exact 169x169 class matrix is `5.87e11` evaluations, about 740 hours, and is
-      therefore **not** planned. Chapters 05, 10, 11 and 12 wait on `adr/0006`'s open question — exact
-      marquee cells plus a declared Monte-Carlo matrix, a reduced preflop game solved exactly, or no
-      preflop solve. `solver/pushfold.py` Nash follows whichever is chosen.
+      therefore **not** planned. The route is chosen by `adr/0007`: a payoff table sampled over **boards**
+      and enumerated over every dealable combo pair (`src/pokergto/preflop.py` — 20,000 boards is the whole
+      169x169 grid in 7.3 min at a 0.0030 mean standard error, agreeing with three exactly computed cells
+      within 0.5 to 1.9 of its own sigmas). Before chapters 05, 10, 11 and 12 can be authored: write
+      `data/gen/preflop/**` with its seed, boards, batches and per-cell stderr in the schema, and measure
+      whether a range boundary flips its call/fold verdict between two independent seeds.
+      `solver/pushfold.py` Nash follows those.
 - [ ] `theory/range_advantage`, `sizing`, `polarization`, `blockers`, `protection`, `frequencies`
 - [ ] Chapters **03 Range Advantage**, **04 Bet Sizing**, **05 Preflop (Cash)**,
       **10 Heads-Up / BvB** bilingual (27 lessons)
@@ -127,9 +131,9 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 ## M8 — Post-1.0 depth (only if each item clears its cost guard)
 
 - [ ] Equity realization vs SPR as a computed quantity rather than a rule of thumb
-- [ ] A 2-street 1326-combo toy — re-scoped by `adr/0006`: the two-street *tree* was never the cost, the
-      five-card deal is, and a full preflop enumeration on that scale is ~740 hours. Only a deliberately
-      reduced hand space belongs here.
+- [ ] A 2-street 1326-combo toy — re-scoped by `adr/0006` and then unblocked in part by `adr/0007`: the
+      two-street *tree* was never the cost, the five-card deal is, so the affordable form is a board-sampled
+      payoff table over a declared hand space, not an exact enumeration of one.
 - [ ] Balanced exploitation: how much to deviate when the read is 70% right
 
 ---

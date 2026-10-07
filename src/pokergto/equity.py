@@ -132,7 +132,7 @@ def _combo_arrays(rng_positions: list[int], weights: np.ndarray) -> tuple[np.nda
     return combos, weights
 
 
-def _conflict_mask(hero_combos: np.ndarray, villain_combos: np.ndarray) -> np.ndarray:
+def conflict_mask(hero_combos: np.ndarray, villain_combos: np.ndarray) -> np.ndarray:
     """Vectorised 'these two hands share a physical card'. Written as four equality tests rather
     than a Python set loop because real ranges make that loop 1.7M iterations.
     """
@@ -145,7 +145,7 @@ def _conflict_mask(hero_combos: np.ndarray, villain_combos: np.ndarray) -> np.nd
     return conflicts
 
 
-def _score_matrix(combos: np.ndarray, boards: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def score_matrix(combos: np.ndarray, boards: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Scores and legality for every ``(board, combo)`` pair, in as few vector calls as the block allows.
 
     Returns ``(scores, legal)``, both shaped ``(n_boards, n_combos)``. A combo that uses a card the board
@@ -202,7 +202,7 @@ def range_equity(
         villain_positions, villain.weights[villain_positions]
     )
 
-    allowed = ~_conflict_mask(hero_combos, villain_combos)
+    allowed = ~conflict_mask(hero_combos, villain_combos)
     joint = hero_weights[:, None] * villain_weights[None, :]
     joint = joint * allowed
     total_weight = float(joint.sum())
@@ -247,8 +247,8 @@ def range_equity(
             dtype=np.int64,
             count=5 * len(completions),
         ).reshape(len(completions), 5)
-        hero_scores, hero_legal = _score_matrix(hero_combos, board_codes)
-        villain_scores, villain_legal = _score_matrix(villain_combos, board_codes)
+        hero_scores, hero_legal = score_matrix(hero_combos, board_codes)
+        villain_scores, villain_legal = score_matrix(villain_combos, board_codes)
         if single_pair and hero_legal.all() and villain_legal.all():
             # Both hands are on the table, so the runout space was already built from the deck minus
             # those four cards and no combo can ever be illegal. That makes the comparison one

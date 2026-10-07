@@ -85,6 +85,42 @@ MAX_EVALUATOR_SECONDS = 60.0
 MAX_EXACT_EQUITY_SECONDS = 30.0
 MAX_EXACT_EQUITY_MB = 1024.0
 
+#: Milliseconds per board allowed for the preflop matrix pass in `pokergto.preflop`, which is the unit the
+#: whole `adr/0007` budget is stated in: 22 ms measured, so one board costs a two-line function call and the
+#: 169x169 grid costs ``boards x that``. It is the quantity that a refactor can multiply without changing any
+#: result -- scoring every hole against every board is the point of the module, and quietly going back to
+#: per-cell work would look like a cleanup. 80 ms is the same four-times headroom as the budgets above.
+MAX_MATRIX_MS_PER_BOARD = 80.0
+
+
+def _probe_preflop_matrix() -> tuple[str, list[str]]:
+    """Time one board-sampled matrix pass and check the per-board cost is still a shared pass."""
+    from pokergto.preflop import all_in_matrix
+
+    boards, batches = 600, 6
+    started = time.perf_counter()
+    matrix = all_in_matrix(boards, seed=202610071, batches=batches)
+    seconds = time.perf_counter() - started
+    per_board = 1000.0 * seconds / boards
+    problems: list[str] = []
+    if per_board > MAX_MATRIX_MS_PER_BOARD:
+        problems.append(
+            f"preflop matrix: {per_board:.1f} ms/board against a {MAX_MATRIX_MS_PER_BOARD:.0f} ms/board "
+            "ceiling -- 22 ms measured, and the whole 169x169 grid is budgeted as boards x that"
+        )
+    # The diagonal is exact rather than estimated, so it is the cheapest available proof that the pair
+    # enumeration still runs both directions.
+    diagonal = np.diag(matrix.equity)
+    if not np.all(diagonal == 0.5):
+        problems.append(
+            "preflop matrix: a class against itself is not 0.5, the enumeration is asymmetric"
+        )
+    row = (
+        f"{'preflop_matrix_pass':<28} {boards:>9,} boards "
+        f"used {seconds:>6.1f}s / {per_board:>5.1f} ms-per-board of {MAX_MATRIX_MS_PER_BOARD:>4.0f} ms"
+    )
+    return row, problems
+
 
 def _probe_evaluator() -> tuple[str, list[str]]:
     """Score a fixed block of random seven-card hands, and check the batch path is still a batch path."""
@@ -158,7 +194,7 @@ def _probe_exact_equity() -> tuple[str, list[str]]:
 
 def _probe_enumerations() -> list[str]:
     problems: list[str] = []
-    for probe in (_probe_evaluator, _probe_exact_equity):
+    for probe in (_probe_evaluator, _probe_exact_equity, _probe_preflop_matrix):
         row, found = probe()
         print(row)
         problems.extend(found)

@@ -11,6 +11,48 @@ Le résumé est en chinois sous chaque entrée.
 ## [Unreleased]
 
 ### Added / 新增
+- `pokergto.preflop` answers the question `adr/0006` left priced but unsolved: how to get a preflop all-in
+  matrix at all. It samples **boards** rather than deals, scoring all 1,326 holes against each board in one
+  `evaluate7_many` pass and enumerating every dealable combo pair on it, so each cell is exact conditional on
+  the board set and the only noise left is board variance. Measured: 22 ms per board, so the full 169x169
+  grid is 7.3 minutes at 20,000 boards with a 0.0030 mean standard error (worst cell 0.0053), against three
+  cells computed exactly at 142-178 s each -- `AA` v `KK` 0.8194605047, `AKo` v `QQ` 0.4324233606, `72o` v
+  `22` 0.3258923844 -- where the sampled deviations are 0.5 to 1.9 of the matrix's own sigmas. Sampling a
+  *deal* per cell, which is the obvious implementation, measures 8,900 samples/s and prices the same grid at
+  17.9 hours: it pays for two noises at once, and combo choice is not the expensive one.
+  `pokergto.preflop` 回答的是 `adr/0006` 只标了价却没解决的那个问题：翻前全下的矩阵到底怎么拿。它采的是**牌面**而不是发牌：
+  每个牌面用一次 `evaluate7_many` 给 1,326 个组合打分，再在该牌面上枚举所有发得出的组合对，所以在给定的牌面集合上每个格子是
+  精确的，剩下的只有牌面方差。实测每个牌面 22 毫秒，即整个 169×169 网格在 20,000 个牌面下 7.3 分钟，平均标准误 0.0030（最差格
+  0.0053）；与三个精确算出的格（各 142-178 秒：`AA` 对 `KK` 0.8194605047、`AKo` 对 `QQ` 0.4324233606、`72o` 对 `22`
+  0.3258923844）相比，偏差落在自身 sigmas 的 0.5 到 1.9 倍内。显而易见的实现——按格采样整副发牌——实测 8,900 样本/秒，同一张
+  网格要 17.9 小时：那是一次付两种噪声，而组合选择并不是更贵的那种。
+- `adr/0007` closes `adr/0006`'s open question as option A and pins the boundary that choice forces: ADR-0002
+  cut Monte-Carlo sampling of private cards *in the CFR inner loop* without saying what a preflop solve may do
+  about the payoff table underneath it. Terminal utilities may come from a declared board sample; regret sums,
+  strategy sums and exploitability stay exact over whatever table they are given. Two cautions are recorded
+  rather than footnoted. A binomial error bar on the comparison count understates the truth by about 3.2x,
+  because pairs sharing a board are correlated -- the first version of the validation test made exactly that
+  mistake and called a real 1.6-sigma deviation "6.2 sigma", so the test now checks the empirical sigma against
+  a closed-form hypergeometric one. And "sampled" is not "usable": a range boundary compares an equity to a
+  threshold, so the number of classes whose verdict flips between two independent seeds has to be measured
+  before chapters 05, 10, 11 and 12 print a range. That measurement, and the `data/gen/preflop/**` artifact
+  itself, are outstanding, and both are prerequisites rather than follow-ups.
+  `adr/0007` 把 `adr/0006` 的开放问题按 A 关闭，并钉住这个选择逼出来的边界：ADR-0002 当年禁止"CFR 内循环里采样私有牌"，
+  但没说翻前求解依赖的支付表怎么办。现在的规则是：全下的终结效用可以来自声明过的牌面样本；遗憾和、策略和与可剥削度仍须在拿到手
+  的表上精确计算。两条告诫写进正文：牌面共享的比较相关，按二项式算误差会小约 3.2 倍（校验测试第一版就犯了这错，把真实的 1.6
+  sigma 说成"6.2 sigma"，因此现在拿超几何闭式解去校经验 sigma）；"被采样"不等于"能用"——范围边界是拿胜率与门槛比较，所以在
+  05/10/11/12 印范围之前必须量两个独立种子之间有多少类判定会翻转。该测量与 `data/gen/preflop/**` 生成物都还没做，而且是前置
+  条件不是后续工作。
+- `tests/test_preflop.py` holds nine checks: a class against itself is exactly 0.5 with zero dispersion,
+  `equity[i,j] + equity[j,i] == 1` to the last bit, all 28,561 ordered cells populated including the diagonal,
+  determinism under a fixed seed and movement under a different one, refusal of sample sizes too small to
+  disperse, the closed-form pair-count check, the `1/sqrt(boards)` behaviour of the error bar, and agreement
+  with the exact cells (marked `slow`). `tools/cost_probe.py` gains a per-board ceiling for the matrix pass --
+  80 ms against 22 ms measured -- because the whole budget is stated in that unit and a refactor could multiply
+  it without changing a single number. `tests/test_preflop.py` 的九条检查：同类对同类恰为 0.5 且无离散、
+  `equity[i,j] + equity[j,i] == 1` 到位、28,561 个有序格全都有值（含对角线）、固定种子可复现且换种子必须变、样本太小直接拒绝、
+  组合数对闭式解、误差棒按 `1/sqrt(boards)` 收缩、与精确格的一致性（标 `slow`）。`tools/cost_probe.py` 新增矩阵扫描的每牌面
+  上限（实测 22 毫秒，预算 80 毫秒），因为整条预算就是以这个单位表述的，重构可以在不改任何数字的情况下把它放大。
 - Leduc hold'em is solved and gated, which is the first solver claim in this repository that has no
   closed form behind it. 360 deals, 36 decision nodes, 3,780 information sets, and the rules are written
   out in `src/pokergto/solver/games.py#leduc` rather than borrowed: the artifact's value is
@@ -98,6 +140,14 @@ Le résumé est en chinois sous chaque entrée.
   这就是只用五张牌测试不算证明。
 
 ### Changed / 变更
+- `equity.py`'s two enumeration primitives are public now: `score_matrix` (was `_score_matrix`) and
+  `conflict_mask` (was `_conflict_mask`). `pokergto.preflop` is their second caller, and importing a sibling's
+  underscore name across a package boundary is how a "private" helper becomes load-bearing without anyone
+  deciding that. Their docstrings already explained the invariants that matter; nothing about their behaviour
+  changed.
+  `equity.py` 的两个枚举原语转为公开：`score_matrix`（原 `_score_matrix`）与 `conflict_mask`（原 `_conflict_mask`）。
+  `pokergto.preflop` 是它们的第二个调用方——跨模块边界引用带下划线的名字，正是"私有"辅助函数在没人拍板的情况下变成关键依赖的
+  方式。行为没有任何变化。
 - Lesson `01-05`'s cost paragraph is now a four-way table measured in one process (definition, direct
   algorithm, and both vectorised: 3,212 / 51,507 / 40,325 / 331,714 seven-card hands per second), its
   "what proves this" list gained the vectorised layer as a fifth route, and its closing claim moved: the

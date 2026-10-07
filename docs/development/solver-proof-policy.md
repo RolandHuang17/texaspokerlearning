@@ -73,7 +73,7 @@ anchor. "It converged" is not an anchor.
 | 1-street bluff-catcher, bet sizes ⅓ / ½ / pot | the bridge between chapter 02's algebra and an equilibrium | mechanism 1 |
 | Leduc hold'em | canonical research benchmark, 2 streets, real card abstraction | exploitability → 0 |
 | 2-street "ruddy" toy | protection, and the no-bluff-on-earlier-street result | exploitability → 0 |
-| 1326-combo preflop model, fixed sizes | the real object cash and MTT preflop need | exactness **retracted** by adr/0006 (~740 h measured-rate for the matrix); anchor to be chosen |
+| 1326-combo preflop model, fixed sizes | the real object cash and MTT preflop need | exactness **retracted** by adr/0006 (~740 h measured-rate for the matrix); payoff table sampled over boards and validated against exact cells, per adr/0007 |
 | Push/fold Nash, 10–20bb, 2–6 seats, antes, optional ICM | highest rigour per unit complexity in the project | zero-sum identity + independent reference |
 
 As of this writing `games.py` ships **three** of them (`kuhn`, `one_street_bluff_catcher`, `leduc`) and
@@ -105,9 +105,11 @@ is the one sentence in this policy that adr/0006 retracts. There are no future *
 still five future *cards*: every preflop all-in cell enumerates `C(52,5) = 2,598,960` boards, and the
 vectorised evaluator that was built to settle the question made the enumeration 4.8x to 20.4x faster, not
 three orders of magnitude faster. The full exact 169x169 matrix prices out at about 740 hours on the
-machine this project is developed on. So preflop is not claimed as solved exactly, what should be taught
-in its place is an open decision with three costed options in adr/0006, and chapters 05, 10, 11 and 12
-stay unauthored until that decision exists.
+machine this project is developed on. So preflop is not claimed as solved exactly: adr/0007 chose the
+sampled-payoff route and measured it (20,000 boards is the whole 169x169 grid in 7.3 minutes at a 0.0030
+mean standard error, agreeing with three exactly-enumerated cells within 0.5 to 1.9 of its own sigmas).
+Chapters 05, 10, 11 and 12 still stay unauthored, because one gate in that record is not passed yet: whether a
+range boundary flips its call/fold verdict between two independent seeds.
 
 Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
 inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two

@@ -5,6 +5,12 @@ its Rule B row for the 1326-combo preflop model, and the sentence "preflop **is*
 retracted. Everything else in ADR-0002 stands, including the 6-max postflop cut and the four proof
 mechanisms.
 
+**Postscript (2026-10-07):** the open question below was closed by
+[ADR-0007](0007-sampled-payoffs-not-sampled-traversals.md), which took option A and measured a
+board-sampled estimator 150x cheaper than the per-cell Monte Carlo priced in option A's row. The
+costs in this record stay as they were measured, because they are the reason the premise was
+retracted.
+
 ## Context
 
 ADR-0002's Rule B listed six games the solver will handle, and justified the preflop row like this:
@@ -93,7 +99,7 @@ So ADR-0002's premise was wrong, and it was wrong in the direction that matters:
    library). Raising it is a decision about what the repository can regenerate, not a performance tweak,
    because ADR-0001 requires every artifact to be reproducible by a reviewer.
 
-## Open question (blocks lessons 05, 10, 11, 12)
+## Open question (blocks lessons 05, 10, 11, 12) — closed by ADR-0007, kept for the record
 
 Three replacements were costed against the measured table. None is chosen here, because the choice
 changes the epistemic status of four chapters and belongs to the maintainer:

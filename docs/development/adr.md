@@ -3,7 +3,7 @@
 > **Single-language by design:** these are contributor-facing engineering docs, and the
 > bilingual-same-PR rule applies to curriculum content only (see adr/0005).
 
-The canonical records are `adr/0001`…`adr/0006` at the repository root:
+The canonical records are `adr/0001`…`adr/0007` at the repository root:
 <https://github.com/RolandHuang17/texaspokerlearning/tree/main/adr>. They live there, and not under
 `docs/`, because an ADR is part of the engineering contract alongside `pyproject.toml`, `NOTICE` and
 `LICENSE` — it must be readable by someone who has only cloned the code and never built the site, and
@@ -110,7 +110,31 @@ enumeration's committed number re-derived on every run), `EXACT_EVAL_BUDGET` sta
 evaluations because a 740-hour artifact is not reproducible by a reviewer, and no lesson may cite a
 preflop matrix as `derived` until a later record chooses what replaces it — the three costed options
 (exact marquee cells plus a declared Monte-Carlo matrix, a reduced preflop game solved exactly, or no
-preflop solve at all) are written out in `adr/0006` and the decision is open.
+preflop solve at all) are written out in `adr/0006`. That choice has since been made: see ADR-0007.
+
+## ADR-0007 — Sampled payoffs are allowed, sampled traversals are not
+
+Closes `adr/0006`'s open question with its option A, and pins down a boundary ADR-0002 left ambiguous: it
+cut "Monte-Carlo sampling of private cards in the CFR inner loop" without saying what a preflop solve may do
+about the *payoff table* underneath it. The answer is that the table may be sampled and the traversal may
+not — terminal utilities for an all-in may come from a declared board sample, while regret sums, strategy
+sums and exploitability stay exact over whatever table they are given.
+
+The mechanism is what made option A affordable enough to consider at all. Sampling a *deal* per cell prices
+at 17.9 hours for the grid (measured 8,900 samples/s), because it pays for two noises at once: which combos
+are in play, and which board comes. Combo choice is not the hard part — for a fixed board every dealable pair
+can be enumerated — so `pokergto.preflop` samples only boards, scores all 1,326 holes per board in one
+`evaluate7_many` pass, and is exact conditional on that board set. Measured: 22 ms per board, so 20,000
+boards is the whole 169x169 grid in 7.3 minutes with a 0.0030 mean standard error, against three cells
+computed exactly (`AA` v `KK` = 0.8194605047 and two others, 142-178 s each) within 0.5 to 1.9 of its own
+sigmas. Two cautions are part of the record rather than footnotes. A binomial error bar on the comparison
+count understates the true spread by about 3.2x, because pairs sharing a board are correlated — the first
+version of the validation test made that mistake and called a real 1.6-sigma deviation "6.2 sigma", so the
+test now checks the empirical error bar against a closed-form hypergeometric one. And being sampled is not
+the same as being usable: a range boundary compares an equity to a threshold, so before chapters 05, 10, 11
+and 12 print a range, the number of classes whose verdict changes between two independent seeds has to be
+measured and stored with the artifact. That measurement is outstanding, and the matrix artifact itself is not
+yet generated; both are prerequisites, not follow-ups.
 
 ## Where each decision is enforced
 
@@ -122,4 +146,5 @@ preflop solve at all) are written out in `adr/0006` and the decision is open.
 | 0004 | `trainer/src/lib/data.ts`, `tools/sync_trainer_data.py`, `workflows/trainer` job in `ci.yml`, `workflows/pages.yml` |
 | 0005 | `data/schema/common.schema.json#/$defs/provenance`, `tools/check_provenance.py`, `CODEOWNERS` on `data/src/**` |
 | 0006 | `tools/cost_probe.py` (evaluator throughput floor, exact-enumeration ceiling, re-derived equity), `EXACT_EVAL_BUDGET` in `src/pokergto/equity.py`, `tests/test_evaluator.py` |
+| 0007 | `src/pokergto/preflop.py`, `tests/test_preflop.py` (identities, closed-form pair counts, agreement with exact cells); the sampling fields a `data/gen/preflop/**` artifact will have to carry |
 
