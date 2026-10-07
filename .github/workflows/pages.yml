@@ -56,6 +56,13 @@ jobs:
         run: python tools/gen_all.py
       - name: Build docs
         run: python -m mkdocs build --strict
+      # `trainer/public/data/**` and `trainer/src/generated/manifest.ts` are generated and gitignored, so the
+      # deployment bundle has to build them from data/gen first -- same reason ci.yml does it, and the same
+      # reason a clean checkout used to fail `vue-tsc` on a module that only existed locally.
+      - name: Sync the trainer's data inputs
+        shell: bash
+        run: python tools/sync_trainer_data.py
+
       - name: Build trainer (if it exists yet)
         id: trainer
         shell: bash

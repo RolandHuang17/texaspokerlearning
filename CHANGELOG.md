@@ -299,6 +299,26 @@ Le résumé est en chinois sous chaque entrée.
   （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- The trainer could not be built from a clean checkout, and the first public CI run is what proved it:
+  `vue-tsc` failed with `src/lib/data.ts(9,26): error TS2307: Cannot find module '../generated/manifest'`.
+  `trainer/src/generated/manifest.ts` and `trainer/public/data/**` are gitignored on purpose (ADR-0001 keeps the
+  artifacts in `data/gen`, and a committed copy would be a second source of truth), but nothing in `ci.yml` or
+  `pages.yml` ever wrote them -- both workflows just asserted with `sync_trainer_data.py --check` that a file
+  nobody had generated matched `data/gen`. That check could only ever pass on a developer's machine, which is
+  precisely the kind of gate that looks green and proves nothing. Both workflows now run
+  `python tools/sync_trainer_data.py` first and `--check` after it, so the pair asserts that the sync is
+  idempotent and that the bundle under test is the committed tree. Verified from a deliberately emptied
+  `trainer/`: sync (50 artifacts), `--check` agrees, `vue-tsc --noEmit && vite build` succeeds, and the
+  deployed `dist/` is 1.8 MB with `data/preflop/preflop.all-in-matrix.json` inside it.
+- 训练器在干净检出上根本构建不出来，是第一次公开 CI 跑把它抓出来的：`vue-tsc` 报
+  `src/lib/data.ts(9,26): error TS2307: Cannot find module '../generated/manifest'`。
+  `trainer/src/generated/manifest.ts` 与 `trainer/public/data/**` 是刻意 gitignore 的（ADR-0001 把产物留在
+  `data/gen`，训练器里再存一份就是第二个真相源），可 `ci.yml` 和 `pages.yml` 里没有任何一步写过它们——两个工作流只是拿
+  `sync_trainer_data.py --check` 断言"一个没人生成的文件和 data/gen 一致"。那道检查只可能在开发者本机通过，而这正是
+  看着绿、什么都没证明的那类门。现在两个工作流都先跑 `python tools/sync_trainer_data.py`、再跑 `--check`，于是这对步骤断言的是
+  同步可幂等、被测的包就是那棵提交树。特意清空 `trainer/` 验证过：同步 50 份产物、`--check` 同意、
+  `vue-tsc --noEmit && vite build` 通过，产出的 `dist/` 是 1.8 MB，里面带着
+  `data/preflop/preflop.all-in-matrix.json`。
 - `pokergto.preflop`'s module docstring claimed the committed 20,000-board matrix sat "1.5, 0.6 and 1.2 standard
   errors" from the three exhaustively enumerated anchor cells. The artifact it describes says otherwise -- and
   describing it is cheap now that it is committed, so the claim was checked instead of defended: the committed

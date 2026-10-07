@@ -286,9 +286,19 @@ jobs:
         with:
           with-node: 'true'
 
-      # The trainer's contract with the data it consumes is ADR-0004: it reads committed artifacts and
-      # nothing else. This proves the bundle would be built against exactly the artifacts in data/gen,
-      # so a chart cannot quietly render a number an older engine wrote.
+      # The trainer's data is a generated *input*, not a committed one: `trainer/public/data/**` and
+      # `trainer/src/generated/manifest.ts` are gitignored on purpose (ADR-0001 -- the artifacts live in
+      # `data/gen`, and a copy of them inside the trainer tree would be a second source of truth). So CI
+      # builds them from `data/gen`, then asks the same tool to verify what it wrote: that pair proves the sync
+      # is idempotent and that the bundle the tests and the build run against is exactly the committed tree.
+      # Needing both steps is not obvious, and the first public CI run is what made it so -- on a clean checkout
+      # nothing had written `src/generated/manifest.ts`, so `vue-tsc` failed with TS2307 on a module that only
+      # ever exists in a developer's working tree.
+      - name: Sync the trainer's data inputs
+        if: steps.probe.outputs.present == 'true'
+        shell: bash
+        run: python tools/sync_trainer_data.py
+
       - name: Trainer data matches data/gen
         if: steps.probe.outputs.present == 'true'
         shell: bash
