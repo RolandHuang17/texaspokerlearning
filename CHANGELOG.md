@@ -218,6 +218,28 @@ Le résumé est en chinois sous chaque entrée.
   `--verify` 重算第 0 批不是一个"今天恰好一致"的平行实现。`EXACT_CELLS` 从 `tests/test_preflop.py` 搬进引擎，因为有两个
   消费者（那个慢测试，和产物的 `crosschecks`）必须读同一处，而不是把同样的三个数敲两遍。
 
+- `.github/PULL_REQUEST_TEMPLATE.md` and two issue templates (`derivation-request`, `range-provenance`)
+  existed only as promises: `docs/en/index.md` and `docs/zh/index.md` link the pull request template at
+  `github.com/RolandHuang17/texaspokerlearning/blob/main/.github/PULL_REQUEST_TEMPLATE.md` -- a well-formed URL
+  for a file that was not in the repository, so it would have 404'd on the day the repository opened --
+  `CONTRIBUTING.md` names both issue types, `docs/development/adr.md` lists the template as ADR-0003's
+  enforcing artifact, and `docs/development/bilingual-style.md` says the same-PR bilingual rule is enforced by
+  "a required checkbox" in it. `.github/ISSUE_TEMPLATE/` was an empty directory. The template now carries that
+  checkbox, the licence-side one-liner ADR-0003 asks for, the gates with their measured costs, and the question
+  `CONTRIBUTING.md` says only a human can answer -- which sections' translation you are unsure about. The
+  `range-provenance` template states the current condition rather than implying an archive of records:
+  `data/src/licensing_manifest.yaml` does not exist, because nothing here yet claims an external origin, and
+  `NOTICE` now says so where it describes the `external` kind.
+- `.github/PULL_REQUEST_TEMPLATE.md` 和两个 issue 模板（`derivation-request`、`range-provenance`）此前只是一份份
+  承诺：`docs/en/index.md` 与 `docs/zh/index.md` 把那份 PR 模板链到
+  `github.com/RolandHuang17/texaspokerlearning/blob/main/.github/PULL_REQUEST_TEMPLATE.md`——URL 写法本身没问题，
+  问题是仓库里没有这个文件，于是它会在开张那天一起 404——`CONTRIBUTING.md` 点名两种 issue 类型，
+  `docs/development/adr.md` 把该模板列为 ADR-0003 的执行工件，`docs/development/bilingual-style.md` 说同 PR 双语
+  规则由它里面"一个必勾选项"执行——而 `.github/ISSUE_TEMPLATE/` 是个空目录。现在模板里真有那个勾选框、有 ADR-0003
+  要求的一句版权归属、有带实测耗时的门禁表，也有 `CONTRIBUTING.md` 说只有人答得了的那个问题：哪几节的翻译你自己
+  没把握。`range-provenance` 模板写的是当下实情，不暗示身后有一堆存档：`data/src/licensing_manifest.yaml` 并不存在，
+  因为这里还没有任何产物声称来自外部，`NOTICE` 也在描述 `external` 那一档的地方把这句说清楚了。
+
 ### Changed / 变更
 - `tools/gen_all.py` has a `preflop` step, an `--include-slow` flag and a `SLOW_STEPS` rule, and the slow rule is
   a **carry-over** rather than an exemption: a skipped step's committed bytes are copied into the tree being

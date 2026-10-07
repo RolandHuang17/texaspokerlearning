@@ -42,6 +42,11 @@ Every artifact that states a strategy claim carries a machine-readable `provenan
 and on any `external` entry without a manifest record. That makes the rule structural: an
 unattributed chart cannot validate, rather than being caught in review.
 
+Current state, stated rather than left to be discovered: `data/src/licensing_manifest.yaml` does
+not exist yet, because no artifact here claims an external origin. Every committed artifact is
+`derived` with a resolvable pointer. Creating that manifest is the first step of taking anything in
+as `external`, and it is the step `check_provenance.py` then holds to.
+
 Published equilibrium *values* for tiny games (Kuhn poker's game value of -1/18, the structure
 of its equilibrium family, Leduc benchmarks) are mathematics, not protectable expression, and
 are cited as `external` with `license: public-domain-math` where used as validation anchors.
