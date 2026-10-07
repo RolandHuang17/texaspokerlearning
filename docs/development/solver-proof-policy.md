@@ -107,11 +107,16 @@ vectorised evaluator that was built to settle the question made the enumeration 
 three orders of magnitude faster. The full exact 169x169 matrix prices out at about 740 hours on the
 machine this project is developed on. So preflop is not claimed as solved exactly: adr/0007 chose the
 sampled-payoff route and measured it (20,000 boards is the whole 169x169 grid in 7.3 minutes at a 0.0030
-mean standard error, agreeing with three exactly-enumerated cells within 0.5 to 1.9 of its own sigmas).
+mean standard error, agreeing with three exactly-enumerated cells within 0.5 to 1.9 of its own sigmas at the
+8,000-board validation size; the committed 20,000-board artifact sits at -1.79, +0.34 and +3.49 with both signs
+present, and two fresh seeds at the same budget land inside 1.14).
 Its boundary gate is measured and passed -- at 20,000 boards and two seeds, no class changes call/fold verdict
-at the 0.5 line or at the big blind's MDF line facing a 2.5x open (closest class QQ, 9.6 sigmas away). What
-still keeps chapters 05, 10, 11 and 12 unauthored is the artifact: `data/gen/preflop/**` has to exist, with
-its sampling fields in the schema, before a lesson can cite it.
+at the 0.5 line or at the big blind's MDF line facing a 2.5x open (closest class QQ, 9.6 sigmas away). The
+artifact exists now: `data/gen/preflop/preflop.all-in-matrix.json`, with its sampling fields required by
+`data/schema/preflop_matrix.schema.json` and its verification tiered by adr/0008. What chapters 05 and 10-12
+still need from it is authored, not generated: a range-level number and its error bar come from a generator run
+that has the per-batch panels in memory (the panels are not committed), and the range in question is lesson
+content. Inventing an opening range to get a pretty matrix first is the thing adr/0005 exists to forbid.
 
 Also cut, for the same reason: GPU/C extensions, Monte-Carlo sampling of private cards inside the CFR
 inner loop, external solver formats, abstraction ladders, browser-side WASM CFR. One tree format, two
@@ -161,10 +166,14 @@ What is *not* here yet, stated because the gap is where the next work is:
   scalar paths return, checked over every hand of five structurally chosen subdecks and millions of random
   boards, with a throughput floor in `tools/cost_probe.py`. `evaluate7_many_reference` keeps the literal
   best-of-21 definition beside the fast form as its oracle.
-- Push/fold Nash and the 1326-combo preflop model are unimplemented, and the second one now has a measured
-  reason as well as an unauthored-lessons reason: chapters 05, 10, 11 and 12 hold no range charts because
-  an invented opening range would be the exact thing adr/0005 forbids, and an exact preflop matrix would
-  take about 740 hours to produce.
+- Push/fold Nash and the 1326-combo preflop model are unimplemented. The preflop matrix the four chapters
+  needed has since been committed as a sampled artifact (`data/gen/preflop/preflop.all-in-matrix.json`,
+  adr/0007 and adr/0008), so the reason those chapters are still unauthored is no longer "there is no number
+  base" -- it is that the ranges on top of the numbers are lesson content, and inventing an opening range to
+  fill a table is the exact thing adr/0005 forbids. One mechanical consequence is worth knowing before
+  authoring: the matrix commits equities, standard errors and the sampling declaration but not the per-batch
+  panels, so a range-weighted equity and its error bar must be emitted by a generator run, not derived from
+  the committed file.
 - Three-player and ICM payoffs are not representable today. `tree.TerminalNode` stores one number per deal
   -- player 0's, with player 1 taking the negative -- and `exploitability.py` averages two best responses.
   Both conventions are correct for zero-sum and wrong for a three-way pot or an ICM tournament, so those

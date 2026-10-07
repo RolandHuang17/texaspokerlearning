@@ -17,6 +17,7 @@ old text. Superseded records stay in the directory with `Status: superseded by A
 | [5](0005-provenance-is-schema-required.md) | `provenance` is a required schema field, so an unattributed claim cannot validate | `data/schema/*`, `tools/check_provenance.py`, `NOTICE` |
 | [6](0006-exact-enumeration-is-bounded-by-measurement.md) | Exactness is bounded by measured wall clock, declared in `tools/cost_probe.py`; the exact 169x169 preflop matrix is out of budget | `src/pokergto/evaluator.py`, `src/pokergto/equity.py`, `tools/cost_probe.py`, chapters 05/10/11/12 |
 | [7](0007-sampled-payoffs-not-sampled-traversals.md) | Sampled payoff tables may be `derived`; sampled CFR traversals may not; a sampled artifact declares seed, boards and per-cell error or it does not ship | `src/pokergto/preflop.py`, `data/gen/preflop/**`, `tools/gen_all.py`, chapters 05/10/11/12 |
+| [8](0008-sampled-artifacts-are-tiered-by-measured-cost.md) | Re-deriving a sampled artifact costs what it costs: full byte regeneration runs on a schedule, per push the engine is proven for one batch plus every identity the file declares | `tools/gen_all.py` (`SLOW_STEPS`, `--include-slow`), `tools/gen_preflop.py --verify`, `.github/workflows/solver-regression.yml` |
 
 Decisions **D1–D7** referenced elsewhere in the documentation map to these records as:
 D1/D2 → ADR-0001, D3/D6 → ADR-0005 and ADR-0002, D4 → the bilingual rules in

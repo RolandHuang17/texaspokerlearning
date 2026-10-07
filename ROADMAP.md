@@ -90,15 +90,24 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
       stay `derived`; the full exact 169x169 class matrix is `5.87e11` evaluations, about 740 hours, and is
       therefore **not** planned. The route is chosen by `adr/0007`: a payoff table sampled over **boards**
       and enumerated over every dealable combo pair (`src/pokergto/preflop.py` — 20,000 boards is the whole
-      169x169 grid in 7.3 min at a 0.0030 mean standard error, agreeing with three exactly computed cells
-      within 0.5 to 1.9 of its own sigmas). Its boundary gate is measured: two seeds at 20,000 boards change
+      169x169 grid in 7.3 min at a 0.0030 mean standard error; the 8,000-board validation run sits within 0.5 to
+      1.9 of its own sigmas against three exactly computed cells, and the committed 20,000-board artifact sits at
+      1.79, 0.34 and 3.49 -- both signs present, and two fresh seeds at the same budget inside 1.14). Its boundary gate is measured: two seeds at 20,000 boards change
       **zero** of 169 call/fold verdicts, at 0.5 against a random hand and at the big blind's MDF line facing
-      a 2.5x open (closest class QQ, 9.6 sigmas from the line). What is left before chapters 05, 10, 11 and 12
-      can be authored is the artifact: `data/gen/preflop/**` with seed, boards, batches and per-cell stderr in
-      the schema. `solver/pushfold.py` Nash and the ICM matrices follow it.
+      a 2.5x open (closest class QQ, 9.6 sigmas from the line). `solver/pushfold.py` Nash and the ICM matrices
+      follow the artifact, and the range-level tables chapters 05 and 10-12 cite must be generated rather than
+      derived from it: the per-batch panels are not committed, so a weighted error bar needs a generator run.
 - [x] `pokergto.preflop` and its boundary measurement (`adr/0007`): board-sampled matrix, exact cells agreed,
       zero verdict flips between seeds. 板面采样的翻前矩阵与边界稳定性测量已完成。
-- [ ] `theory/range_advantage`, `sizing`, `polarization`, `blockers`, `protection`, `frequencies`
+- [x] The committed artifact `data/gen/preflop/preflop.all-in-matrix.json` (169x169 equities with a per-cell
+      standard error, the `sampling` block, and a batch digest that makes a per-push check possible), with
+      `data/schema/preflop_matrix.schema.json`, `tools/gen_preflop.py` and its verification tier. Regenerating it
+      costs 465-499 s, so `adr/0008` splits the proof: per push CI re-derives one batch and every identity, and
+      `.github/workflows/solver-regression.yml` re-derives the whole board set weekly.
+      翻前矩阵产物与其分层验证机制已落地。
+- [ ] `theory/`: `range_advantage.py`, `frequencies.py` and `multiway.py` exist and are cited; `protection` is
+      not written; `sizing`, `polarization` and `blockers` were deleted on purpose (they computed
+      precise-looking numbers from invented exponents) and stay deleted unless a real derivation replaces them
 - [ ] Chapters **03 Range Advantage**, **04 Bet Sizing**, **05 Preflop (Cash)**,
       **10 Heads-Up / BvB** bilingual (27 lessons)
 - [ ] Trainer scores a painted range in **bb/100 of EV lost versus the spot artifact**, not just
@@ -134,9 +143,10 @@ catches a hand-edited number; `status: ready` starts to mean something. *All thr
 ## M8 — Post-1.0 depth (only if each item clears its cost guard)
 
 - [ ] Equity realization vs SPR as a computed quantity rather than a rule of thumb
-- [ ] A 2-street 1326-combo toy — re-scoped by `adr/0006` and then unblocked in part by `adr/0007`: the
+- [ ] A 2-street 1326-combo toy — re-scoped by `adr/0006` and unblocked on its payoff side by `adr/0007`: the
       two-street *tree* was never the cost, the five-card deal is, so the affordable form is a board-sampled
-      payoff table over a declared hand space, not an exact enumeration of one.
+      payoff table over a declared hand space, and that mechanism now exists in `pokergto.preflop`. What is still
+      missing is a game spec with a traceable source rather than a convenient one.
 - [ ] Balanced exploitation: how much to deviate when the read is 70% right
 
 ---

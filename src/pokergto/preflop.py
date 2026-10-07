@@ -23,8 +23,14 @@ Why conditioning on the board is the right axis to sample along:
 
 The three exact cells this was validated against (``pokergto.equity.range_equity(..., mode="exact")``
 with the budget raised, 142-178 s each, measured 2026-10-07): ``AA`` v ``KK`` 0.8194605047, ``AKo`` v
-``QQ`` 0.4324233606, ``72o`` v ``22`` 0.3258923844. At 20,000 boards the deviations were 1.5, 0.6 and
-1.2 standard errors -- no sign of bias, and the magnitude is what sampling noise should be.
+``QQ`` 0.4324233606, ``72o`` v ``22`` 0.3258923844. The committed artifact -- seed 202610071, 20,000 boards,
+20 batches -- sits **-1.79, +0.34 and +3.49** of its own standard errors from them, and two independent runs at
+the same budget on other seeds (202610073 and 202610074, 465 s and 467 s, measured 2026-10-07) sit within 1.14
+and 0.42. Both signs appear, the nine signed deviations average 0.07 sigma with a spread of 1.48, and an error
+bar estimated from 20 batches carries about 16% uncertainty of its own -- so nine cells cannot separate that from
+a calibrated one. A 3.5-sigma cell is unremarkable across 28,392 comparisons -- the
+expected maximum is near four sigma -- and the seed is a date, chosen before the numbers existed: this artifact
+does not re-roll to improve the deviation it prints.
 """
 
 from __future__ import annotations
@@ -57,6 +63,22 @@ NONDEALABLE = conflict_mask(COMBO_CODES, COMBO_CODES)
 
 #: Class-index pair for every ordered slot, used to scatter pair counts into the matrix in one pass.
 _CLASS_CELLS = COMBO_CLASS[:, None] * N_CLASSES + COMBO_CLASS[None, :]
+
+#: Class cells computed exhaustively over all 2,598,960 boards by
+#: ``pokergto.equity.range_equity(hero, villain, (), mode="exact")`` with ``EXACT_EVAL_BUDGET`` raised, on the
+#: author's laptop 2026-10-07: 142.6 s, 176.8 s and 177.5 s. These are the anchors that make "sampled" a claim
+#: with arithmetic under it rather than a guess with a decimal point. They live in the engine rather than in a
+#: test file because two consumers have to agree on them: ``tests/test_preflop.py`` re-runs the comparison, and
+#: ``tools/gen_preflop.py`` writes them into the committed artifact's ``crosschecks`` block.
+EXACT_CELLS: Final[dict[tuple[str, str], float]] = {
+    ("AA", "KK"): 0.819_460_504_7,
+    ("AKo", "QQ"): 0.432_423_360_6,
+    ("72o", "22"): 0.325_892_384_4,
+}
+
+#: The stride between batch seeds. Batches must be independent, so batch ``i`` draws from its own stream; a
+#: stride of 1 would land neighbouring batches on streams that differ only in low bits.
+BATCH_SEED_STRIDE: Final = 7919
 
 
 @dataclass(frozen=True, slots=True)
@@ -165,6 +187,23 @@ def _accumulate(boards: np.ndarray, chunk: int = 200) -> tuple[np.ndarray, np.nd
     return wins.reshape(shape), ties.reshape(shape), totals.reshape(shape)
 
 
+def batch_panel(index: int, *, seed: int, per_batch: int) -> np.ndarray:
+    """One batch's wins / ties / dealable-pair-count panel, exactly as :func:`all_in_matrix` builds them.
+
+    Public because a committed sampled artifact is only checkable by *re-running the same arithmetic*, not by a
+    parallel implementation that happens to agree today. ``tools/gen_preflop.py`` re-derives batch 0 from the
+    seed and board count the artifact declares and compares bytes; that hash means what it says only because
+    this is the single code path that produces a batch.
+    """
+    if index < 0:
+        raise InputError(f"batch index must be non-negative; got {index}")
+    if per_batch < 100:
+        raise InputError(
+            f"a batch of {per_batch} boards cannot support an error bar; the floor is 100"
+        )
+    return np.stack(_accumulate(_sample_boards(per_batch, seed + BATCH_SEED_STRIDE * index)))
+
+
 def all_in_matrix(
     boards: int = 20_000, *, seed: int = 202_610_071, batches: int = 20
 ) -> PreflopMatrix:
@@ -185,7 +224,7 @@ def all_in_matrix(
         raise InputError(f"batches must be between 2 and boards // 100; got {batches}")
     per_batch = boards // batches
     panels = np.stack(
-        [_accumulate(_sample_boards(per_batch, seed + 7919 * index)) for index in range(batches)]
+        [batch_panel(index, seed=seed, per_batch=per_batch) for index in range(batches)]
     )
     wins, ties, totals = (panels[:, axis].sum(axis=0) for axis in range(3))
     equity = np.where(totals > 0, (wins + 0.5 * ties) / np.maximum(totals, 1.0), np.nan)

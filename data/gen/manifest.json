@@ -1,5 +1,5 @@
 {
-  "artifact_count": 49,
+  "artifact_count": 50,
   "engine_version": "0.1.0",
   "files": {
     "glossary.json": {
@@ -19,6 +19,12 @@
       "kind": "curriculum_index",
       "schema": "index",
       "sha256": "74a9f8bf305a51b385ef92a197b17dcec33d745124634db1f18fef3729aa278e"
+    },
+    "preflop/preflop.all-in-matrix.json": {
+      "bytes": 919262,
+      "kind": "preflop_matrix",
+      "schema": "preflop_matrix",
+      "sha256": "2d8d0e99863b13ff77a8acd0009b84c2c8bb8bf18b6272bdd3f00dfb350125dd"
     },
     "quizzes/quiz.01-03.draw-probability-00.json": {
       "bytes": 1783,
@@ -249,10 +255,10 @@
       "sha256": "2cb82889ad7ecc286a013e7bd2ec4e19c7bd87a79088d2bc639b0979eb0c7737"
     },
     "tables/table.03-02.capped-range-check.json": {
-      "bytes": 5636,
+      "bytes": 6078,
       "kind": "table",
       "schema": "table",
-      "sha256": "26df3450788f6becf3d2c7e4689c08bd7c4aa617311e55c8b882090822919e7d"
+      "sha256": "cd53adfec7e7a4ad56ff63dea6942ef2b39b0d2eafcf654e12ff70bec09ee530"
     },
     "tables/table.03-05.removal-effect-by-class.json": {
       "bytes": 3602,

@@ -98,9 +98,9 @@ Decide which artifact it is, then follow the one path that has a generator.
 2. Register it in `BUILDERS`. The id must match `data/schema/common.schema.json#/$defs/id`
    (`table.<lesson-id>.<slug>`, e.g. `table.02-03.mdf-vs-sizing`).
 3. Put the invariants you believe into `checks` (`mdf_equality`, `ev_matches_direct_calculation`,
-   `combo_count`, `frequency_bounds`, …). A check is stored in the artifact and re-run by
-   `gen_all.py --check`, so an artifact that stops passing its own invariants is a bug report, not a
-   diff.
+   `combo_count`, `frequency_bounds`, …). A check is stored in the artifact and re-derived by the
+   builder every time the artifact is generated, so an artifact that stops passing its own invariants
+   is a bug report, not a diff.
 4. `python tools/gen_tables.py --only <id> --out data/gen`, then
    `python tools/gen_all.py --only tables`.
 5. Add the AUTO block pair to **both** lessons, same id, and run `python tools/inject_doc_tables.py`.
@@ -111,13 +111,45 @@ Decide which artifact it is, then follow the one path that has a generator.
 `data/gen`, and a hand-written JSON file there fails `gen_all.py --check` as "stale artifact committed
 with no generator producing it".
 
+**A sampled artifact (one exists today: the preflop matrix).**
+
+`adr/0007` allows sampling of *payoffs*, never of traversals, and `tools/gen_preflop.py` is the shape such an
+artifact has to have:
+
+1. Declare the sample inside the artifact, in the schema, as required fields: `sampling.seed`, `boards`,
+   `batches`, `boards_per_batch`, the estimator's dotted name as a `const`, and a sentence (in both languages)
+   saying what was sampled and what was enumerated. `data/schema/preflop_matrix.schema.json` refuses a sampled
+   file without this block, because a sampled number with no declared sample is a guess formatted like a fact.
+2. Carry an error bar per value, not per file, and compute it from **independent batches** (`pokergto.preflop`
+   advances the seed per batch for exactly this reason). A binomial formula on a count whose comparisons share
+   boards understates the true spread by about 3.2x -- `tests/test_preflop.py` measures the denominator against a
+   closed-form hypergeometric one so the mistake cannot come back.
+3. Store the digits you can defend. `artifacts.dumps` quantises to twelve decimals; this artifact rounds to six
+   before writing, because its own standard error is 0.003 and `verify` refuses a value carrying more precision
+   than `sampling.digits` declares.
+4. Make every `checks` value **re-derivable from the committed cells**, and put anything that needs an expensive
+   re-computation (an exhaustively enumerated anchor cell) in a separate `crosschecks` block that names the test
+   re-running it. `tools/gen_preflop.py --verify` recomputes the identities instead of reading them.
+5. Refuse non-finite values before writing. `json.dumps` emits a bare `NaN`, which is not JSON; the trainer's
+   `JSON.parse` is three steps downstream and would go blank.
+6. Register the step in `gen_all.py`. If it costs more than a few seconds, put it in `SLOW_STEPS` and give it a
+   per-push proof that is exact rather than statistical -- `adr/0008` is the whole argument, and the mechanism is
+   a `sampling.first_batch_sha256` digest of one batch plus the identity re-derivation.
+
+One consequence of (6) is worth stating before you design a lesson around it: the preflop matrix commits
+`equity`, `stderr` and the sampling metadata, but **not** the per-batch panels, so a range-level (weighted) number
+and its error bar cannot be recomputed from the committed artifact. A range equity is therefore its own generated
+artifact, emitted by a generator run that has the panels in memory -- which is how chapters 05 and 10-12 get their
+numbers.
+
 **A range chart, a spot, or a hand example.** These are authored YAML under `data/src/`
-(`spots/`, `hands/`, `quizzes/`), each record carrying its own `provenance` block. Note the honest
-state at the time of writing: `data/src/` does not exist, and neither do
-`tools/gen_ranges.py` nor `tools/run_solver.py`, so `gen_all.py`'s `ranges` and `solver` steps are
-currently no-ops and a range chart has no generator to feed yet. Authoring one today means authoring
-the generator in the same pull request (M4 for preflop ranges, M2 for solver runs), and
-`check_artifact_schema.py` will tell you immediately whether the shape is right.
+(`glossary.yaml`, `curriculum.yaml`, `board_taxonomy.yaml`, `spots/`, `hands/`, `quizzes/`), each record carrying
+its own `provenance` block. `tools/gen_ranges.py` and `tools/run_solver.py` are the generators for the derived
+ones, and `gen_all.py` runs them in a fixed order. A new artifact kind today means adding the generator, the
+builder registration, the schema, the `DIRECTORY_SCHEMA` entry, the manifest `kind` and a `STEPS` entry in one
+pull request -- `tests/test_preflop_artifact.py::test_the_slow_step_is_registered_everywhere_its_artifact_is_named`
+is the pattern for asserting that those lists still agree, because wiring drift is how a committed artifact stops
+being generated.
 
 **A derived theory result.** `src/pokergto/theory/**` is where a "why" claim belongs:
 `range_advantage.py`, `frequencies.py` and `multiway.py` are cited by lessons and each has a test that

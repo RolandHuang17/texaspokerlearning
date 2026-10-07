@@ -369,7 +369,10 @@
             "closed_form_residual",
             "edges_disagree",
             "monotonicity",
-            "value_bracket"
+            "value_bracket",
+            "zero_sum",
+            "diagonal_half",
+            "cells_populated"
           ]
         },
         "value": {

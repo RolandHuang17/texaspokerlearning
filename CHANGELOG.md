@@ -17,14 +17,17 @@ Le résumé est en chinois sous chaque entrée.
   the board set and the only noise left is board variance. Measured: 22 ms per board, so the full 169x169
   grid is 7.3 minutes at 20,000 boards with a 0.0030 mean standard error (worst cell 0.0053), against three
   cells computed exactly at 142-178 s each -- `AA` v `KK` 0.8194605047, `AKo` v `QQ` 0.4324233606, `72o` v
-  `22` 0.3258923844 -- where the sampled deviations are 0.5 to 1.9 of the matrix's own sigmas. Sampling a
+  `22` 0.3258923844 -- where the deviations at that 8,000-board validation size are 0.5 to 1.9 of the matrix's own
+  sigmas (the committed 20,000-board artifact reads -1.79, +0.34 and +3.49, both signs present, with two fresh
+  seeds at the same budget inside 1.14). Sampling a
   *deal* per cell, which is the obvious implementation, measures 8,900 samples/s and prices the same grid at
   17.9 hours: it pays for two noises at once, and combo choice is not the expensive one.
   `pokergto.preflop` 回答的是 `adr/0006` 只标了价却没解决的那个问题：翻前全下的矩阵到底怎么拿。它采的是**牌面**而不是发牌：
   每个牌面用一次 `evaluate7_many` 给 1,326 个组合打分，再在该牌面上枚举所有发得出的组合对，所以在给定的牌面集合上每个格子是
   精确的，剩下的只有牌面方差。实测每个牌面 22 毫秒，即整个 169×169 网格在 20,000 个牌面下 7.3 分钟，平均标准误 0.0030（最差格
   0.0053）；与三个精确算出的格（各 142-178 秒：`AA` 对 `KK` 0.8194605047、`AKo` 对 `QQ` 0.4324233606、`72o` 对 `22`
-  0.3258923844）相比，偏差落在自身 sigmas 的 0.5 到 1.9 倍内。显而易见的实现——按格采样整副发牌——实测 8,900 样本/秒，同一张
+  0.3258923844）相比，8,000 张牌面那次验证的偏差落在自身 sigmas 的 0.5 到 1.9 倍内（提交出去的 20,000 张牌面版本读作
+  -1.79、+0.34、+3.49，正负号都有；同预算下两个新种子落在 1.14 以内）。显而易见的实现——按格采样整副发牌——实测 8,900 样本/秒，同一张
   网格要 17.9 小时：那是一次付两种噪声，而组合选择并不是更贵的那种。
 - `adr/0007` closes `adr/0006`'s open question as option A and pins the boundary that choice forces: ADR-0002
   cut Monte-Carlo sampling of private cards *in the CFR inner loop* without saying what a preflop solve may do
@@ -145,7 +148,88 @@ Le résumé est en chinois sous chaque entrée.
   七高顺，第一版把它算成五高。类别不变，所以仓库里所有类别计数的断言都发现不了它；五张牌上也不可能看见——
   这就是只用五张牌测试不算证明。
 
+- `data/gen/preflop/preflop.all-in-matrix.json` is the artifact `adr/0007` was written to authorise: the
+  board-sampled preflop all-in matrix over all 28,561 ordered class cells, with a per-cell standard error beside
+  every equity, a required `sampling` block (estimator, seed, 20,000 boards, 20 batches, 1,000 boards per batch,
+  `C(48,5)/C(52,5) = 0.658842`, the expected 21,403,800,000 comparisons, and the sha256 of batch 0's integer
+  panel), and `crosschecks` carrying the three exhaustively enumerated anchor cells. Measured from the committed
+  file: mean off-diagonal standard error 0.002954, worst cell `22` v `J4o` 0.005354, zero-sum residual exactly
+  0.0, diagonal exactly 0.5 with zero dispersion, 919,262 bytes on disk (167,943 gzipped, 58,122 lines). Two
+  things are deliberately *not* in it, and both are stated in the schema: the per-cell denominators (nearly
+  determined by combinatorics, and 0.42 MB each) and the per-batch panels (1.7M numbers). The second is a rule
+  with a consequence -- a range-level number and its error bar cannot be recomputed from this artifact, so
+  chapters 05 and 10-12 must get theirs from a generator run.
+  `data/gen/preflop/preflop.all-in-matrix.json` 就是 `adr/0007` 授权的那个产物：28,561 个有序类别格的翻前全下矩阵，
+  每个胜率旁边都放着该格自己的标准误，`sampling` 块是必填项（估计器、种子、20,000 张牌面、20 个批次、每批 1,000 张、
+  `C(48,5)/C(52,5) = 0.658842`、期望比较次数 21,403,800,000，以及第 0 批整数面板的 sha256），`crosschecks` 里放着三个
+  穷举算出的锚定格。从提交文件里量到的：非对角平均标准误 0.002954，最差格 `22` 对 `J4o` 0.005354，零和残差恰为 0.0，
+  对角线恰为 0.5 且离散度为 0，磁盘上 919,262 字节（gzip 后 167,943，58,122 行）。有两样东西是刻意不放进去的，而且都在
+  schema 里写明：逐格分母（几乎可由组合数学推出，每份 0.42 MB）和逐批面板（170 万个数）。后者是一条有后果的规则——
+  范围级的数字及其误差棒无法从这个产物重算，所以第 05 章和 10-12 章必须由生成器那一次运行拿到它们。
+- `data/schema/preflop_matrix.schema.json` makes the sampling declaration structural rather than stylistic: an
+  artifact with no `sampling` block, no batch digest, a class order that is not `HAND_CLASSES_169`, or a value
+  carrying more decimals than `sampling.digits` declares, does not validate. `common.schema.json#/$defs/check.kind`
+  gains `zero_sum`, `diagonal_half` and `cells_populated`, and `manifest.schema.json` gains the
+  `preflop_matrix` kind.
+  `data/schema/preflop_matrix.schema.json` 把"声明抽样"从风格变成结构约束：没有 `sampling` 块、没有批次摘要、类别顺序
+  不是 `HAND_CLASSES_169`、或者某个数的小数位多于 `sampling.digits` 所声明的位数，都过不了校验。
+  `common.schema.json#/$defs/check.kind` 新增 `zero_sum`、`diagonal_half`、`cells_populated`，
+  `manifest.schema.json` 新增 `preflop_matrix` 这个 kind。
+- `tools/gen_preflop.py` writes that artifact in two tiers, because one measured number forced it: regenerating
+  20,000 boards costs 465-499 s. `--verify` (a measured 23 s, so CI can run it on every push) rebuilds batch 0 from
+  the seed the artifact itself declares, compares its digest byte for byte, and re-derives every identity from
+  the committed cells -- the recorded `checks` values included, so nothing in the file is a receipt. `--out`
+  generates the whole thing and refuses to write a payload that does not verify, including any non-finite cell
+  (`json.dumps` emits a bare `NaN`, which is not JSON and would blank the trainer's screen three steps later).
+  `tools/gen_preflop.py` 分两个层级写这个产物，因为一个实测数字逼着这么设计：重生成 20,000 张牌面要 499 秒。
+  `--verify`（实测 26 秒，所以每次 push 都跑得动）用产物自己声明的种子重建第 0 批、逐字节比对摘要，并从已提交的格子里
+  重推导所有恒等式——包括 `checks` 里记录的那些数值，所以文件里没有任何一张"收据"。`--out` 生成整份矩阵，并拒绝写出
+  任何未通过自身校验的内容，非有限格子尤其（`json.dumps` 会写出裸 `NaN`，那不是合法 JSON，三步之后就会把训练器刷成白屏）。
+- `adr/0008-sampled-artifacts-are-tiered-by-measured-cost.md` records the split -- per push the engine is proven
+  for one batch plus every identity, on schedule the full board set is re-derived -- and why the two cheaper
+  answers were rejected: path filters miss the inputs that actually move bytes (`artifacts.py`'s quantisation, a
+  numpy bump), and a statistical drift test needs a threshold, and the existing 600-board cost probe turns out to
+  draw from the committed artifact's *own* seed, making its boards a nested subset of the ones it would compare
+  against. `.github/workflows/solver-regression.yml` is the scheduled tier; it is also the file `adr/0002` and
+  `docs/development/adr.md` have named since the solver gates were written, and which did not exist until now.
+  `adr/0008-sampled-artifacts-are-tiered-by-measured-cost.md` 记下这个分层——每次 push 证明一批加全部恒等式，定时任务
+  重推导全部牌面——也记下两个更省事的答案为什么被否：路径过滤会漏掉真正改变字节的输入（`artifacts.py` 的量化、numpy
+  升级），统计式漂移检验需要一个人定的阈值；而且现有那个 600 张牌面的成本探针其实抽的是提交产物**同一个**种子，它的牌面
+  是要比较的对象自己的子集。`.github/workflows/solver-regression.yml` 就是定时那一层；它同时也是 `adr/0002` 和
+  `docs/development/adr.md` 从写下求解门禁那天起就点名、却一直到今天才存在的文件。
+- `tests/test_preflop_artifact.py` (12 tests: 10 fast, 2 slow) proves the artifact's guards can fire: one changed
+  digit in one cell, a `summary` that no longer matches the grid, a title naming somebody else's board count, a
+  `NaN` cell, a missing `sampling` block, a reversed class order, and a *deleted* committed matrix (which must
+  fail the run rather than be carried over as if present). The two slow tests are the matrix's own byte
+  re-derivation and the anchor cross-check; with them the suite measures **258 passed in 21:47**, against
+  **244 in 11:22** before this increment, and the per-push fast tier measures **2:49**.
+  `tests/test_preflop_artifact.py`（10 个测试：8 快 2 慢）证明这些防线真的会响：改一格的一个末位数字、`summary` 与网格
+  不再吻合、标题写着别人的牌面预算、一个 `NaN` 格子、缺 `sampling` 块、类别顺序被颠倒，以及提交的矩阵被**删掉**（必须让
+  这次运行失败，而不是被当作存在照样搬过去）。两个慢测试就是矩阵自己的字节重生成与锚定格对照；加上它们之后实测
+  **258 passed in 21:47**，这一增量之前是 **244 in 11:22**，每次 push 的快层实测 **2:49**。
+- `pokergto.preflop` gains `batch_panel()` and `BATCH_SEED_STRIDE`, and now carries `EXACT_CELLS` itself. The
+  first pair exists because a committed sampled artifact is only checkable by re-running *the same* arithmetic --
+  `all_in_matrix` builds its panels through `batch_panel`, so `--verify` re-deriving batch 0 is not a parallel
+  implementation that happens to agree today. `EXACT_CELLS` moved out of `tests/test_preflop.py` because two
+  consumers (that slow test, and the artifact's `crosschecks`) must read one source rather than type the same
+  three numbers twice.
+  `pokergto.preflop` 新增 `batch_panel()` 与 `BATCH_SEED_STRIDE`，并由它自己保管 `EXACT_CELLS`。前两个的存在理由是：
+  提交出去的采样产物只能靠**重跑同一套算式**来核验——`all_in_matrix` 的面板本就是通过 `batch_panel` 堆起来的，所以
+  `--verify` 重算第 0 批不是一个"今天恰好一致"的平行实现。`EXACT_CELLS` 从 `tests/test_preflop.py` 搬进引擎，因为有两个
+  消费者（那个慢测试，和产物的 `crosschecks`）必须读同一处，而不是把同样的三个数敲两遍。
+
 ### Changed / 变更
+- `tools/gen_all.py` has a `preflop` step, an `--include-slow` flag and a `SLOW_STEPS` rule, and the slow rule is
+  a **carry-over** rather than an exemption: a skipped step's committed bytes are copied into the tree being
+  produced, so the manifest still fingerprints a complete tree and the "committed with no generator producing
+  it" scan stays intact. If the artifact is missing, the run refuses with the command that would fix it --
+  skipped must never be readable as deleted. The module docstring's step order was also wrong (it said
+  glossary → tables → ranges → solver → index → manifest); it now says what the code does, including `quizzes`.
+  `tools/gen_all.py` 多了 `preflop` 步骤、`--include-slow` 开关和一条 `SLOW_STEPS` 规则，而且这条规则是**搬运**而不是
+  豁免：被跳过的步骤，其已提交字节会被拷进正在生成的那棵树，于是 manifest 仍然给一整棵完整的树按指纹，"提交了但没有生成器
+  产出它"那道扫描也照常生效。文件缺失时整个运行直接拒绝，并附上能修好它的命令——跳过绝不可以被读成删除。模块文档字符串里的
+  步骤顺序原本也是错的（写的是 glossary → tables → ranges → solver → index → manifest），现在照代码写，连 `quizzes`
+  一起补上。
 - `equity.py`'s two enumeration primitives are public now: `score_matrix` (was `_score_matrix`) and
   `conflict_mask` (was `_conflict_mask`). `pokergto.preflop` is their second caller, and importing a sibling's
   underscore name across a package boundary is how a "private" helper becomes load-bearing without anyone
@@ -193,6 +277,42 @@ Le résumé est en chinois sous chaque entrée.
   （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- `pokergto.preflop`'s module docstring claimed the committed 20,000-board matrix sat "1.5, 0.6 and 1.2 standard
+  errors" from the three exhaustively enumerated anchor cells. The artifact it describes says otherwise -- and
+  describing it is cheap now that it is committed, so the claim was checked instead of defended: the committed
+  seed sits at **-1.79, +0.34 and +3.49** sigmas, and two independent 20,000-board runs at other seeds
+  (202610073, 202610074; 465.1 s and 466.7 s, measured 2026-10-07) sit inside 1.14 and 0.42. The nine signed
+  deviations average 0.07 sigma with a spread of 1.48, and an error bar estimated from 20 batches carries about
+  16% uncertainty of its own -- nine cells cannot separate that from a calibrated one, which is the honest limit
+  of what this check establishes. A 3.5-sigma cell out of 28,392 is an expected occurrence, the expected
+  maximum is near four sigma, and the seed is a date chosen before the numbers existed, so it was not re-rolled
+  to make the printed deviation look better. Four live documents also carried the phrase "0.5 to 1.9 of its own
+  sigmas" beside a 20,000-board sentence where it belonged to the 8,000-board validation run; each now names its
+  own budget.
+  `pokergto.preflop` 的模块文档字符串写着 20,000 张牌面的提交矩阵与三个穷举锚定格相距"1.5、0.6、1.2 个标准误"。产物现在就在那儿，
+  这句话当场就能核——于是它被检验而不是被辩护：提交种子实测 **-1.79、+0.34、+3.49** 个 sigma，另外两个种子各跑一次同预算的
+  20,000 张牌面（202610073、202610074，耗时 465.1 秒与 466.7 秒，2026-10-07 实测）落在 1.14 与 0.42 以内。九个带符号的偏差
+  均值 0.07 sigma、离散 1.48，而用 20 个批次估出来的误差棒自己就带着约 16% 的不确定度——九个格子分不出它和"标定正确"，这是这项
+  检查能证明的诚实边界。28,392 个格子里出一个 3.5 sigma 本就预期之内，期望最大值接近四个 sigma；而种子是个日期、在数字出来之
+  前就定下了，所以没有为了让印出来的偏差好看而重摇。另有四处现行文档把"自身 sigmas
+  的 0.5 到 1.9"写在一句讲 20,000 张牌面的话旁边，而它其实属于 8,000 张牌面那次验证；现在每处都标了自己的预算。
+- Three contributor docs stated things that had stopped being true, in the past tense of authority.
+  `docs/development/local-dev.md` reported the repository's "verified state" as 335 ruff findings, 24 of 48 files
+  unformatted, 59 mypy errors and "pytest collects nothing and exits 5: there is no `tests/` directory yet" --
+  measured today: no findings, 14 of 167, clean over 31 files, and a suite that collects. Same file named a
+  `data-drift.yml` workflow that does not exist (the gate is the `data` job in `ci.yml`) and gave a step order
+  missing `preflop` and `quizzes`. `docs/development/data-provenance.md` told contributors that `data/src/` does
+  not exist and that `tools/gen_ranges.py` and `tools/run_solver.py` are absent, so their steps are no-ops; all
+  three exist and produce the committed trees. `docs/development/adr.md` described the development machine as
+  numpy 2.x where the build log for the committed tree says 1.26.4. Each now carries today's measurement, and
+  the numbers that went into the ADR records stay where they are, since a record is a record.
+  三份贡献者文档用斩钉截铁的口吻说着早已不成立的话。`docs/development/local-dev.md` 把仓库的"实测状态"写成 335 条 ruff
+  告警、48 个文件里 24 个未格式化、59 个 mypy 错误、"pytest 什么都收集不到、退出码 5：还没有 `tests/` 目录"——今天的实测是：
+  零告警、167 个里 14 个、31 个文件干净、测试照常收集。同一份文件还点了一个不存在的 `data-drift.yml`（那道门在 `ci.yml` 的
+  `data` job 里），步骤顺序也漏了 `preflop` 和 `quizzes`。`docs/development/data-provenance.md` 告诉贡献者 `data/src/`
+  不存在、`tools/gen_ranges.py` 与 `tools/run_solver.py` 也不存在所以对应步骤是空跑——这三样都在，而且正在产出提交的树。
+  `docs/development/adr.md` 把开发机写成 numpy 2.x，而提交树那份构建日志里是 1.26.4。现在每份都换成今天的实测；ADR
+  记录里的数字原样留着，因为记录就是记录。
 - `PreflopMatrix.equity_against` reported its error bar twenty times too wide. It derived the spread of a
   weighted row by multiplying the batch-to-batch standard deviation by `sqrt(batches)` -- the right scaling
   for `pairs_stderr`, which estimates a **sum** -- on a quantity that is a **ratio**, where the estimate is

@@ -1,19 +1,27 @@
 #!/usr/bin/env python3
 """Regenerate ``data/gen`` — or verify that the committed tree already matches the engine.
 
-    python tools/gen_all.py                 # write
+    python tools/gen_all.py                 # write, except the slow steps below
     python tools/gen_all.py --check         # CI: fail on any byte difference
     python tools/gen_all.py --only tables --only glossary
     python tools/gen_all.py --skip solver   # local loop, when you did not touch the solver
+    python tools/gen_all.py --check --include-slow   # the scheduled tier: re-derive everything
 
 Why ``--check`` is a byte-diff and not a hash dance: generation is deterministic by construction
 (``pokergto.artifacts.dumps`` sorts keys, pins float quantisation, writes no timestamps into artifact
 bodies, and the solvers run under fixed seeds). So a rebuild of unchanged inputs changes nothing, and
 anything that does change is a real change someone must read.
 
-Order matters and is fixed: glossary -> tables -> ranges -> solver -> index -> manifest. The index
-counts authored artifacts, so it has to run after them; the manifest fingerprints everything, so it is
-always last.
+Order matters and is fixed: glossary -> ranges -> solver -> preflop -> tables -> quizzes -> index ->
+manifest. The preflop matrix is read by nothing here but is placed with the computation that produces it;
+the index counts authored artifacts, so it has to run after them; the manifest fingerprints everything, so
+it is always last.
+
+``SLOW_STEPS`` is the one exception to "everything re-runs", and it is a measured decision rather than a
+convenience: re-deriving the 20,000-board preflop matrix costs 465-499 s, while its per-push proof is a 23-second
+re-derivation of one batch (``tools/gen_preflop.py --verify``) plus the identity checks the artifact carries.
+A skipped step carries its committed bytes into the tree it produces, so the manifest and the staleness scan
+keep telling the truth about the rest of the tree. See ``adr/0008``.
 """
 
 from __future__ import annotations
@@ -21,6 +29,7 @@ from __future__ import annotations
 import argparse
 import filecmp
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -78,6 +87,20 @@ def _step_solver(out: Path) -> list[Path]:
         return []
     _run(script, "--out", str(out / "solver"))
     return sorted((out / "solver").glob("*.json"))
+
+
+def _step_preflop(out: Path) -> list[Path]:
+    """The board-sampled preflop all-in matrix (``adr/0007``).
+
+    A measured 465-499 s at the committed 20,000 boards, which is why this step is a member of ``SLOW_STEPS`` and is
+    not re-derived by default. It is a registered step rather than a manually-run script because the manifest
+    has to fingerprint it and ``compare()`` has to know a generator produces it.
+    """
+    script = TOOLS / "gen_preflop.py"
+    if not script.exists():  # pragma: no cover
+        return []
+    _run(script, "--out", str(out))
+    return sorted((out / "preflop").glob("*.json"))
 
 
 def _step_quizzes(out: Path) -> list[Path]:
@@ -178,6 +201,8 @@ def _kind_by_name(path: Path) -> str:
         return "range_chart"
     if "matrices" in parents:
         return "pushfold_matrix"
+    if "preflop" in parents:
+        return "preflop_matrix"
     if "solver" in parents:
         return "solver_run"
     if "spots" in parents:
@@ -198,6 +223,7 @@ def _schema_for(path: Path) -> str | None:
         "tables": "table",
         "ranges": "range_chart",
         "matrices": "range_chart",
+        "preflop": "preflop_matrix",
         "solver": "solver_run",
         "spots": "spot",
         "quizzes": "quiz",
@@ -233,6 +259,7 @@ STEPS: list[tuple[str, Step]] = [
     ("glossary", _step_glossary),
     ("ranges", _step_ranges),
     ("solver", _step_solver),
+    ("preflop", _step_preflop),
     ("tables", _step_tables),
     ("quizzes", _step_quizzes),
     ("index", _step_index),
@@ -249,12 +276,68 @@ STEPS: list[tuple[str, Step]] = [
 FULL_TREE_ONLY = {"manifest"}
 
 
+#: Steps that are skipped unless ``--include-slow`` is passed, mapped to the ``data/gen`` directories whose
+#: committed bytes are carried into the tree instead.
+#:
+#: ``preflop`` is here because of one measured number: 465-499 s to re-derive 20,000 boards (23-25 ms per board,
+#: 2026-10-07), on a gate -- ``gen_all --check`` -- that runs on every push and every pull request. Paying that
+#: per push is not extra rigour, it is a tax that teaches contributors to add ``--skip``, and a skipped gate
+#: nobody re-runs is the failure mode ``adr/0002`` already wrote a scheduled job for. So the per-push tier
+#: re-derives what one batch determines and compares it byte for byte
+#: (``python tools/gen_preflop.py --verify``, about 23 s), and the scheduled
+#: ``.github/workflows/solver-regression.yml`` re-derives the whole board set with ``--include-slow``. Recorded
+#: in ``adr/0008``.
+SLOW_STEPS: dict[str, tuple[str, ...]] = {"preflop": ("preflop",)}
+
+
+def _carry_over(out: Path, prefixes: tuple[str, ...]) -> list[Path]:
+    """Copy a skipped slow step's committed artifacts into the tree being produced, or refuse loudly.
+
+    A copy rather than an exemption, for two reasons that are both about not weakening a gate. The manifest
+    fingerprints the whole tree, so a matrix missing from the rebuild would make the rebuilt ``manifest.json``
+    disagree with the committed one and read as a real change. And ``compare()`` treats a committed file that no
+    generator produces as stale -- true of a skipped step, and a false alarm that would hide the real kind.
+    Carrying the bytes over keeps both of those checks telling the truth about everything else in the tree.
+
+    What this must never become is "skipped means deleted". If the committed artifact is not on disk, that is a
+    real failure, and it is reported as one instead of being compared away.
+    """
+    carried: list[Path] = []
+    for prefix in prefixes:
+        source_dir = GEN_DIR / prefix
+        committed = sorted(source_dir.rglob("*.json")) if source_dir.exists() else []
+        if not committed:
+            raise SystemExit(
+                f"data/gen/{prefix} holds no artifact, and its generating step is not being re-derived. "
+                f"Run `python tools/gen_all.py --include-slow`, or `python tools/gen_preflop.py --out data/gen`."
+            )
+        for source in committed:
+            target = out / source.relative_to(GEN_DIR)
+            if target.resolve() != source.resolve():
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(source, target)
+            carried.append(target)
+    return carried
+
+
 def generate(
-    out: Path, *, only: set[str] | None = None, skip: set[str] | None = None
+    out: Path,
+    *,
+    only: set[str] | None = None,
+    skip: set[str] | None = None,
+    include_slow: bool = False,
 ) -> list[Path]:
     filtered = bool(only or skip)
     written: list[Path] = []
+    carried: list[Path] = []
     for name, step in STEPS:
+        # First question, before any filter: is this a slow step the caller did not explicitly ask for? Answering
+        # it after `--only` would let a filtered run skip the carry-over entirely, and the carry-over is what makes
+        # "not re-derived" different from "deleted" -- it refuses the run when the committed artifact is absent.
+        explicitly_requested = bool(only) and name in only
+        if not include_slow and name in SLOW_STEPS and not explicitly_requested:
+            carried.extend(_carry_over(out, SLOW_STEPS[name]))
+            continue
         if only and name not in only:
             continue
         if skip and name in skip:
@@ -262,6 +345,14 @@ def generate(
         if filtered and name in FULL_TREE_ONLY:
             continue
         written.extend(step(out))
+    if carried:
+        print(
+            f"note: {len(carried)} artifact(s) carried from data/gen instead of re-derived "
+            f"({', '.join(sorted(SLOW_STEPS))}). Their bytes are compared, their engine is not re-run: "
+            "`python tools/gen_preflop.py --verify` re-derives one batch on every push, and "
+            "`--include-slow` re-derives the full board set. See adr/0008.",
+            file=sys.stderr,
+        )
     if filtered and not only:
         print(
             "note: manifest step skipped for a filtered run; it fingerprints the whole tree and would "
@@ -305,6 +396,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--only", action="append", default=[])
     parser.add_argument("--skip", action="append", default=[])
+    parser.add_argument(
+        "--include-slow",
+        action="store_true",
+        help="re-derive SLOW_STEPS too (the preflop matrix: a measured 465-499 s). The scheduled tier does this.",
+    )
     parser.add_argument("--list", action="store_true")
     args = parser.parse_args(argv)
 
@@ -336,7 +432,7 @@ def main(argv: list[str] | None = None) -> int:
         with tempfile.TemporaryDirectory(prefix="pokergto-check-") as tmp:
             rebuilt = Path(tmp) / "gen"
             rebuilt.mkdir(parents=True, exist_ok=True)
-            produced = generate(rebuilt, only=only, skip=skip)
+            produced = generate(rebuilt, only=only, skip=skip, include_slow=args.include_slow)
             if not produced and not GEN_DIR.exists():
                 ok("nothing generated and nothing committed: data gate passes on an empty tree")
                 return 0
@@ -369,7 +465,7 @@ def main(argv: list[str] | None = None) -> int:
         ok("data/gen is byte-identical to a fresh generation")
         return 0
 
-    written = generate(GEN_DIR, only=only, skip=skip)
+    written = generate(GEN_DIR, only=only, skip=skip, include_slow=args.include_slow)
     ok(f"gen_all: wrote {len(written)} artifacts into data/gen")
     print(f"     built by {_environment_note()}", file=sys.stderr)
     if not written:

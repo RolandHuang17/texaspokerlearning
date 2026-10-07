@@ -20,7 +20,20 @@
         "properties": {
           "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
           "kind": {
-            "enum": ["glossary", "curriculum_index", "table", "range_chart", "spot", "quiz", "hand_example", "solver_run", "pushfold_matrix", "board_taxonomy", "index"]
+            "enum": [
+              "glossary",
+              "curriculum_index",
+              "table",
+              "range_chart",
+              "spot",
+              "quiz",
+              "hand_example",
+              "solver_run",
+              "pushfold_matrix",
+              "preflop_matrix",
+              "board_taxonomy",
+              "index"
+            ]
           },
           "bytes": { "type": "integer", "minimum": 0 },
           "schema": { "type": ["string", "null"] }

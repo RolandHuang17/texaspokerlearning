@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://pokergto.dev/schemas/preflop_matrix.schema.json",
+  "title": "A board-sampled preflop all-in equity matrix over the 169 classes",
+  "description": "The artifact adr/0007 authorises: boards are sampled, deals are enumerated. Each cell is therefore exact conditional on the committed board set, and the only error is board variance -- which is why `stderr` sits beside every cell instead of being a footnote. `sampling` is required, not advisory: a sampled number that does not declare its seed, board count and batch count is a guess formatted like a fact. Range-level (weighted) numbers CANNOT be recomputed from this file, because the per-batch panels that produce a weighted error bar are not committed; they come from a generator run, which is why the derived tables this artifact supports are separate artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "orientation",
+    "classes",
+    "equity",
+    "stderr",
+    "sampling",
+    "summary",
+    "crosschecks",
+    "provenance",
+    "checks",
+    "unverified_claims"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "id": { "$ref": "common.schema.json#/$defs/id" },
+    "title": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "caption": { "$ref": "common.schema.json#/$defs/lang_string" },
+    "orientation": {
+      "const": "pairs-then-suited-then-offsuit-descending-rank",
+      "description": "A pinned literal naming the order of `classes`, which is pokergto.cards.HAND_CLASSES_169: AA..22, then every suited class, then every offsuit class, each group in descending rank order. If the order ever changes, every consumer changes in the same commit -- the same rule data/schema/range_chart.schema.json applies to a 13x13 grid."
+    },
+    "classes": {
+      "type": "array",
+      "minItems": 169,
+      "maxItems": 169,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[AKQJT98765432]{2}([so])?$" }
+    },
+    "equity": {
+      "description": "equity[i][j] is hero class i's share of the pot all-in preflop against villain class j, over the committed board set. Dense and full: the transpose is stored rather than derived, so a consumer never performs arithmetic on a sampled number (ADR-0004).",
+      "type": "array",
+      "minItems": 169,
+      "maxItems": 169,
+      "items": {
+        "type": "array",
+        "minItems": 169,
+        "maxItems": 169,
+        "items": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "stderr": {
+      "description": "Independent-batch standard error of the cell above it, in the same pot-share units. The diagonal is exactly 0.0 with exactly 0.0 dispersion -- a class against itself is a fair deal by symmetry, not an estimate.",
+      "type": "array",
+      "minItems": 169,
+      "maxItems": 169,
+      "items": {
+        "type": "array",
+        "minItems": 169,
+        "maxItems": 169,
+        "items": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+    "sampling": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "estimator",
+        "sampler",
+        "seed",
+        "boards",
+        "batches",
+        "boards_per_batch",
+        "board_space_size",
+        "survival_probability",
+        "expected_comparisons",
+        "first_batch_sha256",
+        "digits"
+      ],
+      "properties": {
+        "estimator": {
+          "const": "pokergto.preflop.all_in_matrix",
+          "description": "Which function wrote these numbers, pinned as a literal so a rename cannot quietly leave the artifact describing a function that no longer exists."
+        },
+        "sampler": {
+          "$ref": "common.schema.json#/$defs/lang_string",
+          "description": "How the boards were drawn and what was enumerated per board, in both languages. Written out because the whole claim of this artifact rests on that distinction."
+        },
+        "seed": { "type": "integer" },
+        "boards": { "type": "integer", "minimum": 100 },
+        "batches": { "type": "integer", "minimum": 2 },
+        "boards_per_batch": {
+          "type": "integer",
+          "minimum": 100,
+          "description": "The engine's own floor: a batch under 100 boards cannot support the error bar it is used to produce."
+        },
+        "board_space_size": {
+          "type": "integer",
+          "const": 2598960,
+          "description": "C(52,5). Stated so a reader can see what fraction of the board space this artifact is."
+        },
+        "survival_probability": {
+          "type": "number",
+          "description": "C(48,5) / C(52,5): the chance that a four-card hole set is disjoint from a uniform five-card board. Closed form, and the reason pair counts are checkable without trusting the sample."
+        },
+        "expected_comparisons": {
+          "type": "integer",
+          "description": "boards x (ordered disjoint combo pairs) x survival_probability. The expected amount of comparison work the grid rests on; derived from combinatorics and the sampling block, so a reader never has to take a sample's word for its own size."
+        },
+        "first_batch_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$",
+          "description": "sha256 over the first batch's integer wins/ties/pair-count panel. tools/gen_preflop.py --verify recomputes that batch from seed/boards_per_batch/batches and compares bytes, which is the per-push proof that the engine still produces this artifact's numbers; the full board set is re-derived on the schedule (adr/0008)."
+        },
+        "digits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Decimal places every stored value carries. Twelve would be decoration on a quantity whose own error bar is 0.003."
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cells_populated", "mean_stderr_off_diagonal", "max_stderr_off_diagonal", "max_stderr_cell"],
+      "properties": {
+        "cells_populated": { "type": "integer", "minimum": 1, "maximum": 28561 },
+        "mean_stderr_off_diagonal": { "type": "number", "minimum": 0 },
+        "max_stderr_off_diagonal": { "type": "number", "minimum": 0 },
+        "max_stderr_cell": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["hero", "villain"],
+          "properties": {
+            "hero": { "type": "string" },
+            "villain": { "type": "string" }
+          }
+        }
+      }
+    },
+    "crosschecks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exact_cells", "agreement"],
+      "properties": {
+        "exact_cells": {
+          "type": "object",
+          "description": "Class cells computed by exhaustive enumeration over all 2,598,960 boards, from pokergto.equity.range_equity(mode=\"exact\") with the budget raised. Keys are \"hero:villain\" in the order the `classes` array uses. These are inputs to the agreement check, not restatements of this artifact's own numbers, and tools/gen_preflop.py --verify refuses an artifact whose keys and values have drifted from pokergto.preflop.EXACT_CELLS.",
+          "additionalProperties": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "agreement": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["hero", "villain", "exact", "sampled", "deviation_sigma", "test"],
+            "properties": {
+              "hero": { "type": "string" },
+              "villain": { "type": "string" },
+              "exact": { "type": "number" },
+              "sampled": { "type": "number" },
+              "deviation_sigma": { "type": "number", "minimum": 0 },
+              "test": { "type": "string", "description": "The executing test that re-runs the comparison, so a stored agreement cannot rot into a claim." }
+            }
+          }
+        }
+      }
+    },
+    "provenance": { "$ref": "common.schema.json#/$defs/provenance" },
+    "checks": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/check" } },
+    "unverified_claims": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/unverified_claim" }
+    }
+  }
+}

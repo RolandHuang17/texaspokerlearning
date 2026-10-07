@@ -29,6 +29,10 @@ jobs:
       - uses: ./.github/actions/setup-env
         with:
           with-node: 'true'
+      # Write mode, unfiltered, and deliberately without `--include-slow`: the eight-minute preflop matrix is not
+      # re-derived here (adr/0008), so the deploy keeps the committed artifact's bytes -- which are the ones the
+      # `data` job in `ci.yml` just verified, and the ones the trainer bundle ships. Pages pays seconds, not
+      # minutes, for a number nobody changed.
       - name: Generate data and nav
         run: python tools/gen_all.py
       - name: Build docs

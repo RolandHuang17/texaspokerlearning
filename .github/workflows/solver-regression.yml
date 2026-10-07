@@ -1,0 +1,60 @@
+name: Slow tier (solver regression + full data re-derivation)
+
+# The file `adr/0002` and `docs/development/adr.md` have named since the solver gates were written --
+# `solver-regression.yml`, "runs on a schedule because it is too expensive for every commit" -- and which did
+# not exist until now. Naming a gate that was never built is exactly the kind of claim this repository is
+# arranged to catch, so the gap is closed with the file rather than with an edit to the record.
+#
+# The schedule exists for one measured number: re-deriving the committed preflop matrix costs 465-499 s
+# (25.5 ms per board over 20,000 boards, measured 2026-10-07), and the per-push data gate cannot pay that for a
+# number nobody touched. Per push, CI proves a *batch* of that matrix byte for byte
+# (`tools/gen_preflop.py --verify`, ~23 s) plus every identity the artifact carries; here it proves the whole
+# board set. `adr/0008` records the split and what each tier does not prove.
+
+on:
+  schedule:
+    # Mondays 03:17 UTC. Off the hour and off the Monday-morning peak, because scheduled workflows are queued
+    # behind everything else on those minutes.
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: slow-tier-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  slow:
+    name: re-derive everything, including the slow steps
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-env
+
+      # Re-solves every registered game and compares bytes against data/gen/solver. The same step `ci.yml`
+      # runs; on this tier it is the one that has time to catch a solver change that only shows up at full
+      # iteration counts.
+      - name: Committed solver artifacts still match a fresh solve
+        shell: bash
+        run: python tools/run_solver.py --check
+
+      # What the proofs and the sampled estimators are allowed to cost. A valid run that takes eleven minutes is
+      # still a bad teaching artifact, and scope slides one street at a time (adr/0002, adr/0006).
+      - name: Cost budgets (solver, exact enumeration, preflop matrix)
+        shell: bash
+        run: python tools/cost_probe.py
+
+      # The tier that `ci.yml` deliberately does not run: `--include-slow` re-derives the 20,000-board matrix
+      # instead of carrying its committed bytes into the comparison.
+      - name: data/gen re-derived at the full committed budget
+        shell: bash
+        run: python tools/gen_all.py --check --include-slow
+
+      # The slow marker holds the 2,598,960-hand enumeration, the exact-equity agreements, the batch-independence
+      # scaling check and the byte-reproducibility of the committed tree.
+      - name: Slow test tier
+        shell: bash
+        run: python -m pytest -m slow -q

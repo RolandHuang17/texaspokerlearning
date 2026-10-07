@@ -98,7 +98,10 @@ Supersedes part of ADR-0002 on one point: a claim that a computation is "tractab
 being priced. The preflop all-in matrix was written into Rule B on the reasoning that no future streets
 means a tractable enumeration, and the reasoning was sound about the tree and wrong about the deal: every
 cell still runs the board out to five cards. Priced after the vectorised evaluator landed, on the
-development laptop (py3.12, Windows, numpy 2.x, 2026-10-07): `evaluate5_many` 1,028,474 hands/s against
+development laptop (py3.12, Windows, **numpy 1.26.4** -- the 2026-10-07 build log of `tools/gen_all.py`
+reports the interpreter and numpy that produced the committed tree; `adr/0006` and `adr/0007` say "numpy 2.x",
+which was wrong when written and is corrected here rather than in the records, per this file's rule that a
+changed decision gets a new ADR and a wrong footnote gets a correction): `evaluate5_many` 1,028,474 hands/s against
 62,118 scalar (16.6x), `evaluate7_many` 313,984 against 46,296 (6.8x), the widest exact flop enumeration
 37.9 s to 7.84 s, exact preflop hand-versus-hand 353.8 s to 17.3 s — and the full 169x169 exact matrix
 5.87x10^11 evaluations, **~740 hours**. Three findings are part of the record because they changed the
@@ -126,8 +129,9 @@ are in play, and which board comes. Combo choice is not the hard part — for a 
 can be enumerated — so `pokergto.preflop` samples only boards, scores all 1,326 holes per board in one
 `evaluate7_many` pass, and is exact conditional on that board set. Measured: 22 ms per board, so 20,000
 boards is the whole 169x169 grid in 7.3 minutes with a 0.0030 mean standard error, against three cells
-computed exactly (`AA` v `KK` = 0.8194605047 and two others, 142-178 s each) within 0.5 to 1.9 of its own
-sigmas. Two cautions are part of the record rather than footnotes. A binomial error bar on the comparison
+computed exactly (`AA` v `KK` = 0.8194605047 and two others, 142-178 s each): the 8,000-board validation run
+sits within 0.5 to 1.9 of its own sigmas, and the committed 20,000-board artifact sits at -1.79, +0.34 and
++3.49, with two fresh seeds at the same budget inside 1.14 and both signs present. Two cautions are part of the record rather than footnotes. A binomial error bar on the comparison
 count understates the true spread by about 3.2x, because pairs sharing a board are correlated — the first
 version of the validation test made that mistake and called a real 1.6-sigma deviation "6.2 sigma", so the
 test now checks the empirical error bar against a closed-form hypergeometric one. And being sampled is not
@@ -135,9 +139,35 @@ the same as being usable: a range boundary compares an equity to a threshold, so
 and 12 print a range, the number of classes whose verdict changes between two independent seeds has to be
 measured. It has been: at 20,000 boards, two seeds, all 169 classes, **zero classes change verdict** at the
 0.5 line against a random hand and zero at the big blind's MDF line (0.7273) facing a 2.5x open, where the
-closest class -- QQ -- sits 9.6 standard errors from the line. So the committed budget is 20,000 boards and
-the open piece is the artifact itself, not the statistics behind it. A chapter needing a tighter spot (a
-3-bet shove, say) re-runs that measurement instead of borrowing this one.
+closest class -- QQ -- sits 9.6 standard errors from the line. So the committed budget is 20,000 boards, and the
+statistics behind the artifact are settled; what the artifact had to add was the sampling declaration and the
+verification tier, which is ADR-0008. A chapter needing a tighter spot (a 3-bet shove, say) re-runs that
+measurement instead of borrowing this one.
+
+## ADR-0008 — Sampled artifacts are tiered by measured cost
+
+`tools/gen_all.py --check` compares `data/gen` byte for byte on every push, and until the preflop matrix arrived
+every step in it cost seconds. The matrix costs a measured 465-499 s, so the gate had to answer a question it had
+never been asked: what does "regenerated in CI" mean when one artifact costs eight and a half minutes to
+regenerate. Paying it per push buys nothing for a number nobody touched and teaches contributors to reach for
+`--skip`; leaving the step out makes the staleness scan call a committed artifact a fossil. ADR-0008 splits the
+proof by cost instead.
+
+Per push: every non-sampled artifact is still byte-compared, and a slow step's committed bytes are *carried into*
+the rebuilt tree rather than exempted from it, so the manifest keeps fingerprinting a complete tree and an absent
+slow artifact is a hard failure -- skipped must never read as deleted. The sampled artifact's own per-push proof is
+`tools/gen_preflop.py --verify`: re-run batch 0 of the artifact's declared seed (1,000 boards, ~23 s), hash the
+integer wins/ties/pair-count panel, and compare it byte for byte against `sampling.first_batch_sha256`, then
+re-derive every identity the file declares from the cells themselves. It is exact, not statistical, which is why
+the record also rejects the two tempting alternatives: path filters (an `artifacts.py` edit or a numpy bump changes
+the bytes without matching any path) and a z-test against a small fresh sample (a threshold tuned until it passes
+is decoration -- and `cost_probe.py`'s existing 600-board probe draws from the committed artifact's own seed, so
+its boards are a nested subset of the ones it would be comparing against). Weekly, `solver-regression.yml` -- the
+workflow ADR-0002 has named since it was written and which did not exist -- re-derives the full board set with
+`--include-slow` along with the `slow` test tier.
+
+Each tier's scope is stated where it is invoked, and no document may claim CI proves every committed artifact is
+byte-identical to a fresh generation without naming the tier that does.
 
 ## Where each decision is enforced
 
@@ -149,5 +179,6 @@ the open piece is the artifact itself, not the statistics behind it. A chapter n
 | 0004 | `trainer/src/lib/data.ts`, `tools/sync_trainer_data.py`, `workflows/trainer` job in `ci.yml`, `workflows/pages.yml` |
 | 0005 | `data/schema/common.schema.json#/$defs/provenance`, `tools/check_provenance.py`, `CODEOWNERS` on `data/src/**` |
 | 0006 | `tools/cost_probe.py` (evaluator throughput floor, exact-enumeration ceiling, re-derived equity), `EXACT_EVAL_BUDGET` in `src/pokergto/equity.py`, `tests/test_evaluator.py` |
-| 0007 | `src/pokergto/preflop.py`, `tests/test_preflop.py` (identities, closed-form pair counts, agreement with exact cells); the sampling fields a `data/gen/preflop/**` artifact will have to carry |
+| 0007 | `src/pokergto/preflop.py`, `tests/test_preflop.py` (identities, closed-form pair counts, agreement with exact cells), `data/schema/preflop_matrix.schema.json` (the `sampling` block is required, not conventional), `data/gen/preflop/preflop.all-in-matrix.json` |
+| 0008 | `tools/gen_all.py` (`SLOW_STEPS`, `_carry_over`, `--include-slow`), `tools/gen_preflop.py --verify`, `.github/workflows/solver-regression.yml`, `tests/test_preflop_artifact.py` |
 

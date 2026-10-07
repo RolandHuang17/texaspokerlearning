@@ -121,31 +121,26 @@ corrupt a file on commit. `.editorconfig` exists to make editors do the same, an
 `tools/` plus `tests/` are type-checked loosely on purpose (build glue and assertions).
 
 **The verified state of this repository at the time of writing**, so nobody reads the table above as a
-promise that these are green:
+promise that these are green. Measured 2026-10-07 with ruff 0.16.10 and mypy 1.10.0:
 
-- `python -m ruff check . --no-cache` reports **335 findings** across `src/pokergto/**` and
-  `tools/**`. The bulk is pydocstyle (`D102`, `D103`, `D105`, `D205`, `D209`), then `UP035`
-  (deprecated `typing` imports, 17), `PLC0415` (imports inside functions, 16 — deliberate in
-  `artifacts._registry()` and `gen_tables.build_hand_class_counts()`), `RUF001`/`RUF002` (35 + 5 —
-  fullwidth `，、：` inside Chinese captions and docstrings flagged as "ambiguous unicode"), and 7
-  `F401` unused imports. The `RUF001`/`RUF002` cluster is a configuration question, not a code
-  question: in a bilingual repository the flagged characters are the content. Either the rule gets
-  `ruff.lint.allowed-confusables` or a per-file ignore for the Chinese string sites, or the noise
-  teaches contributors to skim the rest.
-- `python -m ruff format --check .` would reformat **24 of 48** files, i.e. the codebase is not
-  currently format-clean and the `ruff-format` pre-commit hook will rewrite files the first time it
-  runs on them.
-- `python -m mypy` reports **59 errors in 14 files**, concentrated in the new `src/pokergto/solver/**`
-  (`Missing type parameters for generic type "ndarray"` — 32 `type-arg` errors under numpy 1.26
-  stubs), plus two real ones in `cli.py:244` (the `# type: ignore[union-attr]` on
-  `stream.reconfigure` is unused/wrong for this mypy version).
-- `python -m pytest` collects **nothing** and exits 5: there is no `tests/` directory yet. pytest also
-  warns that `testpaths` points at a missing directory.
+- `python -m ruff check . --no-cache` reports **no findings** ("All checks passed!") across `src/`, `tools/`
+  and `tests/`. The docstring, annotation, and CJK-punctuation rules it used to fail on are configured in
+  `pyproject.toml`, not worked around at call sites.
+- `python -m ruff format --check .` would reformat **14 of 167** Python files, so the codebase is not
+  format-clean and the `ruff-format` hook will rewrite those files the first time it touches them. The 14 are
+  pre-existing; new and edited files are being added formatted.
+- `python -m mypy` is **clean**: "Success: no issues found in 31 source files", strict over `src/pokergto`. The
+  old numpy `ndarray` generic backlog is gone -- the package casts at the few array boundaries where a cast pays
+  rather than parameterising every signature.
+- `python -m pytest -m "not slow"` passes the fast tier in a measured **2:49** (247 tests); the full suite,
+  including the 2,598,960-hand enumeration and the preflop matrix's own byte re-derivation, measures
+  **258 passed in 21:47** and is what CI's coverage arm and `solver-regression.yml` run.
 
-So: `mkdocs build --strict` and the five `tools/check_*` / `gen_all --check` gates are green here;
-`ruff`, `ruff format`, `mypy` and `pytest` are not, and the reason is M0/M2 content that is still being
-authored, not a broken toolchain. CI reflects this (`ci.yml` says which job is gated and which is
-reporting).
+`ruff`, `ruff format` and `mypy` steps in `ci.yml` stay `continue-on-error` for one reason that is not laziness:
+`pyproject.toml` pins them as *floors* (`ruff>=0.4`, `mypy>=1.8`), so CI resolves whatever ships tomorrow, and a
+blocking gate on an unpinned linter turns every future release into a red build on every pull request. Pinning
+them and flipping the gates to blocking is a 1.0-hardening item. `mkdocs build --strict` and the
+`tools/check_*` / `gen_all --check` gates are blocking, and green.
 
 
 ## The gates, and what each one costs
@@ -157,12 +152,24 @@ python tools/check_artifact_schema.py         # every data/gen artifact validate
 python tools/check_provenance.py              # every claim states its origin; proprietary licences rejected
 python tools/check_bilingual.py               # en/zh mirror, template order, AUTO ids, term registration
 python tools/inject_doc_tables.py --check     # no hand-edited number inside an AUTO block
+python tools/gen_preflop.py --verify          # the sampled matrix re-derives its first batch (~23 s)
 python tools/gen_all.py --check --skip solver # committed data/gen == what the engine produces now
 ```
 
-All five are fast except the last, which re-runs the 2,598,960-hand enumeration in
-`gen_tables.build_hand_class_counts`. That enumeration is the point of the project, so it is not
-going to be mocked out; but the same cost applies to `gen_all.py` (write mode).
+Five of those six are seconds. The fifth is the per-push tier for the one sampled artifact (see below), and the
+sixth re-runs the 2,598,960-hand enumeration in `gen_tables.build_hand_class_counts` -- a measured **2:03** for
+the whole unfiltered `--check` on an idle machine (2026-10-07), which is the number `ci.yml`'s data job pays on
+every push. That
+enumeration is the point of the project, so it is not going to be mocked out; the same cost applies to
+`gen_all.py` in write mode.
+
+**The one artifact that is not re-derived per run.** `preflop` holds the board-sampled preflop matrix, a measured
+465-499 s to regenerate, and it is a `SLOW_STEPS` member of `tools/gen_all.py` (`adr/0008`). Ordinary runs carry its
+committed bytes into the tree instead of re-deriving them, which keeps the manifest fingerprinting a complete tree
+and keeps the staleness scan truthful -- and a slow step whose artifact is *missing* fails the run outright rather
+than comparing it away. `--include-slow` re-derives it. So the sentence "CI proves every committed artifact is
+byte-identical to a fresh generation" is false for `data/gen/preflop/` and true for everything else, which is why
+the workflow that runs each tier says so in its own comments.
 
 Two things `--check` guarantees, both verified rather than assumed:
 
@@ -185,8 +192,11 @@ to be downloaded), say so in the pull request rather than marking it green.
 ## Regenerating
 
 ```bash
-python tools/gen_all.py                       # write everything
+python tools/gen_all.py                       # write everything except the slow steps
+python tools/gen_all.py --include-slow        # and the 20,000-board preflop matrix (9 min)
 python tools/gen_all.py --only tables         # just the numeric tables
+python tools/gen_preflop.py --out data/gen     # the sampled matrix on its own
+python tools/gen_preflop.py --verify           # re-derive its first batch and its identities
 python tools/gen_tables.py --list             # the table ids that have builders
 python tools/gen_tables.py --only table.02-03.mdf-vs-sizing --out data/gen
 python tools/gen_tables.py --skip-expensive    # the loop without the 2.6M-hand enumeration
@@ -194,10 +204,11 @@ python tools/inject_doc_tables.py             # fill AUTO blocks in docs/** from
 python tools/inject_doc_tables.py --file docs/zh/02-the-math-of-one-decision/03-mdf.md
 ```
 
-Order matters and `gen_all.py` enforces it: glossary → tables → ranges → solver → index → manifest.
-The index counts authored artifacts, so it runs after them; the manifest fingerprints everything, so
-it is last. If you regenerate, commit the regenerated `data/gen/` in the same pull request —
-`data-drift.yml` fails otherwise, and it fails with the diff, not with a shrug.
+Order matters and `gen_all.py` enforces it: glossary → ranges → solver → preflop → tables → quizzes → index →
+manifest. The solver writes the runs `tables` reads, the index counts authored artifacts so it runs after them,
+and the manifest fingerprints everything so it is always last. If you regenerate, commit the regenerated
+`data/gen/` in the same pull request -- the `data` job in `ci.yml` fails otherwise, and it fails with the diff,
+not with a shrug; `solver-regression.yml` re-runs the whole thing weekly including the slow step.
 
 ## Docs preview
 

@@ -33,6 +33,7 @@ DIRECTORY_SCHEMA = {
     "hands": "hand_example",
     "solver": "solver_run",
     "matrices": "range_chart",
+    "preflop": "preflop_matrix",
     "viz": None,
 }
 

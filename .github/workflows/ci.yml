@@ -194,6 +194,16 @@ jobs:
         shell: bash
         run: python tools/check_artifact_schema.py
 
+      # The per-push tier for the sampled preflop matrix (adr/0008). It re-derives batch 0 of the artifact's own
+      # declared seed -- 1,000 boards, a measured 23 s -- and compares it byte for byte against
+      # `sampling.first_batch_sha256`, then re-derives every identity the file claims from its committed cells.
+      # What it does NOT prove is the full 20,000-board re-derivation, which measures 465-499 s and belongs to
+      # `solver-regression.yml`; the step below carries the matrix's committed bytes rather than re-running its
+      # engine. Say the boundary out loud, because a gate whose scope is unstated gets read as stronger than it is.
+      - name: Preflop matrix re-derives its first batch
+        shell: bash
+        run: python tools/gen_preflop.py --verify
+
       - name: Every strategy claim declares provenance
         shell: bash
         run: python tools/check_provenance.py
@@ -210,7 +220,7 @@ jobs:
       # forbids extra properties, so a `provenance` block cannot be attached to a term at all. The
       # generated artifact it feeds (glossary.json) is provenance-carrying and is validated by the
       # schema job above, which is where a terminology claim should be checked anyway.
-      - name: data/gen is byte-identical to a fresh generation
+      - name: data/gen is byte-identical to a fresh generation (slow steps carried, not re-derived)
         shell: bash
         run: python tools/gen_all.py --check
 
@@ -220,6 +230,12 @@ jobs:
       # `schema_version`, `engine_version` -- while interpreter, numpy and commit sha go to the build
       # log. A committed, byte-compared file that named the commit it came from could never agree with
       # CI's HEAD.
+      #
+      # One step is deliberately not re-derived here: `preflop`, at a measured 465-499 s. `gen_all` carries its
+      # committed bytes into the rebuilt tree so the manifest and the staleness scan still describe a complete
+      # tree, and refuses the run outright if the artifact is missing -- "skipped" must never read as "deleted".
+      # The full re-derivation is `solver-regression.yml`'s job, and the per-push proof of the engine behind
+      # those bytes is the `gen_preflop.py --verify` step above.
 
   docs:
     name: docs build
