@@ -107,9 +107,18 @@ DEVELOPMENT_PAGES = (
 )
 
 
+#: The site's root page: one file carrying both languages, whose only job is to let a reader who typed
+#: the project URL pick a locale. It is not a lesson and has no twin, which is why `check_bilingual.py`
+#: skips pages with no locale segment. It has to appear in the nav anyway, or `mkdocs build --strict`
+#: fails on a page that exists but is unreachable -- and an unreachable landing page is exactly how
+#: `https://.../texaspokerlearning/` came to serve a 404 while the two locale trees were fine.
+LANDING_PAGE = "index.md"
+
+
 def build_site_nav(registry: CurriculumRegistry, docs_root: Path) -> list[dict[str, Any]]:
-    """The complete ``mkdocs.yml`` nav: two locale trees plus the development section."""
+    """The complete ``mkdocs.yml`` nav: a locale choice page, then two locale trees and the development section."""
     return [
+        {"Start / 开始": LANDING_PAGE},
         {"English": build_nav(registry, "en", docs_root)},
         {"中文": build_nav(registry, "zh", docs_root)},
         {"Development": list(DEVELOPMENT_PAGES)},

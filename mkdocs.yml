@@ -11,9 +11,11 @@ site_description: >-
   and cited to its provenance, never asserted from memory.
 site_author: Roland Huang
 
-# Placeholder until the Pages site is confirmed. It is load-bearing, not decorative: the language
-# selector below emits root-relative links, and mkdocs uses this value for canonical tags and for
-# the sitemap. Changing the deploy target means changing it here and nowhere else.
+# Confirmed live rather than a placeholder: GitHub Pages serves this exact URL from the `Deploy GitHub
+# Pages` workflow (enabled 2026-10-07, and the root page is what answers there now -- before `docs/index.md`
+# existed the site had no root `index.html`, so the advertised URL returned a themed 404). It is
+# load-bearing, not decorative: the language selector emits root-relative links, and mkdocs uses this value
+# for canonical tags and for the sitemap. Changing the deploy target means changing it here and nowhere else.
 site_url: https://RolandHuang17.github.io/texaspokerlearning/
 
 # The curriculum lives as a mirrored tree, docs/en/<chapter>/<lesson>.md and the identical byte-path
@@ -163,6 +165,7 @@ plugins:
 # single-language by design (adr/0005), which is why they appear once, outside either locale tree, and
 # why tools/check_bilingual.py exempts `development/` from the mirroring rule.
 nav:
+  - Start / 开始: index.md
   - English: en/index.md
   - 中文: zh/index.md
   - Development:

@@ -92,6 +92,13 @@ def _lesson_files(base: Path) -> set[str]:
     found: set[str] = set()
     for path in base.rglob("*.md"):
         relative = path.relative_to(DOCS).as_posix()
+        if "/" not in relative:
+            # A page at the site root is the language *choice* page, not a lesson: there is no twin
+            # under a locale directory to compare it against, and the whole point of that one file is
+            # that it carries both languages. Splitting on "/" below assumes a locale prefix, so this
+            # guard has to come first -- without it the gate raises IndexError on `docs/index.md`
+            # before the exemption list ever gets a chance to say "index.md is exempt".
+            continue
         without_locale = relative.split("/", 1)[1]
         if _is_exempt(without_locale):
             continue

@@ -321,6 +321,32 @@ Le résumé est en chinois sous chaque entrée.
   （0.81 秒对 0.11 秒）。
 
 ### Fixed / 修复
+- The URL the README advertises was the one page that did not exist. `https://rolandhuang17.github.io/
+  texaspokerlearning/` returned a themed 404 (64 KB of it) because mkdocs had no root page -- the nav had two
+  locale trees (`en/`, `zh/`) and a development section, so the built site had `en/index.html` and
+  `zh/index.html` and no `index.html`. Found by curling the three published URLs after enabling Pages rather
+  than by trusting that a green deploy meant the site answered, which is the only reason it was caught at all.
+  `docs/index.md` is now that root page: one file, both languages, three ways in (curriculum, trainer,
+  contributing). `tools/gen_curriculum_index.py` puts it at the head of the generated nav, because a page that
+  exists but is unreachable is a `mkdocs build --strict` error waiting to happen, and `mkdocs.yml`'s static
+  fallback nav and its `site_url` comment now describe a live site instead of a placeholder.
+- Writing that page exposed a crash in the bilingual gate: `_lesson_files` computed
+  `relative.split("/", 1)[1]` to strip the locale prefix *before* consulting the exemption list, so any page
+  directly under `docs/` raised `IndexError` and the `(^|/)index\.md$` exemption could never be reached for
+  the one file it was written to cover. It had not fired only because no such page existed. The gate now skips
+  paths with no locale segment, with the reason in the comment: a root page is the language *choice*, not a
+  lesson with a twin.
+- 仓库 README 宣传的那个 URL，恰好是全站唯一不存在的一页。`https://rolandhuang17.github.io/texaspokerlearning/`
+  返回一个带主题的 404（64 KB），因为 mkdocs 根本没有根页面——nav 里只有两棵语言树（`en/`、`zh/`）加一节开发文档，
+  所以构建产物里有 `en/index.html` 和 `zh/index.html`，偏偏没有 `index.html`。这是开了 Pages 之后把三条已发布 URL
+  真去 curl 一遍才发现的；如果我只信"部署跑绿了"，它就漏过去了。现在 `docs/index.md` 就是那一页：一个文件、两种语言、
+  三条入口（课程、训练器、怎么贡献）。`tools/gen_curriculum_index.py` 把它放到生成 nav 的最前面——一个存在却进不去的
+  页面，正是 `mkdocs build --strict` 迟早要报的错；`mkdocs.yml` 的静态兜底 nav 和那句 `site_url` 注释也从"占位待确认"
+  改成了"已经活着"。
+- 写这一页还顺带撞出双语门禁的一个崩溃：`_lesson_files` 在查豁免表*之前*就先算了
+  `relative.split("/", 1)[1]` 去削掉语言前缀，所以任何直接放在 `docs/` 下的页都会抛 `IndexError`——而那条
+  `(^|/)index\.md$` 豁免，恰好就是为了这种文件写的，却永远走不到。它此前没炸，只是因为还没有这样的文件。现在门禁会跳过
+  没有语言段的相对路径，理由写在注释里：根页面是"选语言"的那一页，不是有对儿的课文。
 - `data/gen/solver/*.csv` were the only artifacts that could not survive a different machine, and the first
   public CI run found it: `tools/run_solver.py`'s `curve_csv` wrote each exploitability with `:.10g` -- ten
   significant digits of the raw double -- while the JSON artifact for the same curve quantises to twelve
