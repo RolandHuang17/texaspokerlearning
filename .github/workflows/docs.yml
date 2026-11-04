@@ -37,7 +37,7 @@ jobs:
       - name: Internal links
         run: python tools/check_docs_links.py
       - name: Upload site artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: site
           path: site/
