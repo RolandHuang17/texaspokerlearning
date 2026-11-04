@@ -28,7 +28,7 @@ jobs:
     name: mkdocs build --strict
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup-env
       - name: Generate nav the mkdocs config expects
         run: python tools/gen_all.py --only index --skip solver
